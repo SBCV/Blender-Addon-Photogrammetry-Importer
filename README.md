@@ -34,3 +34,7 @@ or
 <Blender_Root>/<Version>/python/scripts/pip.exe install pillow
 ```
 respectively.
+
+Usage
+=====
+In Blender use (as usual) File/Import/VSFM NVM Import (.nvm) to import the NVM file. The corresponding image files must be located in the same folder as the NVM file. 
