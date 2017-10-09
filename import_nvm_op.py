@@ -4,16 +4,6 @@ from mathutils import Matrix, Vector
 import math
 from math import radians
 
-from bpy.props import (CollectionProperty,
-                       StringProperty,
-                       BoolProperty,
-                       EnumProperty,
-                       FloatProperty,
-                       )
-                       
-from bpy_extras.io_utils import (ImportHelper,
-                                 ExportHelper,
-                                 axis_conversion)
 
 def get_world_matrix_from_translation_vec(translation_vec, rotation):
     t = Vector(translation_vec).to_4d()
@@ -139,21 +129,25 @@ def add_cameras(cameras, path_to_images=None,
 
         if add_image_planes:
 
-            # Group image plane and camera:
-            camera_image_plane_pair = bpy.data.groups.new(
-                "Camera Image Plane Pair Group %s" % image_file_name_stem)
-            camera_image_plane_pair.objects.link(camera_object)
+            path_to_image = os.path.join(path_to_images, camera.file_name)
+            if os.path.isfile(path_to_image):
 
-            image_plane_name = image_file_name_stem + '_image_plane'
-            # do not add image planes by default, this is slow !
-            bimage = bpy.data.images.load(os.path.join(path_to_images, camera.file_name))
-            image_plane_obj = add_camera_image_plane(
-                rotation_mat, translation_vec, bimage, camera.width, 
-                camera.height, focal_length, name=image_plane_name)
-            camera_image_plane_pair.objects.link(image_plane_obj)
+                # Group image plane and camera:
+                camera_image_plane_pair = bpy.data.groups.new(
+                    "Camera Image Plane Pair Group %s" % image_file_name_stem)
+                camera_image_plane_pair.objects.link(camera_object)
 
-            set_object_parent(image_plane_obj, image_planes_parent, keep_transform=True)
-            image_planes_group.objects.link(image_plane_obj)
+                image_plane_name = image_file_name_stem + '_image_plane'
+
+                # do not add image planes by default, this is slow !
+                bimage = bpy.data.images.load(path_to_image)
+                image_plane_obj = add_camera_image_plane(
+                    rotation_mat, translation_vec, bimage, camera.width, 
+                    camera.height, focal_length, name=image_plane_name)
+                camera_image_plane_pair.objects.link(image_plane_obj)
+
+                set_object_parent(image_plane_obj, image_planes_parent, keep_transform=True)
+                image_planes_group.objects.link(image_plane_obj)
 
 def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height, focal_length, name):
     """
@@ -204,18 +198,39 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
     return mesh_obj
 
 
+from bpy.props import (CollectionProperty,
+                       StringProperty,
+                       BoolProperty,
+                       EnumProperty,
+                       FloatProperty,
+                       IntProperty,
+                       )
+
+from bpy_extras.io_utils import (ImportHelper,
+                                 ExportHelper,
+                                 axis_conversion)
+
 class ImportNVM(bpy.types.Operator, ImportHelper):
     """Load a NVM file"""
     bl_idname = "import_scene.nvm"
     bl_label = "Import NVM"
     bl_options = {'UNDO'}
 
-    files = CollectionProperty(name="File Path",
-                          description="File path used for importing "
-                                      "the NVM file",
-                          type=bpy.types.OperatorFileListElement)
+    files = CollectionProperty(
+        name="File Path",
+        description="File path used for importing the NVM file",
+        type=bpy.types.OperatorFileListElement)
 
     directory = StringProperty()
+
+    default_width = IntProperty(
+        name="Default Width",
+        description = "Width, which will be used used if corresponding image is not found.", 
+        default=1920)
+    default_height = IntProperty(
+        name="Default Height", 
+        description = "Height, which will be used used if corresponding image is not found.",
+        default=1080)
 
     filename_ext = ".nvm"
     filter_glob = StringProperty(default="*.nvm", options={'HIDDEN'})
@@ -232,7 +247,8 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
             
             path_to_images = os.path.dirname(path)
             cameras, points = NVMFileHandler.parse_nvm_file(path)
-            cameras = NVMFileHandler.parse_camera_image_files(cameras, path_to_images)
+            cameras = NVMFileHandler.parse_camera_image_files(
+                cameras, path_to_images, self.default_width, self.default_height)
             print(len(cameras))
             print(len(points))
             add_points_as_mesh(points)

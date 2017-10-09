@@ -2,7 +2,11 @@
 import os
 from collections import defaultdict
 import numpy as np
-from PIL import Image
+
+try:
+    from PIL import Image as PILImage
+except ImportError:
+    PILImage = None
 
 from nvm_import.camera import Camera
 from collections import namedtuple
@@ -10,15 +14,22 @@ from collections import namedtuple
 Measurement = namedtuple('Measurement', ['image_index', 'feature_index', 'x', 'y'])
 Point = namedtuple('Point', ['coord', 'color', 'measurements', 'id', 'scalars']) 
 
+
 class NVMFileHandler(object):
 
     @staticmethod
-    def parse_camera_image_files(cameras, path_to_images):
+    def parse_camera_image_files(cameras, path_to_images, default_width, default_height):
 
         for camera in cameras:
-            # this does NOT load the data into memory -> should be fast!
-            image = Image.open(os.path.join(path_to_images, camera.file_name))
-            camera.width, camera.height = image.size
+            image_path = os.path.join(path_to_images, camera.file_name)
+            if PILImage is not None and os.path.isfile(image_path):
+                # this does NOT load the data into memory -> should be fast!
+                image = PILImage.open(image_path)
+                camera.width, camera.height = image.size
+            else:
+                print("Using default width and height!")
+                camera.width = default_width
+                camera.height = default_height
         return cameras
 
     # Check the LoadNVM function in util.h of Multicore bundle adjustment code for more details.
