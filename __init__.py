@@ -20,10 +20,10 @@ Created by Sebastian Bullinger
 
 bl_info = {
     "name": "VSFM NVM Import Addon",
-    "description": "",
+    "description": "Allows to import VisualSFM's .nvm file format (cameras and points) into Blender.",
     "author": "Sebastian Bullinger",
-    "version": (0, 0, 1),
-    "blender": (2, 78, 0),
+    "version": (1, 0, 0),
+    "blender": (2, 79, 0),
     "location": "View3D",
     "warning": "",
     "wiki_url": "",

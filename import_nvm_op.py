@@ -55,19 +55,54 @@ def add_empty(empty_name):
     bpy.context.scene.objects.link(empty_obj)
     return empty_obj
 
-def add_points_as_mesh(points):
+def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, mesh_scale):
     name = "Point_Cloud"
     mesh = bpy.data.meshes.new(name)
     mesh.update()
     mesh.validate()
 
-    points = [tuple(point.coord) for point in points]
+    point_world_coordinates = [tuple(point.coord) for point in points]
 
-    mesh.from_pydata(points, [], [])
+    mesh.from_pydata(point_world_coordinates, [], [])
     meshobj = add_obj(mesh, name)
 
     # TODO replace matrix with identity matrix
     meshobj.matrix_world = Matrix.Rotation(radians(0), 4, 'X')
+    
+    print("mesh_type")
+    print(mesh_type)
+        
+    if add_meshes_at_vertex_positions:
+        bpy.ops.object.select_all(action='DESELECT')
+        if mesh_type == "PLANE":
+            bpy.ops.mesh.primitive_plane_add(radius=mesh_scale)
+        elif mesh_type == "CUBE":
+            bpy.ops.mesh.primitive_cube_add(radius=mesh_scale)
+        elif mesh_type == "SPHERE":
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=mesh_scale)
+        else:
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=mesh_scale)
+        viz_mesh = bpy.context.object
+
+        for index, point in enumerate(points):
+            
+            if index % 1000 == 0:
+                print("Creating Representation for Vertex " + str(index) + " of " + str(len(points)))
+            coord = tuple(point.coord)
+            color = tuple(point.color)  # must be in between 0 and 1
+            
+            ob = viz_mesh.copy()
+            ob.location = coord
+            bpy.context.scene.objects.link(ob)
+
+            mat = bpy.data.materials.new("materialName")
+            mat.diffuse_color = [color[0]/255.0, color[1]/255.0, color[2]/255.0]
+            ob.active_material = mat
+            ob.material_slots[0].link = 'OBJECT'
+            ob.material_slots[0].material = mat
+        bpy.context.scene.update
+
+
     
 def add_cameras(cameras, path_to_images=None,
                 add_image_planes=False,
@@ -222,7 +257,6 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         type=bpy.types.OperatorFileListElement)
 
     directory = StringProperty()
-
     default_width = IntProperty(
         name="Default Width",
         description = "Width, which will be used used if corresponding image is not found.", 
@@ -231,6 +265,23 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         name="Default Height", 
         description = "Height, which will be used used if corresponding image is not found.",
         default=1080)
+    add_meshes_at_vertex_positions = BoolProperty(
+        name="Add Meshes at Vertices (This may take a while!)",
+        description = "Add a mesh at each vertex position, so it can be easily rendered. In order to scale the meshes, select one of the them, go into edit mode, and scale the object. All other meshes are scaled accordingly.", 
+        default=False)
+    mesh_items = [
+        ("PLANE", "Plane", "", 1),
+        ("CUBE", "Cube", "", 2),
+        ("SPHERE", "Sphere", "", 3)
+        ]
+    mesh_type = EnumProperty(
+        name="Mesh Type",
+        description = "Select the vertex representation mesh type.", 
+        items=mesh_items)
+    mesh_scale = FloatProperty(
+        name="Initial Mesh Scale", 
+        description = "Initial scale for meshes at vertex positions",
+        default=0.01)
 
     filename_ext = ".nvm"
     filter_glob = StringProperty(default="*.nvm", options={'HIDDEN'})
@@ -251,7 +302,8 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
                 cameras, path_to_images, self.default_width, self.default_height)
             print(len(cameras))
             print(len(points))
-            add_points_as_mesh(points)
+            add_points_as_mesh(points, self.add_meshes_at_vertex_positions, self.mesh_type, self.mesh_scale)
             add_cameras(cameras, path_to_images=path_to_images, add_image_planes=True)
+            
 
         return {'FINISHED'}
