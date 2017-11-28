@@ -3,7 +3,8 @@ import os
 from mathutils import Matrix, Vector
 import math
 from math import radians
-
+import time
+from nvm_import.stop_watch import StopWatch
 
 def get_world_matrix_from_translation_vec(translation_vec, rotation):
     t = Vector(translation_vec).to_4d()
@@ -31,11 +32,12 @@ def invert_y_and_z_axis(input_matrix_or_vector):
     output_matrix_or_vector[2] = -output_matrix_or_vector[2]
     return output_matrix_or_vector
 
-def add_obj(data, obj_name):
+def add_obj(data, obj_name, deselect_others=False):
     scene = bpy.context.scene
 
-    for obj in scene.objects:
-        obj.select = False
+    if deselect_others:
+        for obj in scene.objects:
+            obj.select = False
 
     new_obj = bpy.data.objects.new(obj_name, data)
     scene.objects.link(new_obj)
@@ -55,7 +57,9 @@ def add_empty(empty_name):
     bpy.context.scene.objects.link(empty_obj)
     return empty_obj
 
-def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, mesh_scale):
+def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, point_extent):
+    print("Adding Points: ...")
+    stop_watch = StopWatch()
     name = "Point_Cloud"
     mesh = bpy.data.meshes.new(name)
     mesh.update()
@@ -66,22 +70,23 @@ def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, mesh_s
     mesh.from_pydata(point_world_coordinates, [], [])
     meshobj = add_obj(mesh, name)
 
-    # TODO replace matrix with identity matrix
-    meshobj.matrix_world = Matrix.Rotation(radians(0), 4, 'X')
-    
-    print("mesh_type")
-    print(mesh_type)
-        
     if add_meshes_at_vertex_positions:
+        print("Representing Points in the Point Cloud with Meshes: True")
+        print("Mesh Type: " + str(mesh_type))
+
+        # The default size of elements added with 
+        #   primitive_cube_add, primitive_uv_sphere_add, etc. is (2,2,2)
+        point_scale = point_extent * 0.5 
+
         bpy.ops.object.select_all(action='DESELECT')
         if mesh_type == "PLANE":
-            bpy.ops.mesh.primitive_plane_add(radius=mesh_scale)
+            bpy.ops.mesh.primitive_plane_add(radius=point_scale)
         elif mesh_type == "CUBE":
-            bpy.ops.mesh.primitive_cube_add(radius=mesh_scale)
+            bpy.ops.mesh.primitive_cube_add(radius=point_scale)
         elif mesh_type == "SPHERE":
-            bpy.ops.mesh.primitive_uv_sphere_add(radius=mesh_scale)
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=point_scale)
         else:
-            bpy.ops.mesh.primitive_uv_sphere_add(radius=mesh_scale)
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=point_scale)
         viz_mesh = bpy.context.object
 
         for index, point in enumerate(points):
@@ -101,7 +106,10 @@ def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, mesh_s
             ob.material_slots[0].link = 'OBJECT'
             ob.material_slots[0].material = mat
         bpy.context.scene.update
-
+    else:
+        print("Representing Points in the Point Cloud with Meshes: False")
+    print("Duration: " + str(stop_watch.get_elapsed_time()))
+    print("Adding Points: Done")
 
     
 def add_cameras(cameras, path_to_images=None,
@@ -125,17 +133,22 @@ def add_cameras(cameras, path_to_images=None,
     :param image_plane_group_name:
     :return:
     """
-
+    print("Adding Cameras: ...")
+    stop_watch = StopWatch()
     cameras_parent = add_empty(cameras_parent)
     camera_group = bpy.data.groups.new(camera_group_name)
 
     if add_image_planes:
+        print("Adding image planes: True")
         image_planes_parent = add_empty(image_planes_parent)
         image_planes_group = bpy.data.groups.new(image_plane_group_name)
+    else:
+        print("Adding image planes: False")
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
 
+        start_time = stop_watch.get_elapsed_time()
         assert camera.width is not None and camera.height is not None
 
         # camera_name = "Camera %d" % index     # original code
@@ -163,7 +176,6 @@ def add_cameras(cameras, path_to_images=None,
         camera_group.objects.link(camera_object)
 
         if add_image_planes:
-
             path_to_image = os.path.join(path_to_images, camera.file_name)
             if os.path.isfile(path_to_image):
 
@@ -183,6 +195,11 @@ def add_cameras(cameras, path_to_images=None,
 
                 set_object_parent(image_plane_obj, image_planes_parent, keep_transform=True)
                 image_planes_group.objects.link(image_plane_obj)
+
+        end_time = stop_watch.get_elapsed_time()
+
+    print("Duration: " + str(stop_watch.get_elapsed_time()))
+    print("Adding Cameras: Done")
 
 def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height, focal_length, name):
     """
@@ -257,6 +274,11 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         type=bpy.types.OperatorFileListElement)
 
     directory = StringProperty()
+
+    import_cameras = BoolProperty(
+        name="Import Cameras",
+        description = "Import Cameras", 
+        default=True)
     default_width = IntProperty(
         name="Default Width",
         description = "Width, which will be used used if corresponding image is not found.", 
@@ -265,23 +287,33 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         name="Default Height", 
         description = "Height, which will be used used if corresponding image is not found.",
         default=1080)
+    add_image_planes = BoolProperty(
+        name="Add an Image Plane for each Camera",
+        description = "Add an Image Plane for each Camera", 
+        default=False)
+
+    import_points = BoolProperty(
+        name="Import Points",
+        description = "Import Points", 
+        default=True)
     add_meshes_at_vertex_positions = BoolProperty(
         name="Add Meshes at Vertices (This may take a while!)",
         description = "Add a mesh at each vertex position, so it can be easily rendered. In order to scale the meshes, select one of the them, go into edit mode, and scale the object. All other meshes are scaled accordingly.", 
         default=False)
     mesh_items = [
-        ("PLANE", "Plane", "", 1),
-        ("CUBE", "Cube", "", 2),
-        ("SPHERE", "Sphere", "", 3)
+        ("CUBE", "Cube", "", 1),
+        ("SPHERE", "Sphere", "", 2),
+        ("PLANE", "Plane", "", 3)
         ]
     mesh_type = EnumProperty(
         name="Mesh Type",
         description = "Select the vertex representation mesh type.", 
         items=mesh_items)
-    mesh_scale = FloatProperty(
-        name="Initial Mesh Scale", 
-        description = "Initial scale for meshes at vertex positions",
+    point_extent = FloatProperty(
+        name="Initial Point Extent (in Blender Units)", 
+        description = "Initial Point Extent for meshes at vertex positions",
         default=0.01)
+
 
     filename_ext = ".nvm"
     filter_glob = StringProperty(default="*.nvm", options={'HIDDEN'})
@@ -300,10 +332,12 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
             cameras, points = NVMFileHandler.parse_nvm_file(path)
             cameras = NVMFileHandler.parse_camera_image_files(
                 cameras, path_to_images, self.default_width, self.default_height)
-            print(len(cameras))
-            print(len(points))
-            add_points_as_mesh(points, self.add_meshes_at_vertex_positions, self.mesh_type, self.mesh_scale)
-            add_cameras(cameras, path_to_images=path_to_images, add_image_planes=True)
+            print("Number cameras: " + str(len(cameras)))
+            print("Number points: " + str(len(points)))
+            if self.import_points:
+                add_points_as_mesh(points, self.add_meshes_at_vertex_positions, self.mesh_type, self.point_extent)
+            if self.import_cameras:
+                add_cameras(cameras, path_to_images=path_to_images, add_image_planes=self.add_image_planes)
             
 
         return {'FINISHED'}
