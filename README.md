@@ -45,6 +45,7 @@ or
 <Blender_Root>/<Version>/python/scripts/pip.exe install pillow
 ```
 respectively.
+
 IMPORTANT: The full path to the pip executable must be provided (./pip install pillow will not work).
 
 Usage
