@@ -5,6 +5,7 @@ import math
 from math import radians
 import time
 from nvm_import.stop_watch import StopWatch
+import numpy as np
 
 def get_world_matrix_from_translation_vec(translation_vec, rotation):
     t = Vector(translation_vec).to_4d()
@@ -57,7 +58,7 @@ def add_empty(empty_name):
     bpy.context.scene.objects.link(empty_obj)
     return empty_obj
 
-def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, point_extent):
+def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_extent):
     print("Adding Points: ...")
     stop_watch = StopWatch()
     name = "Point_Cloud"
@@ -70,7 +71,7 @@ def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, point_
     mesh.from_pydata(point_world_coordinates, [], [])
     meshobj = add_obj(mesh, name)
 
-    if add_meshes_at_vertex_positions:
+    if add_points_as_particle_system or add_meshes_at_vertex_positions:
         print("Representing Points in the Point Cloud with Meshes: True")
         print("Mesh Type: " + str(mesh_type))
 
@@ -89,22 +90,91 @@ def add_points_as_mesh(points, add_meshes_at_vertex_positions, mesh_type, point_
             bpy.ops.mesh.primitive_uv_sphere_add(radius=point_scale)
         viz_mesh = bpy.context.object
 
-        for index, point in enumerate(points):
+        if add_points_as_particle_system:
             
-            if index % 1000 == 0:
-                print("Creating Representation for Vertex " + str(index) + " of " + str(len(points)))
-            coord = tuple(point.coord)
-            color = tuple(point.color)  # must be in between 0 and 1
+            if not viz_mesh.data.materials:
+                material_name = "PointCloudMaterial"
+                material = bpy.data.materials.get(material_name)
+                if material is None:
+                    material = bpy.data.materials.new(name=material_name)
+                viz_mesh.data.materials.append(material)
+                
+                # enable cycles, otherwise the material has no nodes
+                bpy.context.scene.render.engine = 'CYCLES'
+                material = bpy.data.materials['PointCloudMaterial']
+                material.use_nodes = True
+                node_tree = material.node_tree
+                if 'Material Output' in node_tree.nodes:
+                    material_output_node = node_tree.nodes['Material Output']
+                else:
+                    material_output_node = node_tree.nodes.new('ShaderNodeOutputMaterial')
+                if 'Diffuse BSDF' in node_tree.nodes:
+                    diffuse_node = node_tree.nodes['Diffuse BSDF']
+                else:
+                    diffuse_node = node_tree.nodes.new("ShaderNodeBsdfDiffuse")
+                node_tree.links.new(diffuse_node.outputs['BSDF'], material_output_node.inputs['Surface'])
+                
+                if 'Image Texture' in node_tree.nodes:
+                    image_texture_node = node_tree.nodes['Image Texture']
+                else:
+                    image_texture_node = node_tree.nodes.new("ShaderNodeTexImage")
+                node_tree.links.new(image_texture_node.outputs['Color'], diffuse_node.inputs['Color'])
+                
+                vis_image_height = 10
+                
+                if 'ParticleColor' in bpy.data.images:
+                    image = bpy.data.images['ParticleColor']
+                else:
+                    # To view the texture we set the height of the texture to vis_image_height 
+                    image = bpy.data.images.new('ParticleColor', len(point_world_coordinates), vis_image_height)
+                
+                print('len(points): ' + str(len(points)))
+                print(type(image.pixels))
+                
+                # working on a copy of the pixels results in a MASSIVE performance speed
+                local_pixels = list(image.pixels[:])
+                print(type(local_pixels))
+                
+                num_points = len(points)
+                
+                for j in range(vis_image_height):
+                    for point_index, point in enumerate(points):
+                        column_offset = point_index * 4     # (R,G,B,A)
+                        row_offset = j * 4 * num_points
+                        color = point.color 
+                        # Order is R,G,B, opacity
+                        local_pixels[row_offset + column_offset] = color[0] / 255.0
+                        local_pixels[row_offset + column_offset + 1] = color[1] / 255.0
+                        local_pixels[row_offset + column_offset + 2] = color[2] / 255.0
+                        # opacity (0 = transparent, 1 = opaque)
+                        #local_pixels[row_offset + column_offset + 3] = 1.0    # already set by default   
+                    
+                image.pixels = local_pixels[:]  
+                
+                image_texture_node.image = bpy.data.images['ParticleColor']
+                particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
+                divide_node = node_tree.nodes.new('ShaderNodeMath')
+                divide_node.operation = 'DIVIDE'
+                node_tree.links.new(particle_info_node.outputs['Index'], divide_node.inputs[0])
+                divide_node.inputs[1].default_value = num_points
+                shader_node_combine = node_tree.nodes.new('ShaderNodeCombineXYZ')
+                node_tree.links.new(divide_node.outputs['Value'], shader_node_combine.inputs['X'])
+                node_tree.links.new(shader_node_combine.outputs['Vector'], image_texture_node.inputs['Vector'])
             
-            ob = viz_mesh.copy()
-            ob.location = coord
-            bpy.context.scene.objects.link(ob)
-
-            mat = bpy.data.materials.new("materialName")
-            mat.diffuse_color = [color[0]/255.0, color[1]/255.0, color[2]/255.0]
-            ob.active_material = mat
-            ob.material_slots[0].link = 'OBJECT'
-            ob.material_slots[0].material = mat
+            if len(meshobj.particle_systems) == 0:
+                meshobj.modifiers.new("particle sys", type='PARTICLE_SYSTEM')
+                particle_sys = meshobj.particle_systems[0]
+                settings = particle_sys.settings
+                settings.type = 'HAIR'
+                settings.use_advanced_hair = True
+                settings.emit_from = 'VERT'
+                settings.count = len(point_world_coordinates)
+                # The final object extent is hair_length * obj.scale 
+                settings.hair_length = 100           # This must not be 0
+                settings.use_emit_random = False
+                settings.render_type = 'OBJECT'
+                settings.dupli_object = viz_mesh
+            
         bpy.context.scene.update
     else:
         print("Representing Points in the Point Cloud with Meshes: False")
@@ -296,10 +366,10 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         name="Import Points",
         description = "Import Points", 
         default=True)
-    add_meshes_at_vertex_positions = BoolProperty(
-        name="Add Meshes at Vertices (This may take a while!)",
-        description = "Add a mesh at each vertex position, so it can be easily rendered. In order to scale the meshes, select one of the them, go into edit mode, and scale the object. All other meshes are scaled accordingly.", 
-        default=False)
+    add_points_as_particle_system = BoolProperty(
+        name="Add Points as Particle System (Recommended)",
+        description="Use a particle system to represent vertex position with an object",
+        default=True)
     mesh_items = [
         ("CUBE", "Cube", "", 1),
         ("SPHERE", "Sphere", "", 2),
@@ -335,7 +405,7 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
             print("Number cameras: " + str(len(cameras)))
             print("Number points: " + str(len(points)))
             if self.import_points:
-                add_points_as_mesh(points, self.add_meshes_at_vertex_positions, self.mesh_type, self.point_extent)
+                add_points_as_mesh(points, self.add_points_as_particle_system, self.mesh_type, self.point_extent)
             if self.import_cameras:
                 add_cameras(cameras, path_to_images=path_to_images, add_image_planes=self.add_image_planes)
             
