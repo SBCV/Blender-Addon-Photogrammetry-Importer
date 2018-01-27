@@ -6,6 +6,7 @@ from math import radians
 import time
 from nvm_import.stop_watch import StopWatch
 import numpy as np
+from nvm_import.point import Point
 
 def get_world_matrix_from_translation_vec(translation_vec, rotation):
     t = Vector(translation_vec).to_4d()
@@ -122,11 +123,8 @@ def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_e
                 
                 vis_image_height = 10
                 
-                if 'ParticleColor' in bpy.data.images:
-                    image = bpy.data.images['ParticleColor']
-                else:
-                    # To view the texture we set the height of the texture to vis_image_height 
-                    image = bpy.data.images.new('ParticleColor', len(point_world_coordinates), vis_image_height)
+                # To view the texture we set the height of the texture to vis_image_height 
+                image = bpy.data.images.new('ParticleColor', len(point_world_coordinates), vis_image_height)
                 
                 print('len(points): ' + str(len(points)))
                 print(type(image.pixels))
@@ -151,7 +149,7 @@ def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_e
                     
                 image.pixels = local_pixels[:]  
                 
-                image_texture_node.image = bpy.data.images['ParticleColor']
+                image_texture_node.image = image
                 particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
                 divide_node = node_tree.nodes.new('ShaderNodeMath')
                 divide_node.operation = 'DIVIDE'

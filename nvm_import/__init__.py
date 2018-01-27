@@ -1,6 +1,6 @@
 '''
-Copyright (C) 2017 YOUR NAME
-YOUR@MAIL.com
+Copyright (C) 2018 Sebastian Bullinger
+
 
 Created by Sebastian Bullinger
 
@@ -19,8 +19,8 @@ Created by Sebastian Bullinger
 '''
 
 bl_info = {
-    "name": "VSFM NVM Import Addon",
-    "description": "Allows to import VisualSFM's .nvm file format (cameras and points) into Blender.",
+    "name": "VSFM NVM Import Export Addon",
+    "description": "Allows to import and export VisualSFM's .nvm file format (cameras and points).",
     "author": "Sebastian Bullinger",
     "version": (1, 0, 0),
     "blender": (2, 79, 0),
@@ -44,6 +44,7 @@ modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in local
 # The root dir is blenders addon folder, 
 # therefore we need the "nvm_import" specifier for this addon  
 from nvm_import.import_nvm_op import ImportNVM
+from nvm_import.export_nvm_op import ExportNVM
 
 
 # register
@@ -53,12 +54,16 @@ import traceback
 
 def menu_func_import(self, context):
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
+    
+def menu_func_export(self, context):
+    self.layout.operator(ExportNVM.bl_idname, text="VSFM NVM Export (.nvm)")
 
 def register():
     try: bpy.utils.register_module(__name__)
     except: traceback.print_exc()
 
     bpy.types.INFO_MT_file_import.append(menu_func_import)
+    bpy.types.INFO_MT_file_export.append(menu_func_export)
 
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
     
@@ -68,6 +73,7 @@ def unregister():
     except: traceback.print_exc()
 
     bpy.types.INFO_MT_file_import.remove(menu_func_import)
+    bpy.types.INFO_MT_file_export.remove(menu_func_export)
 
     print("Unregistered {}".format(bl_info["name"]))
 

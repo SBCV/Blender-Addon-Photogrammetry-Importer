@@ -28,6 +28,18 @@ class Camera:
     def __str__(self):
         return str('Camera: ' + self.file_name + ' ' + str(self._center) + ' ' + str(self.normal))
 
+    def set_calibration(self, calibration_mat, radial_distortion):
+        self._calibration_mat = np.asarray(calibration_mat, dtype=float)
+        self._radial_distortion = radial_distortion
+        assert self._radial_distortion is not None
+    
+    def get_calibration_mat(self):
+        return self._calibration_mat
+
+    @staticmethod
+    def compute_calibration_mat(focal_length, cx, cy):
+        return np.array([[focal_length, 0, cx], [0, focal_length, cy], [0,0,1]], dtype=float)
+
     def set_quaternion(self, quaternion):
         self._quaternion = quaternion
         # we must change the rotation matrixes as well
@@ -60,6 +72,10 @@ class Camera:
 
     def get_camera_center(self):
         return self._center
+    
+    def set_4x4_cam_to_world_mat(self, cam_to_world_mat):
+        self.set_rotation_mat(cam_to_world_mat[0:3, 0:3].transpose())
+        self.set_camera_center_after_rotation(cam_to_world_mat[0:3, 3])
 
     @staticmethod
     def is_rotation_mat_valid(some_mat):

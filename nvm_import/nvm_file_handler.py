@@ -206,7 +206,7 @@ class NVMFileHandler(object):
             quaternion = camera.get_quaternion()
 
             current_line = camera.file_name
-            current_line += '\t' + str(camera.calibration_mat[0][0])
+            current_line += '\t' + str(camera.get_calibration_mat()[0][0])
             current_line += ' ' + ' '.join(list(map(str, quaternion)))
             current_line += ' ' + ' '.join(list(map(str, camera.get_camera_center())))
             current_line += ' ' + '0'   # TODO USE RADIAL DISTORTION
@@ -240,7 +240,7 @@ class NVMFileHandler(object):
         nvm_content.append('0' + os.linesep)
 
         output_file = open(output_nvm_file_name, 'wb')
-        output_file.writelines([item for item in nvm_content])
+        output_file.writelines([item.encode() for item in nvm_content])
 
         print('Write NVM file: Done')
 
