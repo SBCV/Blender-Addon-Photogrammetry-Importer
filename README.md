@@ -26,8 +26,8 @@ git clone https://github.com/SBCV/Blender-Import-NVM-Addon.git
 ```
 Compress the folder "nvm_import" in "Blender-Import-NVM-Addon" to a zip archive. 
 The final structure must look as follows:
-- nvm_import.zip/  
-	- nvm_import/  
+- nvm_import_export.zip/  
+	- nvm_import_export/  
 		- nvm_file_handler.py  
 		- __init__.py  
 		- import_nvm_op.py  
