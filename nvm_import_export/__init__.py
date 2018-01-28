@@ -42,9 +42,9 @@ importlib.reload(developer_utils)
 modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 # The root dir is blenders addon folder, 
-# therefore we need the "nvm_import" specifier for this addon  
-from nvm_import.import_nvm_op import ImportNVM
-from nvm_import.export_nvm_op import ExportNVM
+# therefore we need the "nvm_import_export" specifier for this addon  
+from nvm_import_export.import_nvm_op import ImportNVM
+from nvm_import_export.export_nvm_op import ExportNVM
 
 
 # register

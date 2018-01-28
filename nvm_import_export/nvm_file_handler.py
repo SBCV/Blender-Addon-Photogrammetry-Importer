@@ -8,7 +8,7 @@ try:
 except ImportError:
     PILImage = None
 
-from nvm_import.camera import Camera
+from nvm_import_export.camera import Camera
 from collections import namedtuple
 
 Measurement = namedtuple('Measurement', ['image_index', 'feature_index', 'x', 'y'])

@@ -1,8 +1,8 @@
 import bpy
 import os
 import numpy as np
-from nvm_import.point import Point
-from nvm_import.camera import Camera
+from nvm_import_export.point import Point
+from nvm_import_export.camera import Camera
 
 from bpy.props import (CollectionProperty,
                        StringProperty,
@@ -60,8 +60,8 @@ def get_computer_vision_camera_matrix(blender_camera):
     # Only if the objects have a scale of 1,
     # the 3x3 part of the corresponding matrix_world contains a pure rotation
     # Otherwise it also contains scale or shear information
-    if tuple(blender_camera.scale) != (1, 1, 1):
-        logger.vinfo('blender_camera.scale', blender_camera.scale)
+    if not np.allclose(tuple(blender_camera.scale), (1, 1, 1)):
+        print('blender_camera.scale', blender_camera.scale)
         assert False
 
     camera_matrix = np.array(blender_camera.matrix_world)
@@ -101,19 +101,18 @@ def export_selected_cameras_and_vertices_of_meshes():
             camera_index += 1
             
         else:
-            obj_points = []
-            
-            for vert in obj.data.vertices:
-                coord_world = obj.matrix_world * vert.co
-                obj_points.append(Point(coord=coord_world, 
-                                        color=[255,255,255],
-                                        measurements=[],
-                                        id=point_index,
-                                        scalars=[]))
-                                        
-                point_index += 1
-            
-            points += obj_points
+            if obj.data is not None:
+                obj_points = []
+                for vert in obj.data.vertices:
+                    coord_world = obj.matrix_world * vert.co
+                    obj_points.append(Point(coord=coord_world, 
+                                            color=[255,255,255],
+                                            measurements=[],
+                                            id=point_index,
+                                            scalars=[]))
+                                            
+                    point_index += 1
+                points += obj_points
             
     return cameras, points
 
@@ -147,7 +146,7 @@ class ExportNVM(bpy.types.Operator, ExportHelper):
             #print(cam.get_calibration_mat())
             #print(cam.get_4x4_cam_to_world_mat())
         
-        from nvm_import.nvm_file_handler import NVMFileHandler
+        from nvm_import_export.nvm_file_handler import NVMFileHandler
         NVMFileHandler.write_nvm_file(paths[0], cameras, points)
                 
                  

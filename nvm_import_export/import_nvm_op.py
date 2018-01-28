@@ -4,9 +4,9 @@ from mathutils import Matrix, Vector
 import math
 from math import radians
 import time
-from nvm_import.stop_watch import StopWatch
+from nvm_import_export.stop_watch import StopWatch
 import numpy as np
-from nvm_import.point import Point
+from nvm_import_export.point import Point
 
 def get_world_matrix_from_translation_vec(translation_vec, rotation):
     t = Vector(translation_vec).to_4d()
@@ -392,7 +392,7 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         if not paths:
             paths.append(self.filepath)
 
-        from nvm_import.nvm_file_handler import NVMFileHandler
+        from nvm_import_export.nvm_file_handler import NVMFileHandler
 
         for path in paths:
             
