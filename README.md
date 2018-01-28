@@ -13,6 +13,11 @@ Export
 In Blender use File/Export/VSFM NVM Export (.nvm) to export the NVM file. 
 Select all cameras and objects you want to export. For each selected mesh the vertices are stored as points in the NVM file.
 
+Example
+=====
+This repository contains an example NVM file. The imported result looks as follows.
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/import_result.jpg)
+
 Installation
 ============
 Clone the addon:
