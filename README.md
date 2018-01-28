@@ -1,5 +1,6 @@
 # Blender-Import-NVM-Addon
-Blender addon to import and export VisualSFM's NVM files.
+Blender addon to import and export Structure-from-Motion (SfM) results using VisualSFM's ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/)) NVM file format. Also other SfM software tools like Colmap ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) use this data format.
+
 Tested for Blender 2.78 and 2.79 as well as Ubuntu 14.04 and Windows 10.
 
 Import
