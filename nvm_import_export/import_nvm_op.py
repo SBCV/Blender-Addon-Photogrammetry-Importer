@@ -121,7 +121,7 @@ def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_e
                     image_texture_node = node_tree.nodes.new("ShaderNodeTexImage")
                 node_tree.links.new(image_texture_node.outputs['Color'], diffuse_node.inputs['Color'])
                 
-                vis_image_height = 10
+                vis_image_height = 1
                 
                 # To view the texture we set the height of the texture to vis_image_height 
                 image = bpy.data.images.new('ParticleColor', len(point_world_coordinates), vis_image_height)
