@@ -182,7 +182,8 @@ def add_cameras(cameras, path_to_images=None,
                 cameras_parent='Cameras',
                 camera_group_name='Camera Group',
                 image_planes_parent='Image Planes',
-                image_plane_group_name='Image Plane Group'):
+                image_plane_group_name='Image Plane Group',
+                camera_scale=1.0):
 
     """
     ======== The images are currently only shown in BLENDER RENDER ========
@@ -200,6 +201,8 @@ def add_cameras(cameras, path_to_images=None,
     print("Adding Cameras: ...")
     stop_watch = StopWatch()
     cameras_parent = add_empty(cameras_parent)
+    cameras_parent.hide = True
+    cameras_parent.hide_render = True
     camera_group = bpy.data.groups.new(camera_group_name)
 
     if add_image_planes:
@@ -236,6 +239,9 @@ def add_cameras(cameras, path_to_images=None,
         rotation_mat = invert_y_and_z_axis(rotation_mat)
         translation_vec = invert_y_and_z_axis(translation_vec)
         camera_object.matrix_world = get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
+
+        camera_object.scale *= camera_scale
+
         set_object_parent(camera_object, cameras_parent, keep_transform=True)
         camera_group.objects.link(camera_object)
 
@@ -355,6 +361,10 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera", 
         default=False)
+    camera_extent = FloatProperty(
+        name="Initial Camera Extent (in Blender Units)", 
+        description = "Initial Camera Extent (Visualization)",
+        default=1)
 
     import_points = BoolProperty(
         name="Import Points",
@@ -401,7 +411,7 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
             if self.import_points:
                 add_points_as_mesh(points, self.add_points_as_particle_system, self.mesh_type, self.point_extent)
             if self.import_cameras:
-                add_cameras(cameras, path_to_images=path_to_images, add_image_planes=self.add_image_planes)
+                add_cameras(cameras, path_to_images=path_to_images, add_image_planes=self.add_image_planes, camera_scale=self.camera_extent)
             
 
         return {'FINISHED'}
