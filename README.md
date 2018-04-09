@@ -3,24 +3,29 @@ Blender addon to import and export Structure-from-Motion (SfM) results using Vis
 
 Tested for Blender 2.78 and 2.79 as well as Ubuntu 14.04 and Windows 10.
 
-Import
-=====
+## Example
+This repository contains an example NVM file. The imported result looks as follows.
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/import_result.jpg)
+
+## Usage
+
+### Import
 In Blender use File/Import/VSFM NVM Import (.nvm) to import the NVM file. 
 There are several import options. You can add the image plane for each camera defined in the NVM file. The corresponding image files must be located in the same folder as the NVM file. 
 There is an option to represent each vertex position with an object using a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. The color of the points are shown, if the 3D view is set to "Material".
 
-Export
-=====
+### Export
 In Blender use File/Export/VSFM NVM Export (.nvm) to export the NVM file. 
 Select all cameras and objects you want to export. For each selected mesh the vertices are stored as points in the NVM file.
 
-Example
-=====
-This repository contains an example NVM file. The imported result looks as follows.
-![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/import_result.jpg)
+### Adjust Scale of Points (after importing)
+For each imported point cloud two objects are created. The first object represents the structure of the point cloud and the second object defines the shape of the points in the point cloud. Rescaling of the second object will also update the size of the points in the point cloud.
 
-Installation
-============
+### Adjust Scale of Cameras (after importing) 
+Select the cameras, click in the *3D View* on *Pivot Point* and then on *Individual Origins*. Subsequent scaling operations with *Individual Origins* will only change the camera appearances but not the positions.
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/scale_cameras.jpg)
+
+## Installation
 Clone the addon:
 ```
 git clone https://github.com/SBCV/Blender-Import-NVM-Addon.git
@@ -35,8 +40,7 @@ The final structure must look as follows:
 		- ...  
 
 
-Dependencies
-============
+## Dependencies (optional)
 This addon uses Pillow (https://python-pillow.org/) to import the SfM input images. 
 
 If you haven't installed pip for blender already, download https://bootstrap.pypa.io/get-pip.py and copy the file to 
@@ -66,8 +70,7 @@ respectively.
 
 IMPORTANT: The full path to the pip executable must be provided (./pip install pillow will not work).
 
-License
-=====
+## License
 Blender NVM Import Export Addon
 Copyright (C) 2018  Sebastian Bullinger
 
