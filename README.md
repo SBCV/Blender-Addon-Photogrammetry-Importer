@@ -9,10 +9,19 @@ This repository contains an example NVM file. The imported result looks as follo
 
 ## Usage
 
+Errors, help and logging information during import/export is shown in the "Info" area. 
+
 ### Import
 In Blender use File/Import/VSFM NVM Import (.nvm) to import the NVM file. 
-There are several import options. You can add the image plane for each camera defined in the NVM file. The corresponding image files must be located in the same folder as the NVM file. 
-There is an option to represent each vertex position with an object using a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. The color of the points are shown, if the 3D view is set to "Material".
+
+If present, the addon reads the fixed calibration line in the NVM file (i.e. "NVM_V3 FixedK fx cx fy cy r"  (first line)).
+If not present, adjust the "image path" or the "width" and "height" values using the import dialog. (For correct camera visualization the size of the images is required). By default the addon searches for the images in the in the folder where the NVM file is located. Without the fixed calibration line the addon assumes that the principal point is in the image center. 
+
+There are several import options. You can add the image plane for each camera defined in the NVM file. 
+
+There is an option to represent each vertex position with an object using a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. The color of the points/textures images of the cameras are visible, if 'Cycles Render' is selected and the 3D view is set to "Material".
+
+Note: Blender supports only global render settings (which define the ratio of all cameras). If the nvm file contains cameras with different aspect ratios, it is not possible to visualize the camera cones correctly. 
 
 ### Export
 In Blender use File/Export/VSFM NVM Export (.nvm) to export the NVM file. 
