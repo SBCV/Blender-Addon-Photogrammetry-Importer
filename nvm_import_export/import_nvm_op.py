@@ -230,8 +230,7 @@ def add_cameras(op,
         # Add camera:
         bcamera = bpy.data.cameras.new(camera_name)
         #  Adjust field of view
-        bcamera.angle_x = math.atan(camera.width / (focal_length * 2.0)) * 2.0
-        bcamera.angle_y = math.atan(camera.height / (focal_length * 2.0)) * 2.0
+        bcamera.angle = math.atan(max(camera.width, camera.height) / (focal_length * 2.0)) * 2.0
 
         # Adjust principal point
         p_x, p_y = camera.get_principal_point()
@@ -277,12 +276,22 @@ def add_cameras(op,
                 camera_image_plane_pair.objects.link(camera_object)
 
                 image_plane_name = image_file_name_stem + '_image_plane'
+                
+                px, py = camera.get_principal_point()
 
                 # do not add image planes by default, this is slow !
                 bimage = bpy.data.images.load(path_to_image)
                 image_plane_obj = add_camera_image_plane(
-                    rotation_mat, translation_vec, bimage, camera.width, 
-                    camera.height, focal_length, name=image_plane_name, op=op)
+                    rotation_mat, 
+                    translation_vec, 
+                    bimage, 
+                    camera.width, 
+                    camera.height, 
+                    focal_length, 
+                    px=px,
+                    py=py,
+                    name=image_plane_name, 
+                    op=op)
                 camera_image_plane_pair.objects.link(image_plane_obj)
 
                 set_object_parent(image_plane_obj, image_planes_parent, keep_transform=True)
@@ -293,7 +302,7 @@ def add_cameras(op,
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
     op.report({'INFO'}, 'Adding Cameras: Done')
 
-def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height, focal_length, name, op):
+def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height, focal_length, px, py, name, op):
     """
     Create mesh for image plane
     """
@@ -311,12 +320,18 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
     # Camera view direction:
     view_dir = -Vector((0, 0, 1)) * plane_distance
     plane_center = view_dir
+    
+    relative_shift_x = float((width / 2.0 - px) / float(width))
+    relative_shift_y = float((height / 2.0 - py) / float(height))
+    
+    op.report({'INFO'}, 'relative_shift_x: ' + str(relative_shift_x))
+    op.report({'INFO'}, 'relative_shift_y:' + str(relative_shift_y))
 
     corners = ((-0.5, -0.5),
                (+0.5, -0.5),
                (+0.5, +0.5),
                (-0.5, +0.5))
-    points = [(plane_center + c[0] * right + c[1] * up)[0:3] for c in corners]
+    points = [(plane_center + (c[0] + relative_shift_x) * right + (c[1] + relative_shift_y) * up)[0:3] for c in corners]
     mesh.from_pydata(points, [], [[0, 1, 2, 3]])
     
     # Assign image to face of image plane:
@@ -360,6 +375,20 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
     mesh.validate()
     op.report({'INFO'}, 'add_camera_image_plane: Done')
     return mesh_obj
+
+def adjust_render_settings_if_possible(op, cameras):
+    
+    possible = True
+    width = cameras[0].width
+    height = cameras[0].height
+    for cam in cameras:
+        if cam.width != width or cam.height != height:
+            possible = False
+            break
+    if possible:
+        bpy.context.scene.render.resolution_x = width
+        bpy.context.scene.render.resolution_y = height
+    
 
 
 from bpy.props import (CollectionProperty,
@@ -407,13 +436,18 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera", 
         default=True)
-    image_dir = StringProperty(
+    path_to_images = StringProperty(
         name="Image Directory",
         description = "Path to the directory of images. If no path is provided, the paths in the nvm file are used.", 
         default="",
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
-        
+    adjust_render_settings = BoolProperty(
+        name="Render",
+        description = "Adjust the render settings according to the corresponding images."  +
+                      "All images have to be captured with the same device). " +
+                      "If disabled the visualization of the camera cone in 3D view might be incorrect.", 
+        default=True)
     camera_extent = FloatProperty(
         name="Initial Camera Extent (in Blender Units)", 
         description = "Initial Camera Extent (Visualization)",
@@ -457,22 +491,41 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
 
         for path in paths:
             
-            path_to_images = os.path.dirname(path)
+            # by default search for the images in the nvm directory
+            if self.path_to_images == '':
+                self.path_to_images = os.path.dirname(path)
+            
             cameras, points = NVMFileHandler.parse_nvm_file(path, self)
-            #self.report({'INFO'}, 'cameras[0].get_calibration_mat(): (before)' + str(cameras[0].get_calibration_mat()))
-            cameras, success = NVMFileHandler.parse_camera_image_files(
-                cameras, path_to_images, self.default_width, self.default_height, self)
-            if success:
-                self.report({'INFO'}, 'cameras[0].get_calibration_mat() (after): ' + str(cameras[0].get_calibration_mat()))
-                # https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
-                #   The color depends on the type enum: INFO gets green, WARNING light red, and ERROR dark red
-                # https://docs.blender.org/api/blender_python_api_2_78_release/bpy.types.Operator.html?highlight=report#bpy.types.Operator.report
-                self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
-                self.report({'INFO'}, 'Number points: ' + str(len(points)))
-                if self.import_points:
-                    add_points_as_mesh(self, points, self.add_points_as_particle_system, self.mesh_type, self.point_extent)
-                if self.import_cameras:
-                    add_cameras(self, cameras, path_to_images=path_to_images, add_image_planes=self.add_image_planes, camera_scale=self.camera_extent)
+            
+            # https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
+            #   The color depends on the type enum: INFO gets green, WARNING light red, and ERROR dark red
+            # https://docs.blender.org/api/blender_python_api_2_78_release/bpy.types.Operator.html?highlight=report#bpy.types.Operator.report
+            self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+            self.report({'INFO'}, 'Number points: ' + str(len(points)))
+            
+            if self.import_cameras:
+                cameras, success = NVMFileHandler.parse_camera_image_files(
+                    cameras, self.path_to_images, self.default_width, self.default_height, self)
+                if success:
+                    if self.adjust_render_settings:
+                        adjust_render_settings_if_possible(
+                            self, 
+                            cameras)
+                    add_cameras(
+                        self, 
+                        cameras, 
+                        path_to_images=self.path_to_images, 
+                        add_image_planes=self.add_image_planes, 
+                        camera_scale=self.camera_extent)
+                else:
+                    return {'FINISHED'}
                 
+            if self.import_points:
+                add_points_as_mesh(
+                    self, 
+                    points, 
+                    self.add_points_as_particle_system, 
+                    self.mesh_type, 
+                    self.point_extent)
 
         return {'FINISHED'}
