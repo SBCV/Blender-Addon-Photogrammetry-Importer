@@ -18,8 +18,9 @@ Point = namedtuple('Point', ['coord', 'color', 'measurements', 'id', 'scalars'])
 class NVMFileHandler(object):
 
     @staticmethod
-    def parse_camera_image_files(cameras, path_to_images, default_width, default_height):
-
+    def parse_camera_image_files(cameras, path_to_images, default_width, default_height, op):
+        op.report({'INFO'}, 'parse_camera_image_files: ' + path_to_images)
+        success = True 
         for camera in cameras:
             image_path = os.path.join(path_to_images, camera.file_name)
             if PILImage is not None and os.path.isfile(image_path):
@@ -27,10 +28,21 @@ class NVMFileHandler(object):
                 image = PILImage.open(image_path)
                 camera.width, camera.height = image.size
             else:
-                print("Using default width and height!")
-                camera.width = default_width
-                camera.height = default_height
-        return cameras
+                if default_width > 0 and default_height > 0:
+                    camera.width = default_width
+                    camera.height = default_height
+                    op.report({'WARNING'}, 'Using provided width and height!')
+                else:
+                    op.report({'ERROR'}, 'Corresponding image not found at: ' + image_path)
+                    op.report({'ERROR'}, 'Invalid default values provided for width ' + str(default_width) + ' and height ' + str(default_height))
+                    op.report({'ERROR'}, 'Adjust the image path or the default values to import the NVM file.')
+                    success = False
+                    break
+        if success:     
+            if not camera.is_principal_point_initialized():
+                camera.set_principal_point([camera.width / 2.0, camera.height / 2.0])
+        op.report({'INFO'}, 'parse_camera_image_files: Done')
+        return cameras, success
 
     # Check the LoadNVM function in util.h of Multicore bundle adjustment code for more details.
     # http://grail.cs.washington.edu/projects/mcba/
@@ -38,7 +50,7 @@ class NVMFileHandler(object):
 
 
     @staticmethod
-    def _parse_cameras(input_file, num_cameras):
+    def _parse_cameras(input_file, num_cameras, camera_calibration_matrix, op):
 
         """
         VisualSFM CAMERA coordinate system is the standard CAMERA coordinate system in computer vision (not the same
@@ -52,7 +64,7 @@ class NVMFileHandler(object):
         i.e. the y and z axis of the CAMERA MATRICES are inverted
         therefore, the y and z axis of the TRANSLATION VECTOR are also inverted
         """
-
+        op.report({'INFO'}, '_parse_cameras: ...')
         cameras = []
 
         for i in range(num_cameras):
@@ -79,9 +91,10 @@ class NVMFileHandler(object):
             radial_distortion = float(line_values[9])
 
             # TODO radial_distortion in camera_calibration_matrix
-            camera_calibration_matrix = np.array([[focal_length, 0, 0],
-                                      [0, focal_length, 0],
-                                      [0, 0, 1]])
+            if camera_calibration_matrix is None:
+                camera_calibration_matrix = np.array([[focal_length, 0, 0],
+                                          [0, focal_length, 0],
+                                          [0, 0, 1]])
 
             zero_value = float(line_values[10])
             assert(zero_value == 0)
@@ -106,11 +119,13 @@ class NVMFileHandler(object):
             translation_vec = NVMFileHandler.compute_camera_coordinate_system_translation_vector(center_vec, current_camera.get_rotation_mat())
             current_camera._translation_vec = translation_vec
 
-            current_camera.calibration_mat = camera_calibration_matrix
+            current_camera.set_calibration_mat(camera_calibration_matrix)
+            op.report({'INFO'}, 'Calibration mat:')
+            op.report({'INFO'}, str(camera_calibration_matrix))
             current_camera.file_name = file_name
             current_camera.id = i
             cameras.append(current_camera)
-
+        op.report({'INFO'}, '_parse_cameras: Done')
         return cameras
 
     @staticmethod
@@ -144,9 +159,30 @@ class NVMFileHandler(object):
         return points
 
     @staticmethod
-    def parse_nvm_file(input_visual_fsm_file_name):
+    def parse_fixed_calibration(line, op):
+        
+        line_elements = line.split()
+        if len(line_elements) == 1:
+            assert line.startswith('NVM_V3')
+            calib_mat = None
+        elif len(line_elements) == 7:
+            _,_, fx, cx, fy, cy, r = line_elements
+            calib_mat = np.array(
+                [[float(fx), 0, float(cx)],
+                 [0, float(fy), float(cy)],
+                 [0, 0, 1]])
+        else:
+            assert False
+        if calib_mat is not None:
+            op.report({'INFO'}, 'Found Fixed Calibration in NVM File.')
+            op.report({'INFO'}, 'Fixed calibration mat:')
+            op.report({'INFO'}, str(calib_mat))
+        return calib_mat
 
-        print('Parse NVM file:',input_visual_fsm_file_name)
+    @staticmethod
+    def parse_nvm_file(input_visual_fsm_file_name, op):
+
+        op.report({'INFO'}, 'Parse NVM file: ' + input_visual_fsm_file_name)
         input_file = open(input_visual_fsm_file_name, 'r')
         # Documentation of *.NVM data format
         # http://ccwu.me/vsfm/doc.html#nvm
@@ -159,14 +195,14 @@ class NVMFileHandler(object):
 
         # Read the first two lines (fixed)
         current_line = (input_file.readline()).rstrip()
-        assert current_line == 'NVM_V3'
+        calibration_matrix = NVMFileHandler.parse_fixed_calibration(current_line, op)
         current_line = (input_file.readline()).rstrip()
         assert current_line == ''
 
         amount_cameras = int((input_file.readline()).rstrip())
         print('Amount Cameras (Images in NVM file): ' + str(amount_cameras))
 
-        cameras = NVMFileHandler._parse_cameras(input_file, amount_cameras)
+        cameras = NVMFileHandler._parse_cameras(input_file, amount_cameras, calibration_matrix, op)
         current_line = (input_file.readline()).rstrip()
         assert current_line == ''
         current_line = (input_file.readline()).rstrip()
@@ -177,20 +213,57 @@ class NVMFileHandler(object):
         else:
             points = []
 
-        print('Parse NVM file: Done')
+        op.report({'INFO'}, 'Parse NVM file: Done')
         return cameras, points
+
+    @staticmethod
+    def create_nvm_first_line(cameras, op):
+
+        op.report({'INFO'}, 'create_nvm_first_line: ...')
+        # The first line can be either
+        #   'NVM_V3'
+        # or
+        #   'NVM_V3 FixedK fx cx fy cy r'
+
+        calib_mat = cameras[0].get_calibration_mat()
+        op.report({'INFO'}, 'calib_mat: ' + str(calib_mat))
+        # radial_dist = None
+        # if cameras[0].has_radial_distortion():
+        #     radial_dist = cameras[0].has_radial_distortion()
+
+        fixed_calibration = True
+        for cam in cameras:
+            op.report({'INFO'}, 'cam.get_calibration_mat(): ' + str(cam.get_calibration_mat()))
+            if not np.allclose(cam.get_calibration_mat(), calib_mat):
+                op.report({'INFO'}, 'calib_mat: ' + str(calib_mat))
+                fixed_calibration = False
+                break
+        op.report({'INFO'}, 'fixed_calibration: ' + str(fixed_calibration))
+        if fixed_calibration:
+            fl = 'NVM_V3 FixedK'
+            fl += ' ' + str(calib_mat[0][0])
+            fl += ' ' + str(calib_mat[0][2])
+            fl += ' ' + str(calib_mat[1][1])
+            fl += ' ' + str(calib_mat[1][2])
+            fl += ' ' + str(0)      # TODO Radial distortion
+        else:
+            fl = 'NVM_V3'
+        op.report({'INFO'}, 'fl: ' + fl)
+        op.report({'INFO'}, 'create_nvm_first_line: Done')
+        return fl
 
     @staticmethod
     def nvm_line(content):
         return content + ' ' + os.linesep
 
     @staticmethod
-    def write_nvm_file(output_nvm_file_name, cameras, points):
+    def write_nvm_file(op, output_nvm_file_name, cameras, points):
 
-        print('Write NVM file:', output_nvm_file_name)
+        op.report({'INFO'}, 'Write NVM file: ' + output_nvm_file_name)
 
         nvm_content = []
-        nvm_content.append(NVMFileHandler.nvm_line('NVM_V3'))
+        nvm_content.append(NVMFileHandler.nvm_line(
+            NVMFileHandler.create_nvm_first_line(cameras, op)))
         nvm_content.append(NVMFileHandler.nvm_line(''))
         amount_cameras = len(cameras)
         nvm_content.append(NVMFileHandler.nvm_line(str(amount_cameras)))
@@ -242,7 +315,7 @@ class NVMFileHandler(object):
         output_file = open(output_nvm_file_name, 'wb')
         output_file.writelines([item.encode() for item in nvm_content])
 
-        print('Write NVM file: Done')
+        op.report({'INFO'}, 'Write NVM file: Done')
 
     @staticmethod
     def compute_camera_coordinate_system_translation_vector(c, R):

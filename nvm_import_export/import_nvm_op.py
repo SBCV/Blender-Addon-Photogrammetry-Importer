@@ -59,8 +59,8 @@ def add_empty(empty_name):
     bpy.context.scene.objects.link(empty_obj)
     return empty_obj
 
-def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_extent):
-    print("Adding Points: ...")
+def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent):
+    op.report({'INFO'}, 'Adding Points: ...')
     stop_watch = StopWatch()
     name = "Point_Cloud"
     mesh = bpy.data.meshes.new(name)
@@ -73,8 +73,8 @@ def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_e
     meshobj = add_obj(mesh, name)
 
     if add_points_as_particle_system or add_meshes_at_vertex_positions:
-        print("Representing Points in the Point Cloud with Meshes: True")
-        print("Mesh Type: " + str(mesh_type))
+        op.report({'INFO'}, 'Representing Points in the Point Cloud with Meshes: True')
+        op.report({'INFO'}, 'Mesh Type: ' + str(mesh_type))
 
         # The default size of elements added with 
         #   primitive_cube_add, primitive_uv_sphere_add, etc. is (2,2,2)
@@ -122,12 +122,8 @@ def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_e
             # To view the texture we set the height of the texture to vis_image_height 
             image = bpy.data.images.new('ParticleColor', len(point_world_coordinates), vis_image_height)
             
-            print('len(points): ' + str(len(points)))
-            print(type(image.pixels))
-            
             # working on a copy of the pixels results in a MASSIVE performance speed
             local_pixels = list(image.pixels[:])
-            print(type(local_pixels))
             
             num_points = len(points)
             
@@ -171,12 +167,14 @@ def add_points_as_mesh(points, add_points_as_particle_system, mesh_type, point_e
             
         bpy.context.scene.update
     else:
-        print("Representing Points in the Point Cloud with Meshes: False")
-    print("Duration: " + str(stop_watch.get_elapsed_time()))
-    print("Adding Points: Done")
+        op.report({'INFO'}, 'Representing Points in the Point Cloud with Meshes: False')
+    op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
+    op.report({'INFO'}, 'Adding Points: Done')
 
     
-def add_cameras(cameras, path_to_images=None,
+def add_cameras(op, 
+                cameras, 
+                path_to_images=None,
                 add_image_planes=False,
                 convert_camera_coordinate_system=True,
                 cameras_parent='Cameras',
@@ -198,7 +196,7 @@ def add_cameras(cameras, path_to_images=None,
     :param image_plane_group_name:
     :return:
     """
-    print("Adding Cameras: ...")
+    op.report({'INFO'}, 'Adding Cameras: ...')
     stop_watch = StopWatch()
     cameras_parent = add_empty(cameras_parent)
     cameras_parent.hide = True
@@ -206,11 +204,11 @@ def add_cameras(cameras, path_to_images=None,
     camera_group = bpy.data.groups.new(camera_group_name)
 
     if add_image_planes:
-        print("Adding image planes: True")
+        op.report({'INFO'}, 'Adding image planes: True')
         image_planes_parent = add_empty(image_planes_parent)
         image_planes_group = bpy.data.groups.new(image_plane_group_name)
     else:
-        print("Adding image planes: False")
+        op.report({'INFO'}, 'Adding image planes: False')
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
@@ -223,12 +221,33 @@ def add_cameras(cameras, path_to_images=None,
         image_file_name_stem = os.path.splitext(os.path.basename(camera.file_name))[0]
         camera_name = image_file_name_stem + '_cam'
 
-        focal_length = camera.calibration_mat[0][0]
+        focal_length = camera.get_focal_length()
+        op.report({'INFO'}, 'focal_length: ' + str(focal_length))
+        op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
+        op.report({'INFO'}, 'width: ' + str(camera.width))
+        op.report({'INFO'}, 'height: ' + str(camera.height))
 
         # Add camera:
         bcamera = bpy.data.cameras.new(camera_name)
+        #  Adjust field of view
         bcamera.angle_x = math.atan(camera.width / (focal_length * 2.0)) * 2.0
         bcamera.angle_y = math.atan(camera.height / (focal_length * 2.0)) * 2.0
+
+        # Adjust principal point
+        p_x, p_y = camera.get_principal_point()
+        
+        op.report({'INFO'}, 'p_x: ' + str(p_x))
+        op.report({'INFO'}, 'p_y: ' + str(p_y))
+
+
+        # https://blender.stackexchange.com/questions/58235/what-are-the-units-for-camera-shift
+        # This is measured however in relation to the largest dimension of the rendered frame size. 
+        # So lets say you are rendering in Full HD, that is 1920 x 1080 pixel image; 
+        # a frame shift if 1 unit will shift exactly 1920 pixels in any direction, that is up/down/left/right.
+        max_extent = max(camera.width, camera.height)
+        bcamera.shift_x = (camera.width / 2.0 - p_x) / float(max_extent)
+        bcamera.shift_y = (camera.height / 2.0 - p_y) / float(max_extent)
+
         camera_object = add_obj(bcamera, camera_name)
 
         translation_vec = camera.get_translation_vec()
@@ -247,7 +266,10 @@ def add_cameras(cameras, path_to_images=None,
 
         if add_image_planes:
             path_to_image = os.path.join(path_to_images, camera.file_name)
+            
             if os.path.isfile(path_to_image):
+                
+                op.report({'INFO'}, 'Adding image plane for: ' + str(path_to_image))
 
                 # Group image plane and camera:
                 camera_image_plane_pair = bpy.data.groups.new(
@@ -260,7 +282,7 @@ def add_cameras(cameras, path_to_images=None,
                 bimage = bpy.data.images.load(path_to_image)
                 image_plane_obj = add_camera_image_plane(
                     rotation_mat, translation_vec, bimage, camera.width, 
-                    camera.height, focal_length, name=image_plane_name)
+                    camera.height, focal_length, name=image_plane_name, op=op)
                 camera_image_plane_pair.objects.link(image_plane_obj)
 
                 set_object_parent(image_plane_obj, image_planes_parent, keep_transform=True)
@@ -268,13 +290,15 @@ def add_cameras(cameras, path_to_images=None,
 
         end_time = stop_watch.get_elapsed_time()
 
-    print("Duration: " + str(stop_watch.get_elapsed_time()))
-    print("Adding Cameras: Done")
+    op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
+    op.report({'INFO'}, 'Adding Cameras: Done')
 
-def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height, focal_length, name):
+def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height, focal_length, name, op):
     """
     Create mesh for image plane
     """
+    op.report({'INFO'}, 'add_camera_image_plane: ...')
+    op.report({'INFO'}, 'name: ' + str(name))
     mesh = bpy.data.meshes.new(name)
     mesh.update()
     mesh.validate()
@@ -294,7 +318,7 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
                (-0.5, +0.5))
     points = [(plane_center + c[0] * right + c[1] * up)[0:3] for c in corners]
     mesh.from_pydata(points, [], [[0, 1, 2, 3]])
-
+    
     # Assign image to face of image plane:
     uvmap = mesh.uv_textures.new()
     face = uvmap.data[0]
@@ -303,9 +327,25 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
     # Add mesh to new image plane object:
     mesh_obj = add_obj(mesh, name)
 
-    image_plane_material = bpy.data.materials.new(name="image_plane_material")
+    image_plane_material = bpy.data.materials.new(
+        name="image_plane_material")
+    # Adds "Diffuse BSDF" and a "Material Output" node
+    image_plane_material.use_nodes = True
     image_plane_material.use_shadeless = True
-
+    
+    # get the "Diffuse BSDF" node
+    nodes = image_plane_material.node_tree.nodes
+    links = image_plane_material.node_tree.links
+    
+    shader_node_tex_image = nodes.new(type='ShaderNodeTexImage')
+    shader_node_diffuse_bsdf = nodes.get('Diffuse BSDF')
+    
+    links.new(
+        shader_node_tex_image.outputs['Color'], 
+        shader_node_diffuse_bsdf.inputs['Color'])
+        
+    shader_node_tex_image.image = bimage
+    
     # Assign it to object
     if mesh_obj.data.materials:
         # assign to 1st material slot
@@ -313,10 +353,12 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
     else:
         # no slots
         mesh_obj.data.materials.append(image_plane_material)
+    
     world_matrix = get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
     mesh_obj.matrix_world = world_matrix
     mesh.update()
     mesh.validate()
+    op.report({'INFO'}, 'add_camera_image_plane: Done')
     return mesh_obj
 
 
@@ -333,6 +375,10 @@ from bpy_extras.io_utils import (ImportHelper,
                                  axis_conversion)
 
 class ImportNVM(bpy.types.Operator, ImportHelper):
+    
+    # http://sinestesia.co/blog/tutorials/using-blenders-filebrowser-with-python/
+    # https://www.blender.org/forum/viewtopic.php?t=26470
+    
     """Load a NVM file"""
     bl_idname = "import_scene.nvm"
     bl_label = "Import NVM"
@@ -352,15 +398,22 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
     default_width = IntProperty(
         name="Default Width",
         description = "Width, which will be used used if corresponding image is not found.", 
-        default=1920)
+        default=-1)
     default_height = IntProperty(
         name="Default Height", 
         description = "Height, which will be used used if corresponding image is not found.",
-        default=1080)
+        default=-1)
     add_image_planes = BoolProperty(
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera", 
-        default=False)
+        default=True)
+    image_dir = StringProperty(
+        name="Image Directory",
+        description = "Path to the directory of images. If no path is provided, the paths in the nvm file are used.", 
+        default="",
+        # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
+        )
+        
     camera_extent = FloatProperty(
         name="Initial Camera Extent (in Blender Units)", 
         description = "Initial Camera Extent (Visualization)",
@@ -397,21 +450,29 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
                  for name in self.files]
         if not paths:
             paths.append(self.filepath)
+            
+        self.report({'INFO'}, 'paths: ' + str(paths))
 
         from nvm_import_export.nvm_file_handler import NVMFileHandler
 
         for path in paths:
             
             path_to_images = os.path.dirname(path)
-            cameras, points = NVMFileHandler.parse_nvm_file(path)
-            cameras = NVMFileHandler.parse_camera_image_files(
-                cameras, path_to_images, self.default_width, self.default_height)
-            print("Number cameras: " + str(len(cameras)))
-            print("Number points: " + str(len(points)))
-            if self.import_points:
-                add_points_as_mesh(points, self.add_points_as_particle_system, self.mesh_type, self.point_extent)
-            if self.import_cameras:
-                add_cameras(cameras, path_to_images=path_to_images, add_image_planes=self.add_image_planes, camera_scale=self.camera_extent)
-            
+            cameras, points = NVMFileHandler.parse_nvm_file(path, self)
+            #self.report({'INFO'}, 'cameras[0].get_calibration_mat(): (before)' + str(cameras[0].get_calibration_mat()))
+            cameras, success = NVMFileHandler.parse_camera_image_files(
+                cameras, path_to_images, self.default_width, self.default_height, self)
+            if success:
+                self.report({'INFO'}, 'cameras[0].get_calibration_mat() (after): ' + str(cameras[0].get_calibration_mat()))
+                # https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
+                #   The color depends on the type enum: INFO gets green, WARNING light red, and ERROR dark red
+                # https://docs.blender.org/api/blender_python_api_2_78_release/bpy.types.Operator.html?highlight=report#bpy.types.Operator.report
+                self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+                self.report({'INFO'}, 'Number points: ' + str(len(points)))
+                if self.import_points:
+                    add_points_as_mesh(self, points, self.add_points_as_particle_system, self.mesh_type, self.point_extent)
+                if self.import_cameras:
+                    add_cameras(self, cameras, path_to_images=path_to_images, add_image_planes=self.add_image_planes, camera_scale=self.camera_extent)
+                
 
         return {'FINISHED'}

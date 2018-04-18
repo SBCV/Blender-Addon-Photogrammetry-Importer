@@ -14,7 +14,7 @@ class Camera:
         self._quaternion = np.array([0, 0, 0, 0], dtype=float)
         self._rotation_mat = np.zeros((3, 3), dtype=float)
         
-        self.calibration_mat = np.zeros((3, 3), dtype=float)
+        self._calibration_mat = np.zeros((3, 3), dtype=float)
         
         self.file_name = None
         self.width = None
@@ -32,9 +32,35 @@ class Camera:
         self._calibration_mat = np.asarray(calibration_mat, dtype=float)
         self._radial_distortion = radial_distortion
         assert self._radial_distortion is not None
+        
+    def get_focal_length(self):
+        return self._calibration_mat[0][0]
+    
+    def check_calibration_mat(self):
+        assert self.is_principal_point_initialized()
     
     def get_calibration_mat(self):
+        self.check_calibration_mat()
         return self._calibration_mat
+    
+    def set_calibration_mat(self, calibration_mat):
+        self._calibration_mat = calibration_mat
+
+    def set_principal_point(self, principal_point):
+        self._calibration_mat[0][2] = principal_point[0]
+        self._calibration_mat[1][2] = principal_point[1]
+
+    def get_principal_point(self):
+        calibration_mat = self.get_calibration_mat()
+        cx = calibration_mat[0][2]
+        cy = calibration_mat[1][2]
+        return np.asarray([cx,cy], dtype=float)
+    
+    def is_principal_point_initialized(self):
+        cx_zero = np.isclose(self._calibration_mat[0][2], 0.0)
+        cy_zero = np.isclose(self._calibration_mat[1][2], 0.0)
+        initialized = (not cx_zero) and (not cy_zero)
+        return initialized
 
     @staticmethod
     def compute_calibration_mat(focal_length, cx, cy):

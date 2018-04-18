@@ -27,8 +27,8 @@ def invert_y_and_z_axis(input_matrix_or_vector):
     output_matrix_or_vector[2] = -output_matrix_or_vector[2]
     return output_matrix_or_vector
 
-def get_calibration_mat(blender_camera):
-    print('get_calibration_mat: ...')
+def get_calibration_mat(op, blender_camera):
+    op.report({'INFO'}, 'get_calibration_mat: ...')
     scene = bpy.context.scene
     render_resolution_width = scene.render.resolution_x
     render_resolution_height = scene.render.resolution_y
@@ -38,17 +38,21 @@ def get_calibration_mat(blender_camera):
         float(max(scene.render.resolution_x, scene.render.resolution_y)) * \
         focal_length_in_mm / sensor_width_in_mm
 
+    max_extent = max(render_resolution_width, render_resolution_height)
+    p_x = render_resolution_width / 2.0 - blender_camera.data.shift_x * max_extent
+    p_y = render_resolution_height / 2.0 - blender_camera.data.shift_y * max_extent
+
     calibration_mat = Camera.compute_calibration_mat(
-        focal_length_in_pixel, cx=render_resolution_width / 2, cy=render_resolution_height / 2)
+        focal_length_in_pixel, cx=p_x, cy=p_y)
 
-    print('render_resolution_width', render_resolution_width)
-    print('render_resolution_height', render_resolution_height)
-    print('focal_length_in_pixel', focal_length_in_pixel)
+    op.report({'INFO'}, 'render_resolution_width: ' + str(render_resolution_width))
+    op.report({'INFO'}, 'render_resolution_height: ' + str(render_resolution_height))
+    op.report({'INFO'}, 'focal_length_in_pixel: ' + str(focal_length_in_pixel))
 
-    print('get_calibration_mat: Done')
+    op.report({'INFO'}, 'get_calibration_mat: Done')
     return calibration_mat
 
-def get_computer_vision_camera_matrix(blender_camera):
+def get_computer_vision_camera_matrix(op, blender_camera):
 
     """
     Blender and Computer Vision Camera Coordinate Frame Systems (like VisualSfM, Bundler)
@@ -57,21 +61,20 @@ def get_computer_vision_camera_matrix(blender_camera):
     :return:
     """
 
-    # Only if the objects have a scale of 1,
-    # the 3x3 part of the corresponding matrix_world contains a pure rotation
-    # Otherwise it also contains scale or shear information
+    # Only if the objects have a scale of 1, the 3x3 part 
+    # of the corresponding matrix_world contains a pure rotation.
+    # Otherwise, it also contains scale or shear information
     if not np.allclose(tuple(blender_camera.scale), (1, 1, 1)):
-        print('blender_camera.scale', blender_camera.scale)
+        op.report({'ERROR'}, 'blender_camera.scale: ' + str(blender_camera.scale))
         assert False
 
     camera_matrix = np.array(blender_camera.matrix_world)
     gt_camera_rotation_inverse = camera_matrix.copy()[0:3, 0:3]
     gt_camera_rotation = gt_camera_rotation_inverse.T
 
-    # Important: Blender uses a blender_camera coordinate frame system,
-    # which looks down the negative z-axis
-    # This contradicts the camera coordinate systems used by most SfM camera coordinate systems
-    # Thus rotate the camera rotation matrix by 180 degrees (i.e. invert the y and z axis)
+    # Important: Blender uses a camera coordinate frame system, which looks down the negative z-axis.
+    # This differs from the camera coordinate systems used by most SfM tools/frameworks.
+    # Thus, rotate the camera rotation matrix by 180 degrees (i.e. invert the y and z axis).
     gt_camera_rotation = invert_y_and_z_axis(gt_camera_rotation)
     gt_camera_rotation_inverse = gt_camera_rotation.T
 
@@ -80,7 +83,8 @@ def get_computer_vision_camera_matrix(blender_camera):
     return rotated_camera_matrix_around_x_by_180
 
 
-def export_selected_cameras_and_vertices_of_meshes():
+def export_selected_cameras_and_vertices_of_meshes(op):
+    op.report({'INFO'}, 'export_selected_cameras_and_vertices_of_meshes: ...')
     cameras = []
     points = []
     
@@ -88,10 +92,12 @@ def export_selected_cameras_and_vertices_of_meshes():
     camera_index = 0
     for obj in bpy.context.selected_objects:
         if obj.type == 'CAMERA':
-            calibration_mat = get_calibration_mat(obj)
-            obj.matrix_world
+            op.report({'INFO'}, 'obj.name: ' + str(obj.name))
+            calibration_mat = get_calibration_mat(op, obj)
+            # op.report({'INFO'}, 'calibration_mat:' )
+            # op.report({'INFO'}, str(calibration_mat))
             
-            camera_matrix_computer_vision = get_computer_vision_camera_matrix(obj)
+            camera_matrix_computer_vision = get_computer_vision_camera_matrix(op, obj)
             
             cam = Camera()
             cam.file_name = str('camera_index')
@@ -113,7 +119,7 @@ def export_selected_cameras_and_vertices_of_meshes():
                                             
                     point_index += 1
                 points += obj_points
-            
+    op.report({'INFO'}, 'export_selected_cameras_and_vertices_of_meshes: Done')
     return cameras, points
 
 
@@ -138,16 +144,17 @@ class ExportNVM(bpy.types.Operator, ExportHelper):
                  for name in self.files]
                  
         assert len(paths) == 1
-                 
-        cameras, points = export_selected_cameras_and_vertices_of_meshes()
+        
+        # https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
+        #   The color depends on the type enum: INFO gets green, WARNING light red, and ERROR dark red
+        # https://docs.blender.org/api/blender_python_api_2_78_release/bpy.types.Operator.html?highlight=report#bpy.types.Operator.report
+        cameras, points = export_selected_cameras_and_vertices_of_meshes(self)
         
         for cam in cameras:            
             assert cam.get_calibration_mat() is not None
-            #print(cam.get_calibration_mat())
-            #print(cam.get_4x4_cam_to_world_mat())
         
         from nvm_import_export.nvm_file_handler import NVMFileHandler
-        NVMFileHandler.write_nvm_file(paths[0], cameras, points)
+        NVMFileHandler.write_nvm_file(self, paths[0], cameras, points)
                 
                  
         return {'FINISHED'}
