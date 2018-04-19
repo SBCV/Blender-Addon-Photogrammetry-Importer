@@ -223,7 +223,7 @@ def add_cameras(op,
 
         focal_length = camera.get_focal_length()
         op.report({'INFO'}, 'focal_length: ' + str(focal_length))
-        op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
+        #op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
         op.report({'INFO'}, 'width: ' + str(camera.width))
         op.report({'INFO'}, 'height: ' + str(camera.height))
 
@@ -376,6 +376,27 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
     op.report({'INFO'}, 'add_camera_image_plane: Done')
     return mesh_obj
 
+def set_principal_point_for_cameras(cameras, default_pp_x, default_pp_y, op):
+    
+    if not math.isnan(default_pp_x) and not math.isnan(default_pp_y):
+        op.report({'WARNING'}, 'Setting principal points to default values!')
+    else:
+        op.report({'WARNING'}, 'Setting principal points to image centers!')
+        default_pp_x = cameras[0].width / 2.0
+        default_pp_y = cameras[0].height / 2.0
+    
+    for camera in cameras:
+        if not camera.is_principal_point_initialized():
+            camera.set_principal_point([default_pp_x, default_pp_y])
+
+def principal_points_initialized(cameras):
+    principal_points_initialized = True
+    for camera in cameras:
+        if not camera.is_principal_point_initialized():
+            principal_points_initialized = False
+            break
+    return principal_points_initialized
+
 def adjust_render_settings_if_possible(op, cameras):
     
     possible = True
@@ -432,6 +453,16 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         name="Default Height", 
         description = "Height, which will be used used if corresponding image is not found.",
         default=-1)
+    default_pp_x = FloatProperty(
+        name="Principal Point X Component",
+        description = "Principal Point X Component, which will be used if not contained in the NVM file. " + \
+                      "If no value is provided, the principal point is set to the image center.", 
+        default=float('nan'))
+    default_pp_y = FloatProperty(
+        name="Principal Point Y Component", 
+        description = "Principal Point Y Component, which will be used if not contained in the NVM file. " + \
+                      "If no value is provided, the principal point is set to the image center.", 
+        default=float('nan'))
     add_image_planes = BoolProperty(
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera", 
@@ -443,8 +474,8 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
     adjust_render_settings = BoolProperty(
-        name="Render",
-        description = "Adjust the render settings according to the corresponding images."  +
+        name="Adjust Render Settings",
+        description = "Adjust the render settings according to the corresponding images. "  +
                       "All images have to be captured with the same device). " +
                       "If disabled the visualization of the camera cone in 3D view might be incorrect.", 
         default=True)
@@ -458,8 +489,8 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         description = "Import Points", 
         default=True)
     add_points_as_particle_system = BoolProperty(
-        name="Add Points as Particle System (Recommended)",
-        description="Use a particle system to represent vertex position with an object",
+        name="Add Points as Particle System",
+        description="Use a particle system to represent vertex positions with objects",
         default=True)
     mesh_items = [
         ("CUBE", "Cube", "", 1),
@@ -506,7 +537,16 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
             if self.import_cameras:
                 cameras, success = NVMFileHandler.parse_camera_image_files(
                     cameras, self.path_to_images, self.default_width, self.default_height, self)
+                
                 if success:
+                    # principal point information may be provided in the NVM file
+                    if not principal_points_initialized(cameras):
+                        set_principal_point_for_cameras(
+                            cameras, 
+                            self.default_pp_x,
+                            self.default_pp_y,
+                            self)
+                    
                     if self.adjust_render_settings:
                         adjust_render_settings_if_possible(
                             self, 

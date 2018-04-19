@@ -31,16 +31,14 @@ class NVMFileHandler(object):
                 if default_width > 0 and default_height > 0:
                     camera.width = default_width
                     camera.height = default_height
-                    op.report({'WARNING'}, 'Using provided width and height!')
+                    op.report({'WARNING'}, 'Set width and height to provided values! (' + str(default_width) + ', ' + str(default_height) + ')')
                 else:
                     op.report({'ERROR'}, 'Corresponding image not found at: ' + image_path)
-                    op.report({'ERROR'}, 'Invalid default values provided for width ' + str(default_width) + ' and height ' + str(default_height))
-                    op.report({'ERROR'}, 'Adjust the image path or the default values to import the NVM file.')
+                    op.report({'ERROR'}, 'Invalid values provided for width (' + str(default_width) + ') and height (' + str(default_height) + ')')
+                    op.report({'ERROR'}, 'Adjust the image path or the width/height values to import the NVM file.')
                     success = False
                     break
-        if success:     
-            if not camera.is_principal_point_initialized():
-                camera.set_principal_point([camera.width / 2.0, camera.height / 2.0])
+
         op.report({'INFO'}, 'parse_camera_image_files: Done')
         return cameras, success
 
@@ -64,7 +62,7 @@ class NVMFileHandler(object):
         i.e. the y and z axis of the CAMERA MATRICES are inverted
         therefore, the y and z axis of the TRANSLATION VECTOR are also inverted
         """
-        op.report({'INFO'}, '_parse_cameras: ...')
+        # op.report({'INFO'}, '_parse_cameras: ...')
         cameras = []
 
         for i in range(num_cameras):
@@ -120,12 +118,12 @@ class NVMFileHandler(object):
             current_camera._translation_vec = translation_vec
 
             current_camera.set_calibration_mat(camera_calibration_matrix)
-            op.report({'INFO'}, 'Calibration mat:')
-            op.report({'INFO'}, str(camera_calibration_matrix))
+            # op.report({'INFO'}, 'Calibration mat:')
+            # op.report({'INFO'}, str(camera_calibration_matrix))
             current_camera.file_name = file_name
             current_camera.id = i
             cameras.append(current_camera)
-        op.report({'INFO'}, '_parse_cameras: Done')
+        # op.report({'INFO'}, '_parse_cameras: Done')
         return cameras
 
     @staticmethod
@@ -175,8 +173,8 @@ class NVMFileHandler(object):
             assert False
         if calib_mat is not None:
             op.report({'INFO'}, 'Found Fixed Calibration in NVM File.')
-            op.report({'INFO'}, 'Fixed calibration mat:')
-            op.report({'INFO'}, str(calib_mat))
+            # op.report({'INFO'}, 'Fixed calibration mat:')
+            # op.report({'INFO'}, str(calib_mat))
         return calib_mat
 
     @staticmethod
