@@ -21,7 +21,7 @@ Without the fixed calibration line the addon assumes that the principal point is
 
 There are several import options. For example, one can add the image plane for each camera defined in the NVM file. 
 
-There is an option to represent each vertex position with an object using a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. The color of the points/textures images of the cameras are visible, if 'Cycles Render' is selected and the 3D view is set to "Material".
+There is an option to represent each vertex position with an object using a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. The color of the points / textures of the images are visible, if 'Cycles Render' is selected and the 3D view is set to "Material".
 
 Note: Blender supports only global render settings (which define the ratio of all cameras). If the nvm file contains cameras with different aspect ratios, it is not possible to visualize the camera cones correctly. 
 
