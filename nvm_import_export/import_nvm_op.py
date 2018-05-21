@@ -264,7 +264,7 @@ def add_cameras(op,
         camera_group.objects.link(camera_object)
 
         if add_image_planes:
-            path_to_image = os.path.join(path_to_images, camera.file_name)
+            path_to_image = os.path.join(path_to_images, os.path.basename(camera.file_name))
             
             if os.path.isfile(path_to_image):
                 
@@ -308,6 +308,7 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
     """
     op.report({'INFO'}, 'add_camera_image_plane: ...')
     op.report({'INFO'}, 'name: ' + str(name))
+    bpy.context.scene.render.engine = 'CYCLES'
     mesh = bpy.data.meshes.new(name)
     mesh.update()
     mesh.validate()
