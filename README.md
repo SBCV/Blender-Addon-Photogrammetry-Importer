@@ -1,11 +1,12 @@
 # Blender-Import-NVM-Addon
-Blender addon to import and export Structure-from-Motion (SfM) results using VisualSFM's ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/)) NVM file format. Also other SfM software tools like Colmap ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) use this data format.
+Blender addon to import and export Structure-from-Motion (SfM) results using VisualSFM's ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/)) NVM file format. Also other SfM software tools like Colmap ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) or OpenMVG ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG)) support this data format.
 
 Tested for Blender 2.78 and 2.79 as well as Ubuntu 14.04 and Windows 10.
 
 ## Example
 This repository contains an example NVM file. The imported result looks as follows.
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/import_result.jpg)
+The input images of the NVM file are located here: [https://github.com/openMVG/ImageDataset_SceauxCastle](https://github.com/openMVG/ImageDataset_SceauxCastle).
 
 ## Usage
 
