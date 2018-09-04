@@ -139,7 +139,10 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                     # opacity (0 = transparent, 1 = opaque)
                     #local_pixels[row_offset + column_offset + 3] = 1.0    # already set by default   
                 
-            image.pixels = local_pixels[:]  
+            image.pixels = local_pixels[:] 
+            
+            # Pack the image, otherwise saving and loading will result in a black texture
+            image.pack(as_png=True)
             
             image_texture_node.image = image
             particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
