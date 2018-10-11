@@ -175,6 +175,66 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
     op.report({'INFO'}, 'Adding Points: Done')
 
     
+def add_single_camera(op, camera_name, camera):
+    # Add camera:
+    bcamera = bpy.data.cameras.new(camera_name)
+
+    focal_length = camera.get_focal_length()
+
+    #  Adjust field of view
+    assert camera.width is not None and camera.height is not None
+    bcamera.angle = math.atan(max(camera.width, camera.height) / (focal_length * 2.0)) * 2.0
+
+    # Adjust principal point
+    p_x, p_y = camera.get_principal_point()
+    
+    # https://blender.stackexchange.com/questions/58235/what-are-the-units-for-camera-shift
+    # This is measured however in relation to the largest dimension of the rendered frame size. 
+    # So lets say you are rendering in Full HD, that is 1920 x 1080 pixel image; 
+    # a frame shift if 1 unit will shift exactly 1920 pixels in any direction, that is up/down/left/right.
+    max_extent = max(camera.width, camera.height)
+    bcamera.shift_x = (camera.width / 2.0 - p_x) / float(max_extent)
+    bcamera.shift_y = (camera.height / 2.0 - p_y) / float(max_extent)
+
+    # op.report({'INFO'}, 'focal_length: ' + str(focal_length))
+    # op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
+    # op.report({'INFO'}, 'width: ' + str(camera.width))
+    # op.report({'INFO'}, 'height: ' + str(camera.height))
+    # op.report({'INFO'}, 'p_x: ' + str(p_x))
+    # op.report({'INFO'}, 'p_y: ' + str(p_y))
+
+    return bcamera
+
+def add_camera_animation(op, cameras):
+    op.report({'INFO'}, 'Adding Camera Animation: ...')
+
+    some_cam = cameras[0]
+    bcamera = add_single_camera(op, "animation_camera", some_cam)
+    cam_obj = add_obj(bcamera, "animation_camera")
+
+    scn = bpy.context.scene
+    scn.frame_start = 0
+    scn.frame_end = len(cameras)
+
+    cameras_sorted = sorted(cameras, key=lambda x: x.file_name)
+
+    for index, camera in enumerate(cameras_sorted):
+        #op.report({'INFO'}, 'index: ' + str(index))
+
+        cam_obj.matrix_world = compute_camera_matrix_world(camera)
+        cam_obj.keyframe_insert(data_path="rotation_euler", index=-1, frame=index)
+        cam_obj.keyframe_insert(data_path="location", index=-1, frame=index)
+
+def compute_camera_matrix_world(camera):
+        translation_vec = camera.get_translation_vec()
+        rotation_mat = camera.get_rotation_mat()
+        # Transform the camera coordinate system from computer vision camera coordinate frames to the computer
+        # vision camera coordinate frames
+        # That is, rotate the camera matrix around the x axis by 180 degree, i.e. invert the x and y axis
+        rotation_mat = invert_y_and_z_axis(rotation_mat)
+        translation_vec = invert_y_and_z_axis(translation_vec)
+        return get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
+
 def add_cameras(op, 
                 cameras, 
                 path_to_images=None,
@@ -217,50 +277,15 @@ def add_cameras(op,
     for index, camera in enumerate(cameras):
 
         start_time = stop_watch.get_elapsed_time()
-        assert camera.width is not None and camera.height is not None
-
+        
         # camera_name = "Camera %d" % index     # original code
         # Replace the camera name so it matches the image name (without extension)
         image_file_name_stem = os.path.splitext(os.path.basename(camera.file_name))[0]
         camera_name = image_file_name_stem + '_cam'
-
-        focal_length = camera.get_focal_length()
-        op.report({'INFO'}, 'focal_length: ' + str(focal_length))
-        #op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
-        op.report({'INFO'}, 'width: ' + str(camera.width))
-        op.report({'INFO'}, 'height: ' + str(camera.height))
-
-        # Add camera:
-        bcamera = bpy.data.cameras.new(camera_name)
-        #  Adjust field of view
-        bcamera.angle = math.atan(max(camera.width, camera.height) / (focal_length * 2.0)) * 2.0
-
-        # Adjust principal point
-        p_x, p_y = camera.get_principal_point()
-        
-        op.report({'INFO'}, 'p_x: ' + str(p_x))
-        op.report({'INFO'}, 'p_y: ' + str(p_y))
-
-
-        # https://blender.stackexchange.com/questions/58235/what-are-the-units-for-camera-shift
-        # This is measured however in relation to the largest dimension of the rendered frame size. 
-        # So lets say you are rendering in Full HD, that is 1920 x 1080 pixel image; 
-        # a frame shift if 1 unit will shift exactly 1920 pixels in any direction, that is up/down/left/right.
-        max_extent = max(camera.width, camera.height)
-        bcamera.shift_x = (camera.width / 2.0 - p_x) / float(max_extent)
-        bcamera.shift_y = (camera.height / 2.0 - p_y) / float(max_extent)
-
+        bcamera = add_single_camera(op, camera_name, camera)
         camera_object = add_obj(bcamera, camera_name)
-
-        translation_vec = camera.get_translation_vec()
-        rotation_mat = camera.get_rotation_mat()
-        # Transform the camera coordinate system from computer vision camera coordinate frames to the computer
-        # vision camera coordinate frames
-        # That is, rotate the camera matrix around the x axis by 180 degree, i.e. invert the x and y axis
-        rotation_mat = invert_y_and_z_axis(rotation_mat)
-        translation_vec = invert_y_and_z_axis(translation_vec)
-        camera_object.matrix_world = get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
-
+        matrix_world = compute_camera_matrix_world(camera)
+        camera_object.matrix_world = matrix_world
         camera_object.scale *= camera_scale
 
         set_object_parent(camera_object, cameras_parent, keep_transform=True)
@@ -285,12 +310,11 @@ def add_cameras(op,
                 # do not add image planes by default, this is slow !
                 bimage = bpy.data.images.load(path_to_image)
                 image_plane_obj = add_camera_image_plane(
-                    rotation_mat, 
-                    translation_vec, 
+                    matrix_world, 
                     bimage, 
                     camera.width, 
                     camera.height, 
-                    focal_length, 
+                    camera.get_focal_length(), 
                     px=px,
                     py=py,
                     name=image_plane_name, 
@@ -305,12 +329,15 @@ def add_cameras(op,
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
     op.report({'INFO'}, 'Adding Cameras: Done')
 
-def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height, focal_length, px, py, name, op):
+def add_camera_image_plane(matrix_world, bimage, width, height, focal_length, px, py, name, op):
     """
     Create mesh for image plane
     """
     op.report({'INFO'}, 'add_camera_image_plane: ...')
     op.report({'INFO'}, 'name: ' + str(name))
+
+    assert width is not None and height is not None
+
     bpy.context.scene.render.engine = 'CYCLES'
     mesh = bpy.data.meshes.new(name)
     mesh.update()
@@ -373,8 +400,7 @@ def add_camera_image_plane(rotation_mat, translation_vec, bimage, width, height,
         # no slots
         mesh_obj.data.materials.append(image_plane_material)
     
-    world_matrix = get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
-    mesh_obj.matrix_world = world_matrix
+    mesh_obj.matrix_world = matrix_world
     mesh.update()
     mesh.validate()
     op.report({'INFO'}, 'add_camera_image_plane: Done')
@@ -448,6 +474,10 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
     import_cameras = BoolProperty(
         name="Import Cameras",
         description = "Import Cameras", 
+        default=True)
+    add_camera_motion_as_animation = BoolProperty(
+        name="Add Camera Motion as Animation",
+        description = "Add an animation reflecting the camera motion", 
         default=True)
     default_width = IntProperty(
         name="Default Width",
@@ -538,7 +568,7 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
             self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
             self.report({'INFO'}, 'Number points: ' + str(len(points)))
             
-            if self.import_cameras:
+            if self.import_cameras or self.add_camera_motion_as_animation:
                 cameras, success = NVMFileHandler.parse_camera_image_files(
                     cameras, self.path_to_images, self.default_width, self.default_height, self)
                 
@@ -555,12 +585,18 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
                         adjust_render_settings_if_possible(
                             self, 
                             cameras)
-                    add_cameras(
-                        self, 
-                        cameras, 
-                        path_to_images=self.path_to_images, 
-                        add_image_planes=self.add_image_planes, 
-                        camera_scale=self.camera_extent)
+                    if self.import_cameras:
+                        add_cameras(
+                            self, 
+                            cameras, 
+                            path_to_images=self.path_to_images, 
+                            add_image_planes=self.add_image_planes, 
+                            camera_scale=self.camera_extent)
+                    if self.add_camera_motion_as_animation:
+                        add_camera_animation(
+                            self,
+                            cameras
+                            )
                 else:
                     return {'FINISHED'}
                 
