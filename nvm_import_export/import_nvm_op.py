@@ -1,6 +1,6 @@
 import bpy
 import os
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Vector, Quaternion
 import math
 from math import radians
 import time
@@ -205,7 +205,44 @@ def add_single_camera(op, camera_name, camera):
 
     return bcamera
 
-def add_camera_animation(op, cameras):
+def remove_quaternion_discontinuities(cam_obj):
+
+    # the interpolation of quaternions may lead to discontinuities 
+    # if the quaternions show different signs
+
+    # https://blender.stackexchange.com/questions/58866/keyframe-interpolation-instability
+    action = cam_obj.animation_data.action
+
+    # quaternion curves
+    fqw = action.fcurves.find('rotation_quaternion', index = 0)
+    fqx = action.fcurves.find('rotation_quaternion', index = 1)
+    fqy = action.fcurves.find('rotation_quaternion', index = 2)
+    fqz = action.fcurves.find('rotation_quaternion', index = 3)  
+
+    # invert quaternion so that interpolation takes the shortest path
+    if (len(fqw.keyframe_points) > 0):
+        current_quat = Quaternion((
+            fqw.keyframe_points[0].co[1],
+            fqx.keyframe_points[0].co[1],
+            fqy.keyframe_points[0].co[1],
+            fqz.keyframe_points[0].co[1]))
+
+        for i in range(len(fqw.keyframe_points)-1):
+            last_quat = current_quat
+            current_quat = Quaternion((
+                fqw.keyframe_points[i+1].co[1],
+                fqx.keyframe_points[i+1].co[1],
+                fqy.keyframe_points[i+1].co[1],
+                fqz.keyframe_points[i+1].co[1]))
+
+            if last_quat.dot(current_quat) < 0:
+                current_quat.negate()
+                fqw.keyframe_points[i+1].co[1] = -fqw.keyframe_points[i+1].co[1]
+                fqx.keyframe_points[i+1].co[1] = -fqx.keyframe_points[i+1].co[1]
+                fqy.keyframe_points[i+1].co[1] = -fqy.keyframe_points[i+1].co[1]
+                fqz.keyframe_points[i+1].co[1] = -fqz.keyframe_points[i+1].co[1]
+
+def add_camera_animation(op, cameras, number_interpolation_frames):
     op.report({'INFO'}, 'Adding Camera Animation: ...')
 
     some_cam = cameras[0]
@@ -214,16 +251,28 @@ def add_camera_animation(op, cameras):
 
     scn = bpy.context.scene
     scn.frame_start = 0
-    scn.frame_end = len(cameras)
+    step_size = number_interpolation_frames + 1
+    scn.frame_end = step_size * len(cameras) 
 
     cameras_sorted = sorted(cameras, key=lambda x: x.file_name)
 
     for index, camera in enumerate(cameras_sorted):
         #op.report({'INFO'}, 'index: ' + str(index))
 
+        current_keyframe_index = index * step_size
+
         cam_obj.matrix_world = compute_camera_matrix_world(camera)
-        cam_obj.keyframe_insert(data_path="rotation_euler", index=-1, frame=index)
-        cam_obj.keyframe_insert(data_path="location", index=-1, frame=index)
+
+        cam_obj.keyframe_insert(data_path="location", index=-1, frame=current_keyframe_index)
+
+        # Don't use euler rotations, they show too many discontinuties
+        #cam_obj.keyframe_insert(data_path="rotation_euler", index=-1, frame=current_keyframe_index)
+
+        cam_obj.rotation_mode = 'QUATERNION'
+        cam_obj.keyframe_insert(data_path="rotation_quaternion", index=-1, frame=current_keyframe_index)
+        # q and -q represent the same rotation
+        remove_quaternion_discontinuities(cam_obj)
+
 
 def compute_camera_matrix_world(camera):
         translation_vec = camera.get_translation_vec()
@@ -475,10 +524,6 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         name="Import Cameras",
         description = "Import Cameras", 
         default=True)
-    add_camera_motion_as_animation = BoolProperty(
-        name="Add Camera Motion as Animation",
-        description = "Add an animation reflecting the camera motion", 
-        default=True)
     default_width = IntProperty(
         name="Default Width",
         description = "Width, which will be used used if corresponding image is not found.", 
@@ -507,6 +552,15 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         default="",
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
+    add_camera_motion_as_animation = BoolProperty(
+        name="Add Camera Motion as Animation",
+        description = "Add an animation reflecting the camera motion. The order of the cameras is determined by the corresponding file name.", 
+        default=True)
+    number_interpolation_frames = IntProperty(
+        name="Number of frames between two reconstructed cameras.",
+        description = "The poses of the animated camera are interpolated.", 
+        default=0,
+        min=0)
     adjust_render_settings = BoolProperty(
         name="Adjust Render Settings",
         description = "Adjust the render settings according to the corresponding images. "  +
@@ -595,7 +649,8 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
                     if self.add_camera_motion_as_animation:
                         add_camera_animation(
                             self,
-                            cameras
+                            cameras,
+                            self.number_interpolation_frames
                             )
                 else:
                     return {'FINISHED'}
