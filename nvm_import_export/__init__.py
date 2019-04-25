@@ -23,7 +23,7 @@ bl_info = {
     "description": "Allows to import and export VisualSFM's .nvm file format (cameras and points).",
     "author": "Sebastian Bullinger",
     "version": (1, 0, 0),
-    "blender": (2, 79, 0),
+    "blender": (2, 80, 0),
     "location": "View3D",
     "warning": "",
     "wiki_url": "",
@@ -46,11 +46,8 @@ modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in local
 from nvm_import_export.import_nvm_op import ImportNVM
 from nvm_import_export.export_nvm_op import ExportNVM
 
-
 # register
 ##################################
-
-import traceback
 
 def menu_func_import(self, context):
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
@@ -59,21 +56,21 @@ def menu_func_export(self, context):
     self.layout.operator(ExportNVM.bl_idname, text="VSFM NVM Export (.nvm)")
 
 def register():
-    try: bpy.utils.register_module(__name__)
-    except: traceback.print_exc()
+    bpy.utils.register_class(ImportNVM)
+    bpy.utils.register_class(ExportNVM)
 
-    bpy.types.INFO_MT_file_import.append(menu_func_import)
-    bpy.types.INFO_MT_file_export.append(menu_func_export)
+    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
+    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
     
 
 def unregister():
-    try: bpy.utils.unregister_module(__name__)
-    except: traceback.print_exc()
+    bpy.utils.unregister_class(ImportNVM)
+    bpy.utils.unregister_class(ExportNVM)
 
-    bpy.types.INFO_MT_file_import.remove(menu_func_import)
-    bpy.types.INFO_MT_file_export.remove(menu_func_export)
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
+    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
 
     print("Unregistered {}".format(bl_info["name"]))
 

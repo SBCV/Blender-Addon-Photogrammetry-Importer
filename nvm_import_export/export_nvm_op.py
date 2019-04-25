@@ -129,15 +129,15 @@ class ExportNVM(bpy.types.Operator, ExportHelper):
     bl_label = "Export NVM"
     bl_options = {'UNDO'}
     
-    directory = StringProperty()
+    directory: StringProperty()
 
-    files = CollectionProperty(
+    files: CollectionProperty(
         name="File Path",
         description="File path used for exporting the NVM file",
         type=bpy.types.OperatorFileListElement)
         
     filename_ext = ".nvm"
-    filter_glob = StringProperty(default="*.nvm", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*.nvm", options={'HIDDEN'})
         
     def execute(self, context):
         paths = [os.path.join(self.directory, name.name)

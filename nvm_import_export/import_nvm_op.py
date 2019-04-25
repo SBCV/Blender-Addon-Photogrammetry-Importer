@@ -16,7 +16,7 @@ def get_world_matrix_from_translation_vec(translation_vec, rotation):
 
     camera_rotation.transpose()  # = Inverse rotation
 
-    camera_center = -(camera_rotation * t)  # Camera position in world coordinates
+    camera_center = -(camera_rotation @ t)  # Camera position in world coordinates
     camera_center[3] = 1.0
 
     camera_rotation = camera_rotation.copy()
@@ -36,17 +36,18 @@ def invert_y_and_z_axis(input_matrix_or_vector):
 
 def add_obj(data, obj_name, deselect_others=False):
     scene = bpy.context.scene
+    collection = bpy.context.collection
 
     if deselect_others:
         for obj in scene.objects:
             obj.select = False
 
     new_obj = bpy.data.objects.new(obj_name, data)
-    scene.objects.link(new_obj)
-    new_obj.select = True
+    collection.objects.link(new_obj)
+    new_obj.select_set(state=True)
 
-    if scene.objects.active is None or scene.objects.active.mode == 'OBJECT':
-        scene.objects.active = new_obj
+    if bpy.context.view_layer.objects.active is None or bpy.context.view_layer.objects.active.mode == 'OBJECT':
+        bpy.context.view_layer.objects.active = new_obj
     return new_obj
 
 def set_object_parent(child_object_name, parent_object_name, keep_transform=False):
@@ -56,7 +57,7 @@ def set_object_parent(child_object_name, parent_object_name, keep_transform=Fals
 
 def add_empty(empty_name):
     empty_obj = bpy.data.objects.new(empty_name, None)
-    bpy.context.scene.objects.link(empty_obj)
+    bpy.context.collection.objects.link(empty_obj)
     return empty_obj
 
 def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent):
@@ -82,9 +83,9 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
 
         bpy.ops.object.select_all(action='DESELECT')
         if mesh_type == "PLANE":
-            bpy.ops.mesh.primitive_plane_add(radius=point_scale)
+            bpy.ops.mesh.primitive_plane_add(size=point_scale)
         elif mesh_type == "CUBE":
-            bpy.ops.mesh.primitive_cube_add(radius=point_scale)
+            bpy.ops.mesh.primitive_cube_add(size=point_scale)
         elif mesh_type == "SPHERE":
             bpy.ops.mesh.primitive_uv_sphere_add(radius=point_scale)
         else:
@@ -166,7 +167,7 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                 settings.hair_length = 100           # This must not be 0
                 settings.use_emit_random = False
                 settings.render_type = 'OBJECT'
-                settings.dupli_object = viz_mesh
+                settings.instance_object = viz_mesh
             
         bpy.context.scene.update
     else:
@@ -290,9 +291,9 @@ def add_cameras(op,
                 add_image_planes=False,
                 convert_camera_coordinate_system=True,
                 cameras_parent='Cameras',
-                camera_group_name='Camera Group',
+                camera_collection_name='Camera Collection',
                 image_planes_parent='Image Planes',
-                image_plane_group_name='Image Plane Group',
+                image_plane_collection_name='Image Plane Collection',
                 camera_scale=1.0):
 
     """
@@ -304,21 +305,21 @@ def add_cameras(op,
     :param add_image_planes:
     :param convert_camera_coordinate_system:
     :param cameras_parent:
-    :param camera_group_name:
-    :param image_plane_group_name:
+    :param camera_collection_name:
+    :param image_plane_collection_name:
     :return:
     """
     op.report({'INFO'}, 'Adding Cameras: ...')
     stop_watch = StopWatch()
     cameras_parent = add_empty(cameras_parent)
-    cameras_parent.hide = True
+    cameras_parent.hide_viewport = True
     cameras_parent.hide_render = True
-    camera_group = bpy.data.groups.new(camera_group_name)
+    camera_collection = bpy.data.collections.new(camera_collection_name)
 
     if add_image_planes:
         op.report({'INFO'}, 'Adding image planes: True')
         image_planes_parent = add_empty(image_planes_parent)
-        image_planes_group = bpy.data.groups.new(image_plane_group_name)
+        image_planes_collection = bpy.data.collections.new(image_plane_collection_name)
     else:
         op.report({'INFO'}, 'Adding image planes: False')
 
@@ -338,7 +339,7 @@ def add_cameras(op,
         camera_object.scale *= camera_scale
 
         set_object_parent(camera_object, cameras_parent, keep_transform=True)
-        camera_group.objects.link(camera_object)
+        camera_collection.objects.link(camera_object)
 
         if add_image_planes:
             path_to_image = os.path.join(path_to_images, os.path.basename(camera.file_name))
@@ -348,8 +349,8 @@ def add_cameras(op,
                 op.report({'INFO'}, 'Adding image plane for: ' + str(path_to_image))
 
                 # Group image plane and camera:
-                camera_image_plane_pair = bpy.data.groups.new(
-                    "Camera Image Plane Pair Group %s" % image_file_name_stem)
+                camera_image_plane_pair = bpy.data.collections.new(
+                    "Camera Image Plane Pair Collection %s" % image_file_name_stem)
                 camera_image_plane_pair.objects.link(camera_object)
 
                 image_plane_name = image_file_name_stem + '_image_plane'
@@ -357,10 +358,9 @@ def add_cameras(op,
                 px, py = camera.get_principal_point()
 
                 # do not add image planes by default, this is slow !
-                bimage = bpy.data.images.load(path_to_image)
                 image_plane_obj = add_camera_image_plane(
                     matrix_world, 
-                    bimage, 
+                    path_to_image, 
                     camera.width, 
                     camera.height, 
                     camera.get_focal_length(), 
@@ -371,14 +371,14 @@ def add_cameras(op,
                 camera_image_plane_pair.objects.link(image_plane_obj)
 
                 set_object_parent(image_plane_obj, image_planes_parent, keep_transform=True)
-                image_planes_group.objects.link(image_plane_obj)
+                image_planes_collection.objects.link(image_plane_obj)
 
         end_time = stop_watch.get_elapsed_time()
 
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
     op.report({'INFO'}, 'Adding Cameras: Done')
 
-def add_camera_image_plane(matrix_world, bimage, width, height, focal_length, px, py, name, op):
+def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_length, px, py, name, op):
     """
     Create mesh for image plane
     """
@@ -407,38 +407,30 @@ def add_camera_image_plane(matrix_world, bimage, width, height, focal_length, px
     op.report({'INFO'}, 'relative_shift_x: ' + str(relative_shift_x))
     op.report({'INFO'}, 'relative_shift_y:' + str(relative_shift_y))
 
-    corners = ((-0.5, -0.5),
-               (+0.5, -0.5),
-               (+0.5, +0.5),
-               (-0.5, +0.5))
+    corners = ((-0.5, -0.5), (+0.5, -0.5), (+0.5, +0.5), (-0.5, +0.5))
     points = [(plane_center + (c[0] + relative_shift_x) * right + (c[1] + relative_shift_y) * up)[0:3] for c in corners]
     mesh.from_pydata(points, [], [[0, 1, 2, 3]])
+    mesh.uv_layers.new()
     
-    # Assign image to face of image plane:
-    uvmap = mesh.uv_textures.new()
-    face = uvmap.data[0]
-    face.image = bimage
-
     # Add mesh to new image plane object:
     mesh_obj = add_obj(mesh, name)
 
     image_plane_material = bpy.data.materials.new(
         name="image_plane_material")
-    # Adds "Diffuse BSDF" and a "Material Output" node
+    # Adds "Principled BSDF" and a "Material Output" node
     image_plane_material.use_nodes = True
-    image_plane_material.use_shadeless = True
     
-    # get the "Diffuse BSDF" node
     nodes = image_plane_material.node_tree.nodes
     links = image_plane_material.node_tree.links
     
     shader_node_tex_image = nodes.new(type='ShaderNodeTexImage')
-    shader_node_diffuse_bsdf = nodes.get('Diffuse BSDF')
+    shader_node_principled_bsdf = nodes.get('Principled BSDF')
     
     links.new(
         shader_node_tex_image.outputs['Color'], 
-        shader_node_diffuse_bsdf.inputs['Color'])
-        
+        shader_node_principled_bsdf.inputs['Base Color'])
+    
+    bimage = bpy.data.images.load(path_to_image)
     shader_node_tex_image.image = bimage
     
     # Assign it to object
@@ -513,70 +505,70 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
     bl_label = "Import NVM"
     bl_options = {'UNDO'}
 
-    files = CollectionProperty(
+    files: CollectionProperty(
         name="File Path",
         description="File path used for importing the NVM file",
         type=bpy.types.OperatorFileListElement)
 
-    directory = StringProperty()
+    directory: StringProperty()
 
-    import_cameras = BoolProperty(
+    import_cameras: BoolProperty(
         name="Import Cameras",
         description = "Import Cameras", 
         default=True)
-    default_width = IntProperty(
+    default_width: IntProperty(
         name="Default Width",
         description = "Width, which will be used used if corresponding image is not found.", 
         default=-1)
-    default_height = IntProperty(
+    default_height: IntProperty(
         name="Default Height", 
         description = "Height, which will be used used if corresponding image is not found.",
         default=-1)
-    default_pp_x = FloatProperty(
+    default_pp_x: FloatProperty(
         name="Principal Point X Component",
         description = "Principal Point X Component, which will be used if not contained in the NVM file. " + \
                       "If no value is provided, the principal point is set to the image center.", 
         default=float('nan'))
-    default_pp_y = FloatProperty(
+    default_pp_y: FloatProperty(
         name="Principal Point Y Component", 
         description = "Principal Point Y Component, which will be used if not contained in the NVM file. " + \
                       "If no value is provided, the principal point is set to the image center.", 
         default=float('nan'))
-    add_image_planes = BoolProperty(
+    add_image_planes: BoolProperty(
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera", 
         default=True)
-    path_to_images = StringProperty(
+    path_to_images: StringProperty(
         name="Image Directory",
         description = "Path to the directory of images. If no path is provided, the paths in the nvm file are used.", 
         default="",
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
-    add_camera_motion_as_animation = BoolProperty(
+    add_camera_motion_as_animation: BoolProperty(
         name="Add Camera Motion as Animation",
         description = "Add an animation reflecting the camera motion. The order of the cameras is determined by the corresponding file name.", 
         default=True)
-    number_interpolation_frames = IntProperty(
+    number_interpolation_frames: IntProperty(
         name="Number of frames between two reconstructed cameras.",
         description = "The poses of the animated camera are interpolated.", 
         default=0,
         min=0)
-    adjust_render_settings = BoolProperty(
+    adjust_render_settings: BoolProperty(
         name="Adjust Render Settings",
         description = "Adjust the render settings according to the corresponding images. "  +
                       "All images have to be captured with the same device). " +
                       "If disabled the visualization of the camera cone in 3D view might be incorrect.", 
         default=True)
-    camera_extent = FloatProperty(
+    camera_extent: FloatProperty(
         name="Initial Camera Extent (in Blender Units)", 
         description = "Initial Camera Extent (Visualization)",
         default=1)
 
-    import_points = BoolProperty(
+    import_points: BoolProperty(
         name="Import Points",
         description = "Import Points", 
         default=True)
-    add_points_as_particle_system = BoolProperty(
+    add_points_as_particle_system: BoolProperty(
         name="Add Points as Particle System",
         description="Use a particle system to represent vertex positions with objects",
         default=True)
@@ -585,11 +577,11 @@ class ImportNVM(bpy.types.Operator, ImportHelper):
         ("SPHERE", "Sphere", "", 2),
         ("PLANE", "Plane", "", 3)
         ]
-    mesh_type = EnumProperty(
+    mesh_type: EnumProperty(
         name="Mesh Type",
         description = "Select the vertex representation mesh type.", 
         items=mesh_items)
-    point_extent = FloatProperty(
+    point_extent: FloatProperty(
         name="Initial Point Extent (in Blender Units)", 
         description = "Initial Point Extent for meshes at vertex positions",
         default=0.01)
