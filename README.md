@@ -38,9 +38,13 @@ Select the cameras, click in the *3D View* on *Pivot Point* and then on *Individ
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/scale_cameras.jpg)
 
 ## Installation
-Clone the addon:
+Clone the addon for Blender 2.80 beta:
 ```
 git clone https://github.com/SBCV/Blender-Import-NVM-Addon.git
+```
+or for Blender 2.79
+```
+git clone -b blender279 https://github.com/SBCV/Blender-Import-NVM-Addon.git
 ```
 Compress the folder "nvm_import" in "Blender-Import-NVM-Addon" to a zip archive. 
 The final structure must look as follows:
