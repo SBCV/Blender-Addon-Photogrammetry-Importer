@@ -1,12 +1,23 @@
-import bpy
 import os
-from mathutils import Matrix, Vector, Quaternion
 import math
-from math import radians
 import time
-from nvm_import_export.stop_watch import StopWatch
-import numpy as np
-from nvm_import_export.point import Point
+import bpy 
+from mathutils import Matrix
+from mathutils import Vector
+from mathutils import Quaternion
+
+from photogrammetry_importer.stop_watch import StopWatch
+
+def invert_y_and_z_axis(input_matrix_or_vector):
+    """
+    VisualSFM and Blender use coordinate systems, which differ in the y and z coordinate
+    This Function inverts the y and the z coordinates in the corresponding matrix / vector entries
+    Iinvert y and z axis <==> rotation by 180 degree around the x axis
+    """
+    output_matrix_or_vector = input_matrix_or_vector.copy()
+    output_matrix_or_vector[1] = -output_matrix_or_vector[1]
+    output_matrix_or_vector[2] = -output_matrix_or_vector[2]
+    return output_matrix_or_vector
 
 def get_world_matrix_from_translation_vec(translation_vec, rotation):
     t = Vector(translation_vec).to_4d()
@@ -23,16 +34,15 @@ def get_world_matrix_from_translation_vec(translation_vec, rotation):
     camera_rotation.col[3] = camera_center  # Set translation to camera position
     return camera_rotation
 
-def invert_y_and_z_axis(input_matrix_or_vector):
-    """
-    VisualSFM and Blender use coordinate systems, which differ in the y and z coordinate
-    This Function inverts the y and the z coordinates in the corresponding matrix / vector entries
-    Iinvert y and z axis <==> rotation by 180 degree around the x axis
-    """
-    output_matrix_or_vector = input_matrix_or_vector.copy()
-    output_matrix_or_vector[1] = -output_matrix_or_vector[1]
-    output_matrix_or_vector[2] = -output_matrix_or_vector[2]
-    return output_matrix_or_vector
+def compute_camera_matrix_world(camera):
+        translation_vec = camera.get_translation_vec()
+        rotation_mat = camera.get_rotation_mat()
+        # Transform the camera coordinate system from computer vision camera coordinate frames to the computer
+        # vision camera coordinate frames
+        # That is, rotate the camera matrix around the x axis by 180 degree, i.e. invert the x and y axis
+        rotation_mat = invert_y_and_z_axis(rotation_mat)
+        translation_vec = invert_y_and_z_axis(translation_vec)
+        return get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
 
 def add_obj(data, obj_name, deselect_others=False):
     scene = bpy.context.scene
@@ -50,15 +60,15 @@ def add_obj(data, obj_name, deselect_others=False):
         bpy.context.view_layer.objects.active = new_obj
     return new_obj
 
-def set_object_parent(child_object_name, parent_object_name, keep_transform=False):
-    child_object_name.parent = parent_object_name
-    if keep_transform:
-        child_object_name.matrix_parent_inverse = parent_object_name.matrix_world.inverted()
-
 def add_empty(empty_name):
     empty_obj = bpy.data.objects.new(empty_name, None)
     bpy.context.collection.objects.link(empty_obj)
     return empty_obj
+
+def set_object_parent(child_object_name, parent_object_name, keep_transform=False):
+    child_object_name.parent = parent_object_name
+    if keep_transform:
+        child_object_name.matrix_parent_inverse = parent_object_name.matrix_world.inverted()
 
 def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent):
     op.report({'INFO'}, 'Adding Points: ...')
@@ -175,7 +185,6 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
     op.report({'INFO'}, 'Adding Points: Done')
 
-    
 def add_single_camera(op, camera_name, camera):
     # Add camera:
     bcamera = bpy.data.cameras.new(camera_name)
@@ -273,17 +282,6 @@ def add_camera_animation(op, cameras, number_interpolation_frames):
         cam_obj.keyframe_insert(data_path="rotation_quaternion", index=-1, frame=current_keyframe_index)
         # q and -q represent the same rotation
         remove_quaternion_discontinuities(cam_obj)
-
-
-def compute_camera_matrix_world(camera):
-        translation_vec = camera.get_translation_vec()
-        rotation_mat = camera.get_rotation_mat()
-        # Transform the camera coordinate system from computer vision camera coordinate frames to the computer
-        # vision camera coordinate frames
-        # That is, rotate the camera matrix around the x axis by 180 degree, i.e. invert the x and y axis
-        rotation_mat = invert_y_and_z_axis(rotation_mat)
-        translation_vec = invert_y_and_z_axis(translation_vec)
-        return get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
 
 def add_cameras(op, 
                 cameras, 
@@ -480,179 +478,3 @@ def adjust_render_settings_if_possible(op, cameras):
     if possible:
         bpy.context.scene.render.resolution_x = width
         bpy.context.scene.render.resolution_y = height
-    
-
-
-from bpy.props import (CollectionProperty,
-                       StringProperty,
-                       BoolProperty,
-                       EnumProperty,
-                       FloatProperty,
-                       IntProperty,
-                       )
-
-from bpy_extras.io_utils import (ImportHelper,
-                                 ExportHelper,
-                                 axis_conversion)
-
-class ImportNVM(bpy.types.Operator, ImportHelper):
-    
-    # http://sinestesia.co/blog/tutorials/using-blenders-filebrowser-with-python/
-    # https://www.blender.org/forum/viewtopic.php?t=26470
-    
-    """Load a NVM file"""
-    bl_idname = "import_scene.nvm"
-    bl_label = "Import NVM"
-    bl_options = {'UNDO'}
-
-    files: CollectionProperty(
-        name="File Path",
-        description="File path used for importing the NVM file",
-        type=bpy.types.OperatorFileListElement)
-
-    directory: StringProperty()
-
-    import_cameras: BoolProperty(
-        name="Import Cameras",
-        description = "Import Cameras", 
-        default=True)
-    default_width: IntProperty(
-        name="Default Width",
-        description = "Width, which will be used used if corresponding image is not found.", 
-        default=-1)
-    default_height: IntProperty(
-        name="Default Height", 
-        description = "Height, which will be used used if corresponding image is not found.",
-        default=-1)
-    default_pp_x: FloatProperty(
-        name="Principal Point X Component",
-        description = "Principal Point X Component, which will be used if not contained in the NVM file. " + \
-                      "If no value is provided, the principal point is set to the image center.", 
-        default=float('nan'))
-    default_pp_y: FloatProperty(
-        name="Principal Point Y Component", 
-        description = "Principal Point Y Component, which will be used if not contained in the NVM file. " + \
-                      "If no value is provided, the principal point is set to the image center.", 
-        default=float('nan'))
-    add_image_planes: BoolProperty(
-        name="Add an Image Plane for each Camera",
-        description = "Add an Image Plane for each Camera", 
-        default=True)
-    path_to_images: StringProperty(
-        name="Image Directory",
-        description = "Path to the directory of images. If no path is provided, the paths in the nvm file are used.", 
-        default="",
-        # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
-        )
-    add_camera_motion_as_animation: BoolProperty(
-        name="Add Camera Motion as Animation",
-        description = "Add an animation reflecting the camera motion. The order of the cameras is determined by the corresponding file name.", 
-        default=True)
-    number_interpolation_frames: IntProperty(
-        name="Number of frames between two reconstructed cameras.",
-        description = "The poses of the animated camera are interpolated.", 
-        default=0,
-        min=0)
-    adjust_render_settings: BoolProperty(
-        name="Adjust Render Settings",
-        description = "Adjust the render settings according to the corresponding images. "  +
-                      "All images have to be captured with the same device). " +
-                      "If disabled the visualization of the camera cone in 3D view might be incorrect.", 
-        default=True)
-    camera_extent: FloatProperty(
-        name="Initial Camera Extent (in Blender Units)", 
-        description = "Initial Camera Extent (Visualization)",
-        default=1)
-
-    import_points: BoolProperty(
-        name="Import Points",
-        description = "Import Points", 
-        default=True)
-    add_points_as_particle_system: BoolProperty(
-        name="Add Points as Particle System",
-        description="Use a particle system to represent vertex positions with objects",
-        default=True)
-    mesh_items = [
-        ("CUBE", "Cube", "", 1),
-        ("SPHERE", "Sphere", "", 2),
-        ("PLANE", "Plane", "", 3)
-        ]
-    mesh_type: EnumProperty(
-        name="Mesh Type",
-        description = "Select the vertex representation mesh type.", 
-        items=mesh_items)
-    point_extent: FloatProperty(
-        name="Initial Point Extent (in Blender Units)", 
-        description = "Initial Point Extent for meshes at vertex positions",
-        default=0.01)
-
-
-    filename_ext = ".nvm"
-    filter_glob = StringProperty(default="*.nvm", options={'HIDDEN'})
-
-    def execute(self, context):
-        paths = [os.path.join(self.directory, name.name)
-                 for name in self.files]
-        if not paths:
-            paths.append(self.filepath)
-            
-        self.report({'INFO'}, 'paths: ' + str(paths))
-
-        from nvm_import_export.nvm_file_handler import NVMFileHandler
-
-        for path in paths:
-            
-            # by default search for the images in the nvm directory
-            if self.path_to_images == '':
-                self.path_to_images = os.path.dirname(path)
-            
-            cameras, points = NVMFileHandler.parse_nvm_file(path, self)
-            
-            # https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
-            #   The color depends on the type enum: INFO gets green, WARNING light red, and ERROR dark red
-            # https://docs.blender.org/api/blender_python_api_2_78_release/bpy.types.Operator.html?highlight=report#bpy.types.Operator.report
-            self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
-            self.report({'INFO'}, 'Number points: ' + str(len(points)))
-            
-            if self.import_cameras or self.add_camera_motion_as_animation:
-                cameras, success = NVMFileHandler.parse_camera_image_files(
-                    cameras, self.path_to_images, self.default_width, self.default_height, self)
-                
-                if success:
-                    # principal point information may be provided in the NVM file
-                    if not principal_points_initialized(cameras):
-                        set_principal_point_for_cameras(
-                            cameras, 
-                            self.default_pp_x,
-                            self.default_pp_y,
-                            self)
-                    
-                    if self.adjust_render_settings:
-                        adjust_render_settings_if_possible(
-                            self, 
-                            cameras)
-                    if self.import_cameras:
-                        add_cameras(
-                            self, 
-                            cameras, 
-                            path_to_images=self.path_to_images, 
-                            add_image_planes=self.add_image_planes, 
-                            camera_scale=self.camera_extent)
-                    if self.add_camera_motion_as_animation:
-                        add_camera_animation(
-                            self,
-                            cameras,
-                            self.number_interpolation_frames
-                            )
-                else:
-                    return {'FINISHED'}
-                
-            if self.import_points:
-                add_points_as_mesh(
-                    self, 
-                    points, 
-                    self.add_points_as_particle_system, 
-                    self.mesh_type, 
-                    self.point_extent)
-
-        return {'FINISHED'}

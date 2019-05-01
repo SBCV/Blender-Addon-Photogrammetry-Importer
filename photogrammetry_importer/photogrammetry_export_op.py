@@ -1,8 +1,8 @@
 import bpy
 import os
 import numpy as np
-from nvm_import_export.point import Point
-from nvm_import_export.camera import Camera
+from photogrammetry_importer.point import Point
+from photogrammetry_importer.camera import Camera
 
 from bpy.props import (CollectionProperty,
                        StringProperty,

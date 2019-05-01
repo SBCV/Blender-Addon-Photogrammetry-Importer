@@ -42,21 +42,24 @@ importlib.reload(developer_utils)
 modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 # The root dir is blenders addon folder, 
-# therefore we need the "nvm_import_export" specifier for this addon  
-from nvm_import_export.import_nvm_op import ImportNVM
-from nvm_import_export.export_nvm_op import ExportNVM
+# therefore we need the "photogrammetry_importer" specifier for this addon  
+from photogrammetry_importer.photogrammetry_import_op import ImportNVM
+from photogrammetry_importer.photogrammetry_import_op import ImportPLY
+from photogrammetry_importer.photogrammetry_export_op import ExportNVM
 
 # register
 ##################################
 
 def menu_func_import(self, context):
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
+    self.layout.operator(ImportPLY.bl_idname, text="Point Cloud PLY Import (.ply)")
     
 def menu_func_export(self, context):
     self.layout.operator(ExportNVM.bl_idname, text="VSFM NVM Export (.nvm)")
 
 def register():
     bpy.utils.register_class(ImportNVM)
+    bpy.utils.register_class(ImportPLY)
     bpy.utils.register_class(ExportNVM)
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
@@ -67,6 +70,7 @@ def register():
 
 def unregister():
     bpy.utils.unregister_class(ImportNVM)
+    bpy.utils.unregister_class(ImportPLY)
     bpy.utils.unregister_class(ExportNVM)
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
