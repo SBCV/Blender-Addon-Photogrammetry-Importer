@@ -1,4 +1,4 @@
-# Blender-Import-NVM-Addon
+# Blender-Addon-Photogrammetry-Importer
 Blender addon to import and export Structure-from-Motion (SfM) results using VisualSFM's ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/)) NVM file format. Also other SfM software tools like Colmap ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) or OpenMVG ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG)) support this data format.
 
 Tested for Blender 2.80 beta. If you want to run the addon in Blender 2.79 use the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
