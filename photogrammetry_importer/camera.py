@@ -4,6 +4,10 @@ import numpy as np
 import math
 
 class Camera:
+    """ 
+    This class represents a reconstructed camera and provides functionality to manage
+    intrinsic and extrinsic camera parameters as well as image information. 
+    """
     def __init__(self):
         self._center = np.array([0, 0, 0], dtype=float)              # C = -R^T t
         self._translation_vec = np.array([0, 0, 0], dtype=float)     # t = -R C
@@ -113,7 +117,7 @@ class Camera:
         """
         Original C++ Method ('SetQuaternionRotation()') defined in  pba/src/pba/DataInterface.h
         Parallel bundle adjustment (pba) code (used by visualsfm) is provided here:
-            http://grail.cs.washington.edu/projects/mcba/
+        http://grail.cs.washington.edu/projects/mcba/
         """
         qq = math.sqrt(q[0]*q[0]+q[1]*q[1]+q[2]*q[2]+q[3]*q[3])
         if qq > 0:  # Normalize the quaternion
@@ -141,7 +145,7 @@ class Camera:
         """
         Original C++ Method ('GetQuaternionRotation()') defined in  pba/src/pba/DataInterface.h
         Parallel bundle adjustment (pba) code (used by visualsfm) is provided here:
-            http://grail.cs.washington.edu/projects/mcba/
+        http://grail.cs.washington.edu/projects/mcba/
         """
         q = np.array([0, 0, 0, 0], dtype=float)
         q[0] = 1 + m[0][0] + m[1][1] + m[2][2]

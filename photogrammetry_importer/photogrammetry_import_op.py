@@ -36,6 +36,7 @@ from bpy_extras.io_utils import (ImportHelper,
 
 
 class CameraImportProperties():
+    """ This class encapsulates Blender UI properties that are required to visualize the reconstructed cameras correctly. """
     import_cameras: BoolProperty(
         name="Import Cameras",
         description = "Import Cameras", 
@@ -126,7 +127,7 @@ class CameraImportProperties():
 
 
 class PointImportProperties():
-
+    """ This class encapsulates Blender UI properties that are required to visualize the reconstructed points correctly. """
     import_points: BoolProperty(
         name="Import Points",
         description = "Import Points", 
@@ -161,7 +162,7 @@ class PointImportProperties():
 
 class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
     
-    """Load a NVM file"""
+    """Blender import operator for NVM files. """
     bl_idname = "import_scene.nvm"
     bl_label = "Import NVM"
     bl_options = {'UNDO'}
@@ -206,7 +207,7 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
 
 class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
 
-    """Load a PLY file"""
+    """Blender import operator for PLY files. """
     bl_idname = "import_scene.ply"
     bl_label = "Import PLY"
     bl_options = {'UNDO'}

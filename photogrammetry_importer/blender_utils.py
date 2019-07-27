@@ -1,3 +1,7 @@
+"""
+Collection of convenience functions to add and modify objects in Blender.
+"""
+
 import os
 import math
 import time

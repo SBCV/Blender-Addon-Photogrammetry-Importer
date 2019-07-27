@@ -1,6 +1,7 @@
 import time
 
 class StopWatch(object):
+    """Class to measure computation times."""
 
     def __init__(self):
         self.last_t = time.time()
