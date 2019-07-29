@@ -156,9 +156,6 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                 
             image.pixels = local_pixels[:] 
             
-            # Pack the image, otherwise saving and loading will result in a black texture
-            image.pack(as_png=True)
-            
             image_texture_node.image = image
             particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
             divide_node = node_tree.nodes.new('ShaderNodeMath')
@@ -183,7 +180,7 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                 settings.render_type = 'OBJECT'
                 settings.instance_object = viz_mesh
             
-        bpy.context.scene.update
+        bpy.context.view_layer.update()
     else:
         op.report({'INFO'}, 'Representing Points in the Point Cloud with Meshes: False')
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
