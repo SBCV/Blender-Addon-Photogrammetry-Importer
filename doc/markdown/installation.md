@@ -14,7 +14,7 @@ The final structure must look as follows:
 		- ext  
 		- file_handler  
 		- blender_utils.py
-		...  
+		- ...  
 
 
 ## Dependencies (optional)
