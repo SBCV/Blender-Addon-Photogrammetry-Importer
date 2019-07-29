@@ -1,20 +1,20 @@
 ## Installation
-Clone the addon for Blender 2.80 beta:
+Clone the addon for Blender 2.80 Release Candidate 3:
 ```
-git clone https://github.com/SBCV/Blender-Import-NVM-Addon.git
+git clone https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer.git
 ```
-or for Blender 2.79
+or for Blender 2.79:
 ```
-git clone -b blender279 https://github.com/SBCV/Blender-Import-NVM-Addon.git
+git clone -b blender279 https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer.git
 ```
-Compress the folder "nvm_import" in "Blender-Import-NVM-Addon" to a zip archive. 
+Compress the folder "photogrammetry_importer" in "Blender-Addon-Photogrammetry-Importer" to a zip archive. 
 The final structure must look as follows:
-- nvm_import_export.zip/  
-	- nvm_import_export/  
-		- nvm_file_handler.py  
-		- __init__.py  
-		- import_nvm_op.py  
-		- ...  
+- photogrammetry_importer.zip /  
+	- photogrammetry_importer/
+		- ext  
+		- file_handler  
+		- blender_utils.py
+		...  
 
 
 ## Dependencies (optional)
@@ -37,11 +37,11 @@ depending on your operating system.
 
 Finally, install Pillow with
 ```
-<Blender_Root>/<Version>/python/scripts/pip install pillow
+<Blender_Root>/<Version>/python/bin/pip install pillow
 ```
 or 
 ```
-<Blender_Root>/<Version>/python/scripts/pip.exe install pillow
+<Blender_Root>/<Version>/python/bin/pip.exe install pillow
 ```
 respectively.
 
