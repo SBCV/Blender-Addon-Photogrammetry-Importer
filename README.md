@@ -20,7 +20,7 @@ Tested for Blender 2.80 beta. If you want to run the addon in Blender 2.79 use t
 
 ## Getting Started
 - [Installation Instructions](doc/markdown/installation.md)
-- [Usage (Import/Exort)](doc/markdown/usage.md)
+- [Usage (Import/Export)](doc/markdown/usage.md)
 - [Adjust Results](doc/markdown/adjustment.md)
 
 ## Example
