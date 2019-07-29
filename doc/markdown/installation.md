@@ -25,7 +25,7 @@ If you haven't installed pip for blender already, download https://bootstrap.pyp
 <Blender_Root>/<Version>/python/bin
 ```
 
-Run
+Depending on your operating system, run
 ```
 <Blender_Root>/<Version>/python/bin/python get-pip.py 
 ```
@@ -33,9 +33,11 @@ or
 ```
 <Blender_Root>/<Version>/python/bin/python.exe get-pip.py 
 ```
-depending on your operating system.
 
-Finally, install Pillow with
+
+IMPORTANT: Use the full path to the python executable (otherwise the system python installation may be used).
+
+Depending on your operating system, install Pillow with
 ```
 <Blender_Root>/<Version>/python/bin/pip install pillow
 ```
@@ -43,6 +45,6 @@ or
 ```
 <Blender_Root>/<Version>/python/bin/pip.exe install pillow
 ```
-respectively.
 
-IMPORTANT: The full path to the pip executable must be provided (./pip install pillow will not work).
+
+IMPORTANT: Use the full path to the pip executable (./pip install pillow may not work).
