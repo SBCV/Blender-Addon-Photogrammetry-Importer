@@ -19,8 +19,8 @@ Created by Sebastian Bullinger
 '''
 
 bl_info = {
-    "name": "VSFM NVM Import Export Addon",
-    "description": "Allows to import and export VisualSFM's .nvm file format (cameras and points).",
+    "name": "Photogrammetry Import Export Addon",
+    "description": "Allows to import and export photogrammetry results (cameras and points).",
     "author": "Sebastian Bullinger",
     "version": (1, 0, 0),
     "blender": (2, 80, 0),
