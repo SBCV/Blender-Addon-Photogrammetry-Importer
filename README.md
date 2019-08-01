@@ -16,7 +16,7 @@ Thus, it is possible to import reconstruction results of the following libraries
 	* using NVM, PLY
 - [ ] Meshroom ([https://alicevision.github.io/](https://alicevision.github.io/))
 
-Tested for Blender 2.80 Release Candidate 3. If you want to run the addon in Blender 2.79 use the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
+Tested for Blender 2.80. If you want to run the addon in Blender 2.79 use the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
 ## Getting Started
 - [Installation Instructions](doc/markdown/installation.md)
