@@ -116,21 +116,26 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
             bpy.context.scene.render.engine = 'CYCLES'
             material.use_nodes = True
             node_tree = material.node_tree
+
+            # Print all available nodes with:
+            # bpy.data.materials['material_name'].node_tree.nodes.keys()
+
             if 'Material Output' in node_tree.nodes:    # is created by default
                 material_output_node = node_tree.nodes['Material Output']
             else:
                 material_output_node = node_tree.nodes.new('ShaderNodeOutputMaterial')
-            if 'Diffuse BSDF' in node_tree.nodes:       # is created by default
-                diffuse_node = node_tree.nodes['Diffuse BSDF']
+
+            if 'Principled BSDF' in node_tree.nodes:       # is created by default
+                principled_bsdf_node = node_tree.nodes['Principled BSDF']
             else:
-                diffuse_node = node_tree.nodes.new("ShaderNodeBsdfDiffuse")
-            node_tree.links.new(diffuse_node.outputs['BSDF'], material_output_node.inputs['Surface'])
+                principled_bsdf_node = node_tree.nodes.new("ShaderNodeBsdfPrincipled")
+            node_tree.links.new(principled_bsdf_node.outputs['BSDF'], material_output_node.inputs['Surface'])
             
             if 'Image Texture' in node_tree.nodes:
                 image_texture_node = node_tree.nodes['Image Texture']
             else:
                 image_texture_node = node_tree.nodes.new("ShaderNodeTexImage")
-            node_tree.links.new(image_texture_node.outputs['Color'], diffuse_node.inputs['Color'])
+            node_tree.links.new(image_texture_node.outputs['Color'], principled_bsdf_node.inputs['Base Color'])
             
             vis_image_height = 1
             

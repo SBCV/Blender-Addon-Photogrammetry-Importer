@@ -6,3 +6,5 @@ nvm_import_export.zip
 photogrammetry_importer.zip
 /doc/sphinx/build/
 /examples/source_images/*
+/examples/100_710*.JPG
+/examples/100_7110.JPG
