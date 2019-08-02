@@ -74,7 +74,7 @@ def set_object_parent(child_object_name, parent_object_name, keep_transform=Fals
     if keep_transform:
         child_object_name.matrix_parent_inverse = parent_object_name.matrix_world.inverted()
 
-def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent):
+def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent, add_particle_color_emission):
     op.report({'INFO'}, 'Adding Points: ...')
     stop_watch = StopWatch()
     name = "Point_Cloud"
@@ -135,7 +135,11 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                 image_texture_node = node_tree.nodes['Image Texture']
             else:
                 image_texture_node = node_tree.nodes.new("ShaderNodeTexImage")
+
+            # Add links for base color and emission to improve color visibility
             node_tree.links.new(image_texture_node.outputs['Color'], principled_bsdf_node.inputs['Base Color'])
+            if add_particle_color_emission:
+            	node_tree.links.new(image_texture_node.outputs['Color'], principled_bsdf_node.inputs['Emission'])
             
             vis_image_height = 1
             
@@ -298,7 +302,9 @@ def add_cameras(op,
                 camera_collection_name='Camera Collection',
                 image_planes_parent='Image Planes',
                 image_plane_collection_name='Image Plane Collection',
-                camera_scale=1.0):
+                camera_scale=1.0,
+                image_plane_transparency=0.5,
+                add_image_plane_emission=True):
 
     """
     ======== The images are currently only shown in BLENDER RENDER ========
@@ -370,7 +376,9 @@ def add_cameras(op,
                     camera.get_focal_length(), 
                     px=px,
                     py=py,
-                    name=image_plane_name, 
+                    name=image_plane_name,
+                    transparency=image_plane_transparency,
+                    add_image_plane_emission=add_image_plane_emission,
                     op=op)
                 camera_image_plane_pair.objects.link(image_plane_obj)
 
@@ -382,7 +390,7 @@ def add_cameras(op,
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
     op.report({'INFO'}, 'Adding Cameras: Done')
 
-def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_length, px, py, name, op):
+def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_length, px, py, name, transparency, add_image_plane_emission, op):
     """
     Create mesh for image plane
     """
@@ -429,10 +437,16 @@ def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_len
     
     shader_node_tex_image = nodes.new(type='ShaderNodeTexImage')
     shader_node_principled_bsdf = nodes.get('Principled BSDF')
+    shader_node_principled_bsdf.inputs['Alpha'].default_value = transparency
     
     links.new(
         shader_node_tex_image.outputs['Color'], 
         shader_node_principled_bsdf.inputs['Base Color'])
+
+    if add_image_plane_emission:
+        links.new(
+            shader_node_tex_image.outputs['Color'], 
+            shader_node_principled_bsdf.inputs['Emission'])
     
     bimage = bpy.data.images.load(path_to_image)
     shader_node_tex_image.image = bimage

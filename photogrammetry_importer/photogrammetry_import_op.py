@@ -69,6 +69,16 @@ class CameraImportProperties():
         default="",
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
+    add_image_plane_emission: BoolProperty(
+        name="Add image plane color emission",
+        description = "Add image plane color emission to increase the visibility of the image planes.", 
+        default=True)
+    image_plane_transparency: FloatProperty(
+        name="Image plane transparency value", 
+        description = "Transparency value of the image planes: 0 = invisible, 1 = opaque.",
+        default=0.5,
+        min=0,
+        max=1)
     add_camera_motion_as_animation: BoolProperty(
         name="Add Camera Motion as Animation",
         description = "Add an animation reflecting the camera motion. The order of the cameras is determined by the corresponding file name.", 
@@ -115,7 +125,9 @@ class CameraImportProperties():
                         cameras, 
                         path_to_images=self.path_to_images, 
                         add_image_planes=self.add_image_planes, 
-                        camera_scale=self.camera_extent)
+                        camera_scale=self.camera_extent,
+                        image_plane_transparency=self.image_plane_transparency,
+                        add_image_plane_emission=self.add_image_plane_emission)
                 if self.add_camera_motion_as_animation:
                     add_camera_animation(
                         self,
@@ -149,6 +161,10 @@ class PointImportProperties():
         name="Initial Point Extent (in Blender Units)", 
         description = "Initial Point Extent for meshes at vertex positions",
         default=0.01)
+    add_particle_color_emission: BoolProperty(
+        name="Add particle color emission",
+        description = "Add particle color emission to increase the visibility of the individual objects of the particle system.", 
+        default=True)
         
     def import_photogrammetry_points(self, points):
         if self.import_points:
@@ -157,7 +173,8 @@ class PointImportProperties():
                 points, 
                 self.add_points_as_particle_system, 
                 self.mesh_type, 
-                self.point_extent)
+                self.point_extent,
+                self.add_particle_color_emission)
 
 
 class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
