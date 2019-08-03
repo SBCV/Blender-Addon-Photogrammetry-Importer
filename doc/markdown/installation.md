@@ -1,5 +1,5 @@
 ## Installation
-Clone the addon for Blender 2.80 Release Candidate 3:
+Clone the addon for Blender 2.80:
 ```
 git clone https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer.git
 ```
@@ -36,5 +36,5 @@ For Windows run:
 <Blender_Root>/<Version>/python/Scripts/pip.exe install pillow
 ```
 
-IMPORTANT: Use the full path to the python and the pip executable. Otherwise the system python installation or the system pip executables may be used.
+IMPORTANT: Use the full path to the python and the pip executable. Otherwise the system python installation or the system pip executable may be used.
 
