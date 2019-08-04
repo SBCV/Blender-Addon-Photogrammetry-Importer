@@ -28,8 +28,8 @@ This repository contains an example NVM file. The imported result looks as follo
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/images/import_result.jpg)
 The input images of the NVM file are located here: [https://github.com/openMVG/ImageDataset_SceauxCastle](https://github.com/openMVG/ImageDataset_SceauxCastle).
 
-
-
+There is an import option that interpolates the reconstructed camera poses to compute a camera animation.
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/images/camera_animation.gif)
 
 
 
