@@ -9,6 +9,7 @@ from photogrammetry_importer.blender_utils import adjust_render_settings_if_poss
 from photogrammetry_importer.blender_utils import add_cameras
 from photogrammetry_importer.blender_utils import add_camera_animation
 from photogrammetry_importer.blender_utils import add_points_as_mesh
+from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
 from photogrammetry_importer.file_handler.ply_file_handler import PLYFileHandler
 
@@ -176,6 +177,50 @@ class PointImportProperties():
                 self.point_extent,
                 self.add_particle_color_emission)
 
+class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Operator):
+    
+    """Blender import operator for colmap model folders. """
+    bl_idname = "import_scene.colmap_model"
+    bl_label = "Import Colmap Model Folder"
+    bl_options = {'REGISTER'}
+
+    directory = StringProperty()
+    #filter_folder = BoolProperty(default=True, options={'HIDDEN'})
+
+    # Hide the unused properties of CameraImportProperties
+    default_width: IntProperty(options={'HIDDEN'})
+    default_height: IntProperty(options={'HIDDEN'})
+
+    def execute(self, context):
+
+        path = self.directory
+        # Remove trailing slash
+        path = os.path.dirname(path)
+
+        self.report({'INFO'}, 'path: ' + str(path))
+
+        # By default search for the images on the same level than the colmap model directory
+        if self.path_to_images == '':
+            self.path_to_images = os.path.dirname(path)
+        
+        cameras, points = ColmapFileHandler.parse_colmap_model_folder(path, self)
+        
+        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        
+        self.import_photogrammetry_cameras(cameras)
+        self.import_photogrammetry_points(points)
+
+        self.report({'INFO'}, 'Parse Colmap model folder: Done')
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        # See: 
+        # https://blender.stackexchange.com/questions/14738/use-filemanager-to-select-directory-instead-of-file/14778
+        # https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
 class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
     
@@ -184,23 +229,23 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
     bl_label = "Import NVM"
     bl_options = {'UNDO'}
 
-    files: CollectionProperty(
-        name="File Path",
+    selected_files: CollectionProperty(
+        name="NVM File Path",
         description="File path used for importing the NVM file",
         type=bpy.types.OperatorFileListElement)
 
     directory: StringProperty()
-
     filter_glob: StringProperty(default="*.nvm", options={'HIDDEN'})
 
     def enhance_camera_with_images(self, cameras):
+        # Overwrites CameraImportProperties.enhance_camera_with_images()
         cameras, success = NVMFileHandler.parse_camera_image_files(
         cameras, self.path_to_images, self.default_width, self.default_height, self)
         return cameras, success
 
     def execute(self, context):
         paths = [os.path.join(self.directory, name.name)
-                 for name in self.files]
+                 for name in self.selected_files]
         if not paths:
             paths.append(self.filepath)
             
@@ -229,7 +274,7 @@ class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
     bl_label = "Import PLY"
     bl_options = {'UNDO'}
 
-    files: CollectionProperty(
+    selected_files: CollectionProperty(
         name="File Path",
         description="File path used for importing the PLY file",
         type=bpy.types.OperatorFileListElement)
@@ -240,7 +285,7 @@ class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         paths = [os.path.join(self.directory, name.name)
-                 for name in self.files]
+                 for name in self.selected_files]
         if not paths:
             paths.append(self.filepath)
             
