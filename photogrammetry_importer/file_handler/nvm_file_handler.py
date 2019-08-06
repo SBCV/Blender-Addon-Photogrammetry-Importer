@@ -9,11 +9,8 @@ except ImportError:
     PILImage = None
 
 from photogrammetry_importer.camera import Camera
-from collections import namedtuple
-
-Measurement = namedtuple('Measurement', ['image_index', 'feature_index', 'x', 'y'])
-Point = namedtuple('Point', ['coord', 'color', 'measurements', 'id', 'scalars']) 
-
+from photogrammetry_importer.point import Point
+from photogrammetry_importer.measurement import Measurement
 
 class NVMFileHandler(object):
 
