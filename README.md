@@ -22,7 +22,7 @@ Tested for Blender 2.80. If you want to run the addon in Blender 2.79 use the [2
 ## Getting Started
 - [Installation Instructions](doc/markdown/installation.md)
 - [Usage (Import/Export)](doc/markdown/usage.md)
-- [Adjust Results](doc/markdown/adjustment.md)
+- [Adjust Results (Scale cameras and points)](doc/markdown/adjustment.md)
 
 ## Example
 This repository contains an example NVM file. The imported result looks as follows.
