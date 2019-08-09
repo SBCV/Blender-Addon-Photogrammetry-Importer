@@ -4,6 +4,7 @@ import bpy
 
 from photogrammetry_importer.point import Point
 
+from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler
 from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
 from photogrammetry_importer.file_handler.ply_file_handler import PLYFileHandler
@@ -118,6 +119,47 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
                 self.path_to_images = os.path.dirname(path)
             
             cameras, points = NVMFileHandler.parse_nvm_file(path, self)
+            
+            self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+            self.report({'INFO'}, 'Number points: ' + str(len(points)))
+            
+            self.import_photogrammetry_cameras(cameras)
+            self.import_photogrammetry_points(points)
+
+        return {'FINISHED'}
+
+    
+class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
+
+    """Blender import operator for OpenMVG JSON files. """
+    bl_idname = "import_scene.openmvg_json"
+    bl_label = "Import OpenMVG JSON"
+    bl_options = {'UNDO'}
+
+    selected_files: CollectionProperty(
+        name="JSON File Path",
+        description="File path used for importing the JSON file",
+        type=bpy.types.OperatorFileListElement)
+
+    directory: StringProperty()
+    filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
+
+
+    def execute(self, context):
+        paths = [os.path.join(self.directory, name.name)
+                    for name in self.selected_files]
+        if not paths:
+            paths.append(self.filepath)
+            
+        self.report({'INFO'}, 'paths: ' + str(paths))
+
+        for openMVG_path in paths:
+            
+            # by default search for the images in the nvm directory
+            if self.path_to_images == '':
+                self.path_to_images = os.path.dirname(openMVG_path)
+            
+            cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(openMVG_path, self.path_to_images, self)
             
             self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
             self.report({'INFO'}, 'Number points: ' + str(len(points)))

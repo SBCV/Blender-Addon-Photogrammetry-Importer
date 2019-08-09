@@ -4,7 +4,6 @@ from photogrammetry_importer.ext.read_model import read_model
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
-from photogrammetry_importer.measurement import Measurement
 
 
 # From photogrammetry_importer\ext\read_model.py
@@ -94,13 +93,12 @@ class ColmapFileHandler(object):
             current_camera.height = camera_model.height
 
             focal_length, cx, cy = parse_camera_param_list(camera_model)
-            camera_calibration_matrix = np.array([[focal_length, 0, 0],
-                            [0, focal_length, 0],
+            camera_calibration_matrix = np.array([[focal_length, 0, cx],
+                            [0, focal_length, cy],
                             [0, 0, 1]])
             current_camera.set_calibration(
                 camera_calibration_matrix, 
                 radial_distortion=0)
-            current_camera.set_principal_point([cx, cy])
 
             cameras.append(current_camera)
      
@@ -116,8 +114,7 @@ class ColmapFileHandler(object):
         for col_point3D in col_points3D:
             current_point = Point(
                 coord=col_point3D.xyz, 
-                color=col_point3D.rgb, 
-                measurements = [], 
+                color=col_point3D.rgb,  
                 id=col_point3D.id, 
                 scalars=None)
             points3D.append(current_point)

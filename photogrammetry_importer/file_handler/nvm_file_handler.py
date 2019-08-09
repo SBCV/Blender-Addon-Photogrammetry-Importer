@@ -10,7 +10,6 @@ except ImportError:
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
-from photogrammetry_importer.measurement import Measurement
 
 class NVMFileHandler(object):
 
@@ -90,8 +89,9 @@ class NVMFileHandler(object):
 
             radial_distortion = float(line_values[9])
 
-            # TODO radial_distortion in camera_calibration_matrix
             if camera_calibration_matrix is None:
+                # In this case, we have no information about the principal point
+                # We assume that the principal point lies in the center
                 camera_calibration_matrix = np.array([[focal_length, 0, 0],
                                           [0, focal_length, 0],
                                           [0, 0, 1]])
@@ -119,7 +119,7 @@ class NVMFileHandler(object):
             translation_vec = NVMFileHandler.compute_camera_coordinate_system_translation_vector(center_vec, current_camera.get_rotation_mat())
             current_camera._translation_vec = translation_vec
 
-            current_camera.set_calibration_mat(camera_calibration_matrix)
+            current_camera.set_calibration(camera_calibration_matrix, radial_distortion=radial_distortion)
             # op.report({'INFO'}, 'Calibration mat:')
             # op.report({'INFO'}, str(camera_calibration_matrix))
             current_camera.file_name = file_name
@@ -139,21 +139,7 @@ class NVMFileHandler(object):
             point_line_elements = (point_line.rstrip()).split()
             xyz_vec = list(map(float, point_line_elements[0:3]))
             rgb_vec = list(map(int, point_line_elements[3:6]))
-            number_measurements = int(point_line_elements[6])
-            measurements = point_line_elements[7:]
-
-            current_point_measurement = []
-            for measurement_index in range(0, number_measurements):
-                # From the VSFM docs:
-                # <Measurement> = <Image index> <Feature Index> <xy>
-                current_measurement = measurements[measurement_index*4:(measurement_index+1)*4]
-                image_index = int(current_measurement[0])
-                feature_index = int(current_measurement[1])
-                x_in_nvm_file = float(current_measurement[2])
-                y_in_nvm_file = float(current_measurement[3])
-                current_point_measurement.append(
-                    Measurement(image_index, feature_index, x_in_nvm_file, y_in_nvm_file))
-            current_point = Point(coord=xyz_vec, color=rgb_vec, measurements = current_point_measurement, id=point_index, scalars=None)
+            current_point = Point(coord=xyz_vec, color=rgb_vec, id=point_index, scalars=None)
             points.append(current_point)
 
         return points
@@ -166,7 +152,7 @@ class NVMFileHandler(object):
             assert line.startswith('NVM_V3')
             calib_mat = None
         elif len(line_elements) == 7:
-            _,_, fx, cx, fy, cy, r = line_elements
+            _,_, fx, cx, fy, cy, radial_distortion = line_elements
             calib_mat = np.array(
                 [[float(fx), 0, float(cx)],
                  [0, float(fy), float(cy)],
@@ -202,7 +188,8 @@ class NVMFileHandler(object):
         amount_cameras = int((input_file.readline()).rstrip())
         print('Amount Cameras (Images in NVM file): ' + str(amount_cameras))
 
-        cameras = NVMFileHandler._parse_cameras(input_file, amount_cameras, calibration_matrix, op)
+        cameras = NVMFileHandler._parse_cameras(
+            input_file, amount_cameras, calibration_matrix, op)
         current_line = (input_file.readline()).rstrip()
         assert current_line == ''
         current_line = (input_file.readline()).rstrip()
