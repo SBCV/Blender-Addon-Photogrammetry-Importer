@@ -59,7 +59,6 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
         path = self.directory
         # Remove trailing slash
         path = os.path.dirname(path)
-
         self.report({'INFO'}, 'path: ' + str(path))
 
         # By default search for the images on the same level than the colmap model directory
@@ -93,11 +92,9 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
     bl_label = "Import NVM"
     bl_options = {'UNDO'}
 
-    selected_files: CollectionProperty(
+    filepath: StringProperty(
         name="NVM File Path",
-        description="File path used for importing the NVM file",
-        type=bpy.types.OperatorFileListElement)
-
+        description="File path used for importing the NVM file")
     directory: StringProperty()
     filter_glob: StringProperty(default="*.nvm", options={'HIDDEN'})
 
@@ -108,27 +105,22 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
         return cameras, success
 
     def execute(self, context):
-        paths = [os.path.join(self.directory, name.name)
-                 for name in self.selected_files]
-        if not paths:
-            paths.append(self.filepath)
-            
-        self.report({'INFO'}, 'paths: ' + str(paths))
 
-        for path in paths:
-            
-            # by default search for the images in the nvm directory
-            if self.path_to_images == '':
-                self.path_to_images = os.path.dirname(path)
-            
-            cameras, points = NVMFileHandler.parse_nvm_file(path, self)
-            
-            self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
-            self.report({'INFO'}, 'Number points: ' + str(len(points)))
-            
-            reconstruction_collection = add_collection('Reconstruction Collection')
-            self.import_photogrammetry_cameras(cameras, reconstruction_collection)
-            self.import_photogrammetry_points(points, reconstruction_collection)
+        path = os.path.join(self.directory, self.filepath)
+        self.report({'INFO'}, 'path: ' + str(path))
+
+        # by default search for the images in the nvm directory
+        if self.path_to_images == '':
+            self.path_to_images = os.path.dirname(path)
+        
+        cameras, points = NVMFileHandler.parse_nvm_file(path, self)
+        
+        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        
+        reconstruction_collection = add_collection('Reconstruction Collection')
+        self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+        self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
 
@@ -140,11 +132,9 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
     bl_label = "Import OpenMVG JSON"
     bl_options = {'UNDO'}
 
-    selected_files: CollectionProperty(
+    filepath: StringProperty(
         name="JSON File Path",
-        description="File path used for importing the JSON file",
-        type=bpy.types.OperatorFileListElement)
-
+        description="File path used for importing the JSON file")
     directory: StringProperty()
     filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
 
@@ -156,28 +146,23 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
     default_pp_y: FloatProperty(options={'HIDDEN'})
 
     def execute(self, context):
-        paths = [os.path.join(self.directory, name.name)
-                    for name in self.selected_files]
-        if not paths:
-            paths.append(self.filepath)
-            
-        self.report({'INFO'}, 'paths: ' + str(paths))
 
-        for openMVG_path in paths:
-            
-            # by default search for the images in the nvm directory
-            if self.path_to_images == '':
-                self.path_to_images = os.path.dirname(openMVG_path)
-            
-            cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
-                openMVG_path, self.path_to_images, self)
-            
-            self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
-            self.report({'INFO'}, 'Number points: ' + str(len(points)))
-            
-            reconstruction_collection = add_collection('Reconstruction Collection')
-            self.import_photogrammetry_cameras(cameras, reconstruction_collection)
-            self.import_photogrammetry_points(points, reconstruction_collection)
+        path = os.path.join(self.directory, self.filepath)
+        self.report({'INFO'}, 'path: ' + str(path))
+ 
+        # by default search for the images in the nvm directory
+        if self.path_to_images == '':
+            self.path_to_images = os.path.dirname(path)
+        
+        cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
+            path, self.path_to_images, self)
+        
+        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        
+        reconstruction_collection = add_collection('Reconstruction Collection')
+        self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+        self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
 
@@ -188,29 +173,21 @@ class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
     bl_label = "Import PLY"
     bl_options = {'UNDO'}
 
-    selected_files: CollectionProperty(
-        name="File Path",
-        description="File path used for importing the PLY file",
-        type=bpy.types.OperatorFileListElement)
-
+    filepath: StringProperty(
+        name="PLY File Path",
+        description="File path used for importing the PLY file")
     directory: StringProperty()
-
     filter_glob: StringProperty(default="*.ply", options={'HIDDEN'})
 
     def execute(self, context):
-        paths = [os.path.join(self.directory, name.name)
-                 for name in self.selected_files]
-        if not paths:
-            paths.append(self.filepath)
-            
-        self.report({'INFO'}, 'paths: ' + str(paths))
+        path = os.path.join(self.directory, self.filepath)
+        self.report({'INFO'}, 'path: ' + str(path))
 
-        for path in paths:
-            points = PLYFileHandler.parse_ply_file(path)
-            self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        points = PLYFileHandler.parse_ply_file(path)
+        self.report({'INFO'}, 'Number points: ' + str(len(points)))
 
-            reconstruction_collection = add_collection('Reconstruction Collection')
-            self.import_photogrammetry_points(points, reconstruction_collection)
+        reconstruction_collection = add_collection('Reconstruction Collection')
+        self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
 
