@@ -38,9 +38,9 @@ class OpenMVGJSONFileHandler:
             # handle intrinsic params
             intrinsic_params = intrinsics[int(id_intrinsic)]['value']['ptr_wrapper']['data']
             focal_length = intrinsic_params['focal_length']
-            principal_point_image = intrinsic_params['principal_point']
-            cx = principal_point_image[0] - camera.width / 2.0
-            cy = principal_point_image[1] - camera.height / 2.0
+            principal_point = intrinsic_params['principal_point']
+            cx = principal_point[0]
+            cy = principal_point[1]
  
             if 'disto_k3' in intrinsic_params:
                 op.report({'INFO'},'3 Radial Distortion Parameters are not supported')

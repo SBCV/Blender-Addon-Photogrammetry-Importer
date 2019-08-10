@@ -77,7 +77,9 @@ class CameraImportProperties():
         default=1)
 
     def enhance_camera_with_images(self, cameras):
-        # This function should be overwritten in case the 
+        # This function should be overwritten, 
+        # if image size is not part of the reconstruction data
+        # (e.g. nvm file)
         success = True
         return cameras, success
 
@@ -85,7 +87,7 @@ class CameraImportProperties():
         if self.import_cameras or self.add_camera_motion_as_animation:
             cameras, success = self.enhance_camera_with_images(cameras)
             if success:
-                # principal point information may be provided in the NVM file
+                # The principal point information may be provided in the reconstruction data
                 if not principal_points_initialized(cameras):
                     set_principal_point_for_cameras(
                         cameras, 
@@ -97,6 +99,7 @@ class CameraImportProperties():
                     adjust_render_settings_if_possible(
                         self, 
                         cameras)
+
                 if self.import_cameras:
                     add_cameras(
                         self, 
@@ -106,11 +109,11 @@ class CameraImportProperties():
                         camera_scale=self.camera_extent,
                         image_plane_transparency=self.image_plane_transparency,
                         add_image_plane_emission=self.add_image_plane_emission)
+
                 if self.add_camera_motion_as_animation:
                     add_camera_animation(
                         self,
                         cameras,
-                        self.number_interpolation_frames
-                        )
+                        self.number_interpolation_frames)
             else:
                 return {'FINISHED'}

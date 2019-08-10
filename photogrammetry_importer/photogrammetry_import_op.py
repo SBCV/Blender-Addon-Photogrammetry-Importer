@@ -144,6 +144,12 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
     directory: StringProperty()
     filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
 
+    # The following properties of CameraImportProperties are not required, 
+    # since the corresponding data is always part of the openmvg reconstruction result
+    default_width: IntProperty(options={'HIDDEN'})
+    default_height: IntProperty(options={'HIDDEN'})
+    default_pp_x: FloatProperty(options={'HIDDEN'})
+    default_pp_y: FloatProperty(options={'HIDDEN'})
 
     def execute(self, context):
         paths = [os.path.join(self.directory, name.name)
@@ -159,7 +165,8 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
             if self.path_to_images == '':
                 self.path_to_images = os.path.dirname(openMVG_path)
             
-            cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(openMVG_path, self.path_to_images, self)
+            cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
+                openMVG_path, self.path_to_images, self)
             
             self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
             self.report({'INFO'}, 'Number points: ' + str(len(points)))
