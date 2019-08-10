@@ -53,7 +53,7 @@ class PLYFileHandler:
             for scalar_value_key in scalar_value_keys:
                 scalars[scalar_value_key] = line[scalar_value_key]
 
-            current_point = Point(coord=coord, color=color, measurements=None, id=point_index, scalars=None)
+            current_point = Point(coord=coord, color=color, id=point_index, scalars=None)
             vertices.append(current_point)
 
         ply_data_vertex_dtype = ply_data['vertex'].dtype
