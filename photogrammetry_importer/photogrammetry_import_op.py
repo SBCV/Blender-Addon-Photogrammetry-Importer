@@ -2,7 +2,9 @@ import os
 import numpy as np
 import bpy
 
-from photogrammetry_importer.point import Point
+# from photogrammetry_importer.point import Point
+
+from photogrammetry_importer.blender_utils import add_collection
 
 from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler
 from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
@@ -69,8 +71,9 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
         
-        self.import_photogrammetry_cameras(cameras)
-        self.import_photogrammetry_points(points)
+        reconstruction_collection = add_collection('Reconstruction Collection')
+        self.import_photogrammetry_cameras(cameras,reconstruction_collection)
+        self.import_photogrammetry_points(points, reconstruction_collection)
 
         self.report({'INFO'}, 'Parse Colmap model folder: Done')
 
@@ -123,8 +126,9 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
             self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
             self.report({'INFO'}, 'Number points: ' + str(len(points)))
             
-            self.import_photogrammetry_cameras(cameras)
-            self.import_photogrammetry_points(points)
+            reconstruction_collection = add_collection('Reconstruction Collection')
+            self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+            self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
 
@@ -171,8 +175,9 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
             self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
             self.report({'INFO'}, 'Number points: ' + str(len(points)))
             
-            self.import_photogrammetry_cameras(cameras)
-            self.import_photogrammetry_points(points)
+            reconstruction_collection = add_collection('Reconstruction Collection')
+            self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+            self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
 
@@ -203,7 +208,9 @@ class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
         for path in paths:
             points = PLYFileHandler.parse_ply_file(path)
             self.report({'INFO'}, 'Number points: ' + str(len(points)))
-            self.import_photogrammetry_points(points)
+
+            reconstruction_collection = add_collection('Reconstruction Collection')
+            self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
 

@@ -41,20 +41,18 @@ def get_world_matrix_from_translation_vec(translation_vec, rotation):
 def compute_camera_matrix_world(camera):
         translation_vec = camera.get_translation_vec()
         rotation_mat = camera.get_rotation_mat()
-        # Transform the camera coordinate system from computer vision camera coordinate frames to the computer
-        # vision camera coordinate frames
-        # That is, rotate the camera matrix around the x axis by 180 degree, i.e. invert the x and y axis
+        # Transform the camera coordinate system from computer vision camera coordinate frames 
+        # to the computer vision camera coordinate frames
+        # That is, rotate the camera matrix around the x axis by 180 degrees,
+        # i.e. invert the x and y axis
         rotation_mat = invert_y_and_z_axis(rotation_mat)
         translation_vec = invert_y_and_z_axis(translation_vec)
         return get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
 
-def add_obj(data, obj_name, deselect_others=False):
-    scene = bpy.context.scene
-    collection = bpy.context.collection
-
-    if deselect_others:
-        for obj in scene.objects:
-            obj.select = False
+def add_obj(data, obj_name, collection=None):
+    
+    if collection is None:
+        collection = bpy.context.collection
 
     new_obj = bpy.data.objects.new(obj_name, data)
     collection.objects.link(new_obj)
@@ -64,17 +62,17 @@ def add_obj(data, obj_name, deselect_others=False):
         bpy.context.view_layer.objects.active = new_obj
     return new_obj
 
-def add_empty(empty_name):
-    empty_obj = bpy.data.objects.new(empty_name, None)
-    bpy.context.collection.objects.link(empty_obj)
-    return empty_obj
+def add_collection(collection_name, parent_collection=None):
 
-def set_object_parent(child_object_name, parent_object_name, keep_transform=False):
-    child_object_name.parent = parent_object_name
-    if keep_transform:
-        child_object_name.matrix_parent_inverse = parent_object_name.matrix_world.inverted()
+    if parent_collection is None:
+        parent_collection = bpy.context.collection
 
-def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent, add_particle_color_emission):
+    new_collection = bpy.data.collections.new(collection_name)
+    parent_collection.children.link(new_collection)
+
+    return new_collection
+
+def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent, add_particle_color_emission, reconstruction_collection):
     op.report({'INFO'}, 'Adding Points: ...')
     stop_watch = StopWatch()
     name = "Point_Cloud"
@@ -85,9 +83,9 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
     point_world_coordinates = [tuple(point.coord) for point in points]
 
     mesh.from_pydata(point_world_coordinates, [], [])
-    meshobj = add_obj(mesh, name)
+    meshobj = add_obj(mesh, name, reconstruction_collection)
 
-    if add_points_as_particle_system or add_meshes_at_vertex_positions:
+    if add_points_as_particle_system:
         op.report({'INFO'}, 'Representing Points in the Point Cloud with Meshes: True')
         op.report({'INFO'}, 'Mesh Type: ' + str(mesh_type))
 
@@ -105,6 +103,8 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
         else:
             bpy.ops.mesh.primitive_uv_sphere_add(radius=point_scale)
         viz_mesh = bpy.context.object
+        reconstruction_collection.objects.link(viz_mesh)
+        bpy.context.collection.objects.unlink(viz_mesh)
 
         if add_points_as_particle_system:
             
@@ -129,7 +129,9 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                 principled_bsdf_node = node_tree.nodes['Principled BSDF']
             else:
                 principled_bsdf_node = node_tree.nodes.new("ShaderNodeBsdfPrincipled")
-            node_tree.links.new(principled_bsdf_node.outputs['BSDF'], material_output_node.inputs['Surface'])
+            node_tree.links.new(
+                principled_bsdf_node.outputs['BSDF'], 
+                material_output_node.inputs['Surface'])
             
             if 'Image Texture' in node_tree.nodes:
                 image_texture_node = node_tree.nodes['Image Texture']
@@ -137,14 +139,21 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                 image_texture_node = node_tree.nodes.new("ShaderNodeTexImage")
 
             # Add links for base color and emission to improve color visibility
-            node_tree.links.new(image_texture_node.outputs['Color'], principled_bsdf_node.inputs['Base Color'])
+            node_tree.links.new(
+                image_texture_node.outputs['Color'], 
+                principled_bsdf_node.inputs['Base Color'])
             if add_particle_color_emission:
-            	node_tree.links.new(image_texture_node.outputs['Color'], principled_bsdf_node.inputs['Emission'])
+            	node_tree.links.new(
+                    image_texture_node.outputs['Color'], 
+                    principled_bsdf_node.inputs['Emission'])
             
             vis_image_height = 1
             
             # To view the texture we set the height of the texture to vis_image_height 
-            image = bpy.data.images.new('ParticleColor', len(point_world_coordinates), vis_image_height)
+            image = bpy.data.images.new(
+                'ParticleColor', 
+                len(point_world_coordinates), 
+                vis_image_height)
             
             # working on a copy of the pixels results in a MASSIVE performance speed
             local_pixels = list(image.pixels[:])
@@ -169,11 +178,17 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
             particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
             divide_node = node_tree.nodes.new('ShaderNodeMath')
             divide_node.operation = 'DIVIDE'
-            node_tree.links.new(particle_info_node.outputs['Index'], divide_node.inputs[0])
+            node_tree.links.new(
+                particle_info_node.outputs['Index'], 
+                divide_node.inputs[0])
             divide_node.inputs[1].default_value = num_points
             shader_node_combine = node_tree.nodes.new('ShaderNodeCombineXYZ')
-            node_tree.links.new(divide_node.outputs['Value'], shader_node_combine.inputs['X'])
-            node_tree.links.new(shader_node_combine.outputs['Vector'], image_texture_node.inputs['Vector'])
+            node_tree.links.new(
+                divide_node.outputs['Value'], 
+                shader_node_combine.inputs['X'])
+            node_tree.links.new(
+                shader_node_combine.outputs['Vector'], 
+                image_texture_node.inputs['Vector'])
             
             if len(meshobj.particle_systems) == 0:
                 meshobj.modifiers.new("particle sys", type='PARTICLE_SYSTEM')
@@ -262,12 +277,12 @@ def remove_quaternion_discontinuities(cam_obj):
                 fqy.keyframe_points[i+1].co[1] = -fqy.keyframe_points[i+1].co[1]
                 fqz.keyframe_points[i+1].co[1] = -fqz.keyframe_points[i+1].co[1]
 
-def add_camera_animation(op, cameras, number_interpolation_frames):
+def add_camera_animation(op, cameras, parent_collection, number_interpolation_frames):
     op.report({'INFO'}, 'Adding Camera Animation: ...')
 
     some_cam = cameras[0]
     bcamera = add_single_camera(op, "animation_camera", some_cam)
-    cam_obj = add_obj(bcamera, "animation_camera")
+    cam_obj = add_obj(bcamera, "animation_camera", parent_collection)
 
     scn = bpy.context.scene
     scn.frame_start = 0
@@ -294,14 +309,13 @@ def add_camera_animation(op, cameras, number_interpolation_frames):
         remove_quaternion_discontinuities(cam_obj)
 
 def add_cameras(op, 
-                cameras, 
+                cameras,
+                parent_collection,
                 path_to_images=None,
                 add_image_planes=False,
                 convert_camera_coordinate_system=True,
-                cameras_parent='Cameras',
-                camera_collection_name='Camera Collection',
-                image_planes_parent='Image Planes',
-                image_plane_collection_name='Image Plane Collection',
+                camera_collection_name='Cameras',
+                image_plane_collection_name='Image Planes',
                 camera_scale=1.0,
                 image_plane_transparency=0.5,
                 add_image_plane_emission=True):
@@ -314,22 +328,24 @@ def add_cameras(op,
     :param path_to_images:
     :param add_image_planes:
     :param convert_camera_coordinate_system:
-    :param cameras_parent:
     :param camera_collection_name:
     :param image_plane_collection_name:
     :return:
     """
     op.report({'INFO'}, 'Adding Cameras: ...')
     stop_watch = StopWatch()
-    cameras_parent = add_empty(cameras_parent)
-    cameras_parent.hide_viewport = True
-    cameras_parent.hide_render = True
-    camera_collection = bpy.data.collections.new(camera_collection_name)
+    camera_collection = add_collection(
+        camera_collection_name, 
+        parent_collection)
 
     if add_image_planes:
         op.report({'INFO'}, 'Adding image planes: True')
-        image_planes_parent = add_empty(image_planes_parent)
-        image_planes_collection = bpy.data.collections.new(image_plane_collection_name)
+        image_planes_collection = add_collection(
+            image_plane_collection_name, 
+            parent_collection)
+        camera_image_plane_pair_collection = add_collection(
+            "Camera Image Plane Pair Collection",
+            parent_collection)
     else:
         op.report({'INFO'}, 'Adding image planes: False')
 
@@ -343,13 +359,10 @@ def add_cameras(op,
         image_file_name_stem = os.path.splitext(os.path.basename(camera.file_name))[0]
         camera_name = image_file_name_stem + '_cam'
         bcamera = add_single_camera(op, camera_name, camera)
-        camera_object = add_obj(bcamera, camera_name)
+        camera_object = add_obj(bcamera, camera_name, camera_collection)
         matrix_world = compute_camera_matrix_world(camera)
         camera_object.matrix_world = matrix_world
         camera_object.scale *= camera_scale
-
-        set_object_parent(camera_object, cameras_parent, keep_transform=True)
-        camera_collection.objects.link(camera_object)
 
         if add_image_planes:
             path_to_image = os.path.join(path_to_images, os.path.basename(camera.file_name))
@@ -359,12 +372,11 @@ def add_cameras(op,
                 op.report({'INFO'}, 'Adding image plane for: ' + str(path_to_image))
 
                 # Group image plane and camera:
-                camera_image_plane_pair = bpy.data.collections.new(
-                    "Camera Image Plane Pair Collection %s" % image_file_name_stem)
-                camera_image_plane_pair.objects.link(camera_object)
-
-                image_plane_name = image_file_name_stem + '_image_plane'
+                camera_image_plane_pair_collection_current = add_collection(
+                    "Camera Image Plane Pair Collection %s" % image_file_name_stem,
+                    camera_image_plane_pair_collection)
                 
+                image_plane_name = image_file_name_stem + '_image_plane'
                 px, py = camera.get_principal_point()
 
                 # do not add image planes by default, this is slow !
@@ -379,18 +391,18 @@ def add_cameras(op,
                     name=image_plane_name,
                     transparency=image_plane_transparency,
                     add_image_plane_emission=add_image_plane_emission,
+                    image_planes_collection=image_planes_collection,
                     op=op)
-                camera_image_plane_pair.objects.link(image_plane_obj)
-
-                set_object_parent(image_plane_obj, image_planes_parent, keep_transform=True)
-                image_planes_collection.objects.link(image_plane_obj)
+                
+                camera_image_plane_pair_collection_current.objects.link(camera_object)
+                camera_image_plane_pair_collection_current.objects.link(image_plane_obj)
 
         end_time = stop_watch.get_elapsed_time()
 
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
     op.report({'INFO'}, 'Adding Cameras: Done')
 
-def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_length, px, py, name, transparency, add_image_plane_emission, op):
+def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_length, px, py, name, transparency, add_image_plane_emission, image_planes_collection, op):
     """
     Create mesh for image plane
     """
@@ -425,7 +437,7 @@ def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_len
     mesh.uv_layers.new()
     
     # Add mesh to new image plane object:
-    mesh_obj = add_obj(mesh, name)
+    mesh_obj = add_obj(mesh, name, image_planes_collection)
 
     image_plane_material = bpy.data.materials.new(
         name="image_plane_material")

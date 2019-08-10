@@ -32,7 +32,7 @@ class PointImportProperties():
         description = "Add particle color emission to increase the visibility of the individual objects of the particle system.", 
         default=True)
         
-    def import_photogrammetry_points(self, points):
+    def import_photogrammetry_points(self, points, reconstruction_collection):
         if self.import_points:
             add_points_as_mesh(
                 self, 
@@ -40,4 +40,5 @@ class PointImportProperties():
                 self.add_points_as_particle_system, 
                 self.mesh_type, 
                 self.point_extent,
-                self.add_particle_color_emission)
+                self.add_particle_color_emission,
+                reconstruction_collection)

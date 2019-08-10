@@ -83,7 +83,7 @@ class CameraImportProperties():
         success = True
         return cameras, success
 
-    def import_photogrammetry_cameras(self, cameras):
+    def import_photogrammetry_cameras(self, cameras, parent_collection):
         if self.import_cameras or self.add_camera_motion_as_animation:
             cameras, success = self.enhance_camera_with_images(cameras)
             if success:
@@ -104,6 +104,7 @@ class CameraImportProperties():
                     add_cameras(
                         self, 
                         cameras, 
+                        parent_collection,
                         path_to_images=self.path_to_images, 
                         add_image_planes=self.add_image_planes, 
                         camera_scale=self.camera_extent,
@@ -114,6 +115,7 @@ class CameraImportProperties():
                     add_camera_animation(
                         self,
                         cameras,
+                        parent_collection,
                         self.number_interpolation_frames)
             else:
                 return {'FINISHED'}
