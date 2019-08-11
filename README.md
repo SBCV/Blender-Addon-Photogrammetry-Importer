@@ -6,7 +6,7 @@ This addon supports currently the following data formats:
 - [x] NVM ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
 - [x] Colmap Model Folders ([https://github.com/colmap/colmap](https://github.com/colmap/colmap))
 - [x] OpenMVG JSON files ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-- [ ] Meshroom Graphs ([https://alicevision.github.io/](https://alicevision.github.io/))
+- [x] Meshroom JSON files ([https://alicevision.github.io/](https://alicevision.github.io/))
 
 Thus, it is possible to import reconstruction results of the following libraries:
 - [x] VisualSFM's ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
@@ -15,7 +15,7 @@ Thus, it is possible to import reconstruction results of the following libraries
 	* using Colmap model folders (binary and txt format), NVM, PLY 
 - [x] OpenMVG ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
 	* using OpenMVG JSON files, NVM, PLY
-- [ ] Meshroom ([https://alicevision.github.io/](https://alicevision.github.io/))
+- [x] Meshroom ([https://alicevision.github.io/](https://alicevision.github.io/))
 
 Tested for Blender 2.80. If you want to run the addon in Blender 2.79 use the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
