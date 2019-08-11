@@ -54,7 +54,7 @@ from photogrammetry_importer.photogrammetry_export_op import ExportNVM
 ##################################
 
 def menu_func_import(self, context):
-    self.layout.operator(ImportMeshroom.bl_idname, text="Meshroom Import (.json)")
+    self.layout.operator(ImportMeshroom.bl_idname, text="Meshroom Import (.sfm/.json)")
     self.layout.operator(ImportOpenMVG.bl_idname, text="OpenMVG Import (.json)")
     self.layout.operator(ImportColmap.bl_idname, text="Colmap Import (folder)")
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")

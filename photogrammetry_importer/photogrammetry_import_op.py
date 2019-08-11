@@ -170,15 +170,15 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
 class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
 
     """Blender import operator for OpenMVG JSON files. """
-    bl_idname = "import_scene.meshroom_json"
-    bl_label = "Import Meshroom JSON"
+    bl_idname = "import_scene.meshroom_sfm_json"
+    bl_label = "Import Meshroom SfM/JSON"
     bl_options = {'UNDO'}
 
     filepath: StringProperty(
         name="Meshroom JSON File Path",
-        description="File path used for importing the Meshroom JSON file")
+        description="File path used for importing the Meshroom SfM/JSON file")
     directory: StringProperty()
-    filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*sfm;*.json", options={'HIDDEN'})
 
     # The following properties of CameraImportProperties are not required, 
     # since the corresponding data is always part of the openmvg reconstruction result
