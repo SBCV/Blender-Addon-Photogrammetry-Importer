@@ -75,15 +75,16 @@ def add_collection(collection_name, parent_collection=None):
 def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent, add_particle_color_emission, reconstruction_collection):
     op.report({'INFO'}, 'Adding Points: ...')
     stop_watch = StopWatch()
-    name = "Point_Cloud"
-    mesh = bpy.data.meshes.new(name)
+    particle_obj_name = "Particle Shape" 
+    point_cloud_obj_name = "Point Cloud"
+    mesh = bpy.data.meshes.new(point_cloud_obj_name)
     mesh.update()
     mesh.validate()
 
     point_world_coordinates = [tuple(point.coord) for point in points]
 
     mesh.from_pydata(point_world_coordinates, [], [])
-    meshobj = add_obj(mesh, name, reconstruction_collection)
+    meshobj = add_obj(mesh, point_cloud_obj_name, reconstruction_collection)
 
     if add_points_as_particle_system:
         op.report({'INFO'}, 'Representing Points in the Point Cloud with Meshes: True')
@@ -102,15 +103,16 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
             bpy.ops.mesh.primitive_uv_sphere_add(radius=point_scale)
         else:
             bpy.ops.mesh.primitive_uv_sphere_add(radius=point_scale)
-        viz_mesh = bpy.context.object
-        reconstruction_collection.objects.link(viz_mesh)
-        bpy.context.collection.objects.unlink(viz_mesh)
+        particle_obj = bpy.context.object
+        particle_obj.name = particle_obj_name
+        reconstruction_collection.objects.link(particle_obj)
+        bpy.context.collection.objects.unlink(particle_obj)
 
         if add_points_as_particle_system:
             
             material_name = "PointCloudMaterial"
             material = bpy.data.materials.new(name=material_name)
-            viz_mesh.data.materials.append(material)
+            particle_obj.data.materials.append(material)
             
             # enable cycles, otherwise the material has no nodes
             bpy.context.scene.render.engine = 'CYCLES'
@@ -202,7 +204,7 @@ def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, poi
                 settings.hair_length = 100           # This must not be 0
                 settings.use_emit_random = False
                 settings.render_type = 'OBJECT'
-                settings.instance_object = viz_mesh
+                settings.instance_object = particle_obj
             
         bpy.context.view_layer.update()
     else:
@@ -281,8 +283,8 @@ def add_camera_animation(op, cameras, parent_collection, number_interpolation_fr
     op.report({'INFO'}, 'Adding Camera Animation: ...')
 
     some_cam = cameras[0]
-    bcamera = add_single_camera(op, "animation_camera", some_cam)
-    cam_obj = add_obj(bcamera, "animation_camera", parent_collection)
+    bcamera = add_single_camera(op, "Animated Camera", some_cam)
+    cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)
 
     scn = bpy.context.scene
     scn.frame_start = 0
