@@ -43,6 +43,7 @@ modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in local
 
 # The root dir is blenders addon folder, 
 # therefore we need the "photogrammetry_importer" specifier for this addon
+from photogrammetry_importer.photogrammetry_import_op import ImportMeshroom
 from photogrammetry_importer.photogrammetry_import_op import ImportOpenMVG
 from photogrammetry_importer.photogrammetry_import_op import ImportColmap
 from photogrammetry_importer.photogrammetry_import_op import ImportNVM
@@ -53,6 +54,7 @@ from photogrammetry_importer.photogrammetry_export_op import ExportNVM
 ##################################
 
 def menu_func_import(self, context):
+    self.layout.operator(ImportMeshroom.bl_idname, text="Meshroom Import (.json)")
     self.layout.operator(ImportOpenMVG.bl_idname, text="OpenMVG Import (.json)")
     self.layout.operator(ImportColmap.bl_idname, text="Colmap Import (folder)")
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
@@ -62,6 +64,7 @@ def menu_func_export(self, context):
     self.layout.operator(ExportNVM.bl_idname, text="VSFM NVM Export (.nvm)")
 
 def register():
+    bpy.utils.register_class(ImportMeshroom)
     bpy.utils.register_class(ImportOpenMVG)
     bpy.utils.register_class(ImportColmap)
     bpy.utils.register_class(ImportNVM)
@@ -75,6 +78,7 @@ def register():
     
 
 def unregister():
+    bpy.utils.unregister_class(ImportMeshroom)
     bpy.utils.unregister_class(ImportOpenMVG)
     bpy.utils.unregister_class(ImportColmap)
     bpy.utils.unregister_class(ImportNVM)

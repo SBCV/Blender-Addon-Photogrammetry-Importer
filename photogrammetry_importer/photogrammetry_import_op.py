@@ -6,6 +6,7 @@ import bpy
 
 from photogrammetry_importer.blender_utils import add_collection
 
+from photogrammetry_importer.file_handler.meshroom_json_file_handler import MeshroomJSONFileHandler
 from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler
 from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
@@ -133,8 +134,8 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
     bl_options = {'UNDO'}
 
     filepath: StringProperty(
-        name="JSON File Path",
-        description="File path used for importing the JSON file")
+        name="OpenMVG JSON File Path",
+        description="File path used for importing the OpenMVG JSON file")
     directory: StringProperty()
     filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
 
@@ -155,6 +156,47 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
             self.path_to_images = os.path.dirname(path)
         
         cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
+            path, self.path_to_images, self)
+        
+        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        
+        reconstruction_collection = add_collection('Reconstruction Collection')
+        self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+        self.import_photogrammetry_points(points, reconstruction_collection)
+
+        return {'FINISHED'}
+
+class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
+
+    """Blender import operator for OpenMVG JSON files. """
+    bl_idname = "import_scene.meshroom_json"
+    bl_label = "Import Meshroom JSON"
+    bl_options = {'UNDO'}
+
+    filepath: StringProperty(
+        name="Meshroom JSON File Path",
+        description="File path used for importing the Meshroom JSON file")
+    directory: StringProperty()
+    filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
+
+    # The following properties of CameraImportProperties are not required, 
+    # since the corresponding data is always part of the openmvg reconstruction result
+    default_width: IntProperty(options={'HIDDEN'})
+    default_height: IntProperty(options={'HIDDEN'})
+    default_pp_x: FloatProperty(options={'HIDDEN'})
+    default_pp_y: FloatProperty(options={'HIDDEN'})
+
+    def execute(self, context):
+
+        path = os.path.join(self.directory, self.filepath)
+        self.report({'INFO'}, 'path: ' + str(path))
+    
+        # by default search for the images in the nvm directory
+        if self.path_to_images == '':
+            self.path_to_images = os.path.dirname(path)
+        
+        cameras, points = MeshroomJSONFileHandler.parse_meshroom_file(
             path, self.path_to_images, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
