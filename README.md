@@ -6,18 +6,19 @@ This addon supports currently the following data formats:
 - [x] NVM ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
 - [x] Colmap Model Folders ([https://github.com/colmap/colmap](https://github.com/colmap/colmap))
 - [x] OpenMVG JSON files ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-- [x] Meshroom JSON files ([https://alicevision.github.io/](https://alicevision.github.io/))
+- [x] Meshroom SfM/JSON files ([https://alicevision.github.io/](https://alicevision.github.io/))
 
 Thus, it is possible to import reconstruction results of the following libraries:
 - [x] VisualSFM's ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
 	* using NVM
 - [x] Colmap ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) 
-	* using Colmap model folders (binary and txt format), NVM, PLY 
+	* using Colmap model folders (binary and txt format), NVM and PLY 
 - [x] OpenMVG ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-	* using OpenMVG JSON files, NVM, PLY
+	* using JSON (OpenMVG), NVM and PLY
 - [x] Meshroom ([https://alicevision.github.io/](https://alicevision.github.io/))
+	* using SfM, JSON (Meshroom) and PLY
 
-Tested for Blender 2.80. If you want to run the addon in Blender 2.79 use the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
+Tested for Blender 2.80. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
 ## Getting Started
 - [Installation Instructions](doc/markdown/installation.md)
