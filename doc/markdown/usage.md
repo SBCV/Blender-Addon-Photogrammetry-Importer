@@ -5,22 +5,22 @@
 ### Import
 
 #### General
+In Blender use File/Import/\<Import Function\> to import the corresponding file. 
 
-**For correct camera visualization the size of the images is required. If the size information is not present in the reconstruction result (e.g. NVM file) use the import dialog to adjust the "image path" to automatically read the image size or set the default "width" and "height" values. Pillow is required to read the image size from disc.** By default the addon searches for the images in the in the folder where the reconstruction file is located. 
+For each camera one can add the corresponding image plane. Pillow is required to read the images from disc. Use the import dialog to adjust the "image path". By default the addon searches for the images in the in the folder where the reconstruction file is located. **This addon uses the node system of Cycles to visualize the image planes. Thus, the addon switches automatically to Cycles, if image planes are added.** 
 
-There is an option to represent each vertex position with an object using a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. **The color of the points / textures of the images are visible, if "Cycles Render" is selected and the 3D view is set to "Material".** Eevee does not (yet) support "particle info" nodes. (See [here](https://docs.blender.org/manual/es/dev/render/eevee/materials/nodes_support.html) for more information.) Thus, it is currently **not possible** to render point clouds with individual particle colors **in Eevee**. In the "3D view" go to "Overlays" and disable "Extras" to improve the visualization of the point cloud. The following image shows the corresponding options. 
-![Disable Object Overlays](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/images/disable_object_extras_overlay_annotation.jpg)
-
-One can add the image plane for each camera defined in the reconstruction file. **This addon uses the node system of Cycles to visualize the image planes. Thus, the addon switches automatically to Cycles, if image planes are added.** 
-
-Blender supports only global render settings (which define the ratio of all cameras). If the reconstruction file contains cameras with different aspect ratios, it is not possible to visualize the camera cones correctly. 
+There is an option to represent the point cloud with a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. **The color of the points / textures of the images are visible, if "Cycles Render" is selected and the 3D view is set to "Material".** Eevee does not (yet) support "particle info" nodes. (See [here](https://docs.blender.org/manual/es/dev/render/eevee/materials/nodes_support.html) for more information.) Thus, it is currently **not possible** to render point clouds with individual particle colors **in Eevee**. 
 
 #### NVM
-In Blender use File/Import/VSFM NVM Import (.nvm) to import the NVM file. 
-
 The addon automatically looks for the fixed calibration line in the NVM file (i.e. "NVM_V3 FixedK fx cx fy cy r"  (first line)).
-Without the fixed calibration line the addon assumes that the principal point is at the image center. 
+Without the fixed calibration line the addon assumes that the principal point is at the image center. NVM files contain no information about the size of the images. Use the import dialog to adjust the "image path" to automatically read the image size from disc or set the default "width" and "height" values.
 
+### Limitations
+Blender supports only global render settings (which define the ratio of all cameras). If the reconstruction file contains cameras with different aspect ratios, it is not possible to visualize the camera cones correctly. Furthermore, radial distortions of the camera model used to compute the reconstruction will result in small misalignment of the cameras and the particle system in Blender.
+
+### Visualization
+Sometimes Blender draws boundaries around the particles of the point cloud. In oder to improve the visualization of the point cloud one can disable "Extras" under "Overlays" in the "3D view". The following image shows the corresponding options. 
+![Disable Object Overlays](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/images/disable_object_extras_overlay_annotation.jpg)
 
 ### Export
 In Blender use File/Export/VSFM NVM Export (.nvm) to export the NVM file. 
