@@ -67,10 +67,10 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
             self.path_to_images = os.path.dirname(path)
         
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(path, self)
-        
+
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
-        
+
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras,reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)

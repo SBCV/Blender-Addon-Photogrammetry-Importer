@@ -279,8 +279,52 @@ def remove_quaternion_discontinuities(cam_obj):
                 fqy.keyframe_points[i+1].co[1] = -fqy.keyframe_points[i+1].co[1]
                 fqz.keyframe_points[i+1].co[1] = -fqz.keyframe_points[i+1].co[1]
 
-def add_camera_animation(op, cameras, parent_collection, number_interpolation_frames):
+
+class DummyCamera(object):
+    def __init__(self):
+        self.file_name = None
+
+def is_image_file(fn):
+    image_ext = ['.jpg', '.png']
+    return os.path.splitext(fn)[1].lower() in image_ext
+
+def enhance_cameras_with_dummy_cameras(cameras, path_to_images):
+    all_image_names = [
+        image_name for image_name in os.listdir(path_to_images) 
+        if is_image_file(image_name)]
+    rec_image_names = [camera.file_name for camera in cameras]
+    non_rec_image_names = [
+        image_name for image_name in all_image_names 
+        if image_name not in rec_image_names]
+    for non_rec_image_name in non_rec_image_names:
+        cam = DummyCamera()
+        cam.file_name = non_rec_image_name
+        cameras.append(cam)
+    return cameras
+
+def set_fcurve_interpolation(some_obj, interpolation_type='LINEAR'):
+
+    # interpolation_string: ['CONSTANT', 'LINEAR', 'BEZIER', 'SINE',
+    # 'QUAD', 'CUBIC', 'QUART', 'QUINT', 'EXPO', 'CIRC',
+    # 'BACK', 'BOUNCE', 'ELASTIC']
+    fcurves = some_obj.animation_data.action.fcurves
+    for fcurve in fcurves:
+        for kf in fcurve.keyframe_points:
+            kf.interpolation = interpolation_type
+
+
+def add_camera_animation(op, 
+                        cameras, 
+                        parent_collection, 
+                        number_interpolation_frames, 
+                        interpolation_type,
+                        consider_missing_cameras_during_animation,
+                        path_to_images):
     op.report({'INFO'}, 'Adding Camera Animation: ...')
+
+    if consider_missing_cameras_during_animation:
+        cameras = enhance_cameras_with_dummy_cameras(
+            cameras, path_to_images)
 
     some_cam = cameras[0]
     bcamera = add_single_camera(op, "Animated Camera", some_cam)
@@ -298,17 +342,33 @@ def add_camera_animation(op, cameras, parent_collection, number_interpolation_fr
 
         current_keyframe_index = index * step_size
 
+        if isinstance(camera, DummyCamera):
+            continue 
+
         cam_obj.matrix_world = compute_camera_matrix_world(camera)
 
-        cam_obj.keyframe_insert(data_path="location", index=-1, frame=current_keyframe_index)
+        cam_obj.keyframe_insert(
+            data_path="location", 
+            index=-1, 
+            frame=current_keyframe_index)
 
         # Don't use euler rotations, they show too many discontinuties
-        #cam_obj.keyframe_insert(data_path="rotation_euler", index=-1, frame=current_keyframe_index)
+        #cam_obj.keyframe_insert(
+        #   data_path="rotation_euler", 
+        #   index=-1, 
+        #   frame=current_keyframe_index)
 
         cam_obj.rotation_mode = 'QUATERNION'
-        cam_obj.keyframe_insert(data_path="rotation_quaternion", index=-1, frame=current_keyframe_index)
+        cam_obj.keyframe_insert(
+            data_path="rotation_quaternion", 
+            index=-1, 
+            frame=current_keyframe_index)
         # q and -q represent the same rotation
         remove_quaternion_discontinuities(cam_obj)
+
+        set_fcurve_interpolation(
+            cam_obj,
+            interpolation_type)
 
 def add_cameras(op, 
                 cameras,

@@ -2,6 +2,7 @@ import bpy
 
 from bpy.props import (StringProperty,
                        BoolProperty,
+                       EnumProperty,
                        FloatProperty,
                        IntProperty)
 
@@ -47,24 +48,51 @@ class CameraImportProperties():
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
     add_image_plane_emission: BoolProperty(
-        name="Add image plane color emission",
+        name="Add Image Plane Color Emission",
         description = "Add image plane color emission to increase the visibility of the image planes.", 
         default=True)
     image_plane_transparency: FloatProperty(
-        name="Image plane transparency value", 
+        name="Image Plane Transparency Value", 
         description = "Transparency value of the image planes: 0 = invisible, 1 = opaque.",
         default=0.5,
         min=0,
         max=1)
     add_camera_motion_as_animation: BoolProperty(
         name="Add Camera Motion as Animation",
-        description = "Add an animation reflecting the camera motion. The order of the cameras is determined by the corresponding file name.", 
+        description =   "Add an animation reflecting the camera motion. " + 
+                        " The order of the cameras is determined by the corresponding file name.", 
         default=True)
     number_interpolation_frames: IntProperty(
-        name="Number of frames between two reconstructed cameras.",
+        name="Number of Frames Between two Reconstructed Cameras",
         description = "The poses of the animated camera are interpolated.", 
         default=0,
         min=0)
+
+    interpolation_items = [
+        ("LINEAR", "LINEAR", "", 1),
+        ("BEZIER", "BEZIER", "", 2),
+        ("SINE", "SINE", "", 3),
+        ("QUAD", "QUAD", "", 4),
+        ("CUBIC", "CUBIC", "", 5),
+        ("QUART", "QUART", "", 6),
+        ("QUINT", "QUINT", "", 7),
+        ("EXPO", "EXPO", "", 8),
+        ("CIRC", "CIRC", "", 9),
+        ("BACK", "BACK", "", 10),
+        ("BOUNCE", "BOUNCE", "", 11),
+        ("ELASTIC", "ELASTIC", "", 12),
+        ("CONSTANT", "CONSTANT", "", 13)
+        ]
+    interpolation_type: EnumProperty(
+        name="Interpolation Type",
+        description = "Blender string that defines the type of the interpolation.", 
+        items=interpolation_items)
+
+    consider_missing_cameras_during_animation: BoolProperty(
+        name="Consider Missing Cameras During Camera Animation",
+        description =   "Assume there are three consecutive images A,B and C, but only A and C have been reconstructed. " + 
+                        "This option adjusts the number of interpolation frames between camera A and C.",
+        default=True)
     adjust_render_settings: BoolProperty(
         name="Adjust Render Settings",
         description = "Adjust the render settings according to the corresponding images. "  +
@@ -116,6 +144,9 @@ class CameraImportProperties():
                         self,
                         cameras,
                         parent_collection,
-                        self.number_interpolation_frames)
+                        self.number_interpolation_frames,
+                        self.interpolation_type,
+                        self.consider_missing_cameras_during_animation,
+                        self.path_to_images)
             else:
                 return {'FINISHED'}
