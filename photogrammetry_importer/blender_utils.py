@@ -322,6 +322,9 @@ def add_camera_animation(op,
                         path_to_images):
     op.report({'INFO'}, 'Adding Camera Animation: ...')
 
+    if len(cameras) == 0:
+        return
+
     if consider_missing_cameras_during_animation:
         cameras = enhance_cameras_with_dummy_cameras(
             cameras, path_to_images)
@@ -582,6 +585,9 @@ def principal_points_initialized(cameras):
 
 def adjust_render_settings_if_possible(op, cameras):
     
+    if len(cameras) == 0:
+        return
+
     possible = True
     width = cameras[0].width
     height = cameras[0].height

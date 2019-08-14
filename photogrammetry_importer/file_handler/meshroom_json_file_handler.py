@@ -20,6 +20,18 @@ class MeshroomJSONFileHandler:
     @staticmethod
     def parse_cameras(json_data, op):
 
+        cams = []
+        image_index_to_camera_index = {}
+
+        is_valid_file = 'views' in json_data and 'intrinsics' in json_data and 'poses' in json_data
+
+        if not is_valid_file:
+            op.report(
+                {'ERROR'},
+                'FILE FORMAT ERROR: Incorrect SfM/JSON file. Must contain the SfM reconstruction results: ' +
+                'view, intrinsics and poses.')
+            return cams, image_index_to_camera_index
+
         views = json_data['views']              # is a list of dicts (view)  
         intrinsics = json_data['intrinsics']    # is a list of dicts (intrinsic)
         extrinsics = json_data['poses']         # is a list of dicts (extrinsic)
@@ -29,8 +41,6 @@ class MeshroomJSONFileHandler:
         # Extrinsics may contain only a subset of views! 
         # (Not all views are necessarily contained in the reconstruction)
 
-        cams = []
-        image_index_to_camera_index = {}
         for rec_index, extrinsic in enumerate(extrinsics):
 
             camera = Camera()
@@ -82,20 +92,33 @@ class MeshroomJSONFileHandler:
     @staticmethod
     def parse_points(json_data, image_index_to_camera_index, op, path_to_input_files=None, view_index_to_file_name=None):
 
-        compute_color = (not path_to_input_files is None) and (not view_index_to_file_name is None)
+        points = []
+        is_valid_file = 'structure' in json_data
+
+        if not is_valid_file:
+            op.report(
+                {'ERROR'},
+                'FILE FORMAT ERROR: Incorrect SfM/JSON file. Must contain the SfM reconstruction results: structure.')
+            return points
+
         structure = json_data['structure']
+
+        compute_color = (not path_to_input_files is None) and (not view_index_to_file_name is None)
 
         if compute_color:
             op.report({'INFO'},'Computing color information from files: ...')
             view_index_to_image = {}
             for view_index, file_name in view_index_to_file_name.items():
                 image_path = os.path.join(path_to_input_files, file_name)
+                if not os.path.isfile(image_path):
+                    compute_color = False
+                    break
                 pil_image = Image.open(image_path)
                 view_index_to_image[view_index] = pil_image
 
             op.report({'INFO'},'Computing color information from files: Done')
 
-        points = []
+
         for json_point in structure:
 
             r = g = b = 0
