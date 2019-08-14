@@ -18,7 +18,7 @@ Thus, it is possible to import reconstruction results of the following libraries
 - [x] Meshroom ([https://alicevision.github.io/](https://alicevision.github.io/))
 	* using SfM, JSON (Meshroom) and PLY
 
-Tested for Blender 2.80. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
+Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
 ## Getting Started
 - [Installation Instructions](doc/markdown/installation.md)
