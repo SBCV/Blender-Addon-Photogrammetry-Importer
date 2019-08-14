@@ -374,6 +374,7 @@ def add_cameras(op,
                 cameras,
                 parent_collection,
                 path_to_images=None,
+                add_background_images=False,
                 add_image_planes=False,
                 convert_camera_coordinate_system=True,
                 camera_collection_name='Cameras',
@@ -414,8 +415,6 @@ def add_cameras(op,
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
 
-        start_time = stop_watch.get_elapsed_time()
-        
         # camera_name = "Camera %d" % index     # original code
         # Replace the camera name so it matches the image name (without extension)
         image_file_name_stem = os.path.splitext(os.path.basename(camera.file_name))[0]
@@ -426,45 +425,67 @@ def add_cameras(op,
         camera_object.matrix_world = matrix_world
         camera_object.scale *= camera_scale
 
+        if not add_image_planes and not add_background_images:
+            continue 
+
+        path_to_image = os.path.join(
+            path_to_images, os.path.basename(camera.file_name))
+        if not os.path.isfile(path_to_image):
+            continue
+        blender_image = bpy.data.images.load(path_to_image)
+
+        if add_background_images:
+            op.report({'INFO'}, 'Adding background image for: ' + camera_name)
+
+            camera_data = bpy.data.objects[camera_name].data
+            camera_data.show_background_images = True
+            background_image = camera_data.background_images.new()
+            background_image.image = blender_image
+
         if add_image_planes:
-            path_to_image = os.path.join(path_to_images, os.path.basename(camera.file_name))
+            op.report({'INFO'}, 'Adding image plane for: ' + camera_name)
+
+            # Group image plane and camera:
+            camera_image_plane_pair_collection_current = add_collection(
+                "Camera Image Plane Pair Collection %s" % image_file_name_stem,
+                camera_image_plane_pair_collection)
             
-            if os.path.isfile(path_to_image):
-                
-                op.report({'INFO'}, 'Adding image plane for: ' + str(path_to_image))
+            image_plane_name = image_file_name_stem + '_image_plane'
+            px, py = camera.get_principal_point()
 
-                # Group image plane and camera:
-                camera_image_plane_pair_collection_current = add_collection(
-                    "Camera Image Plane Pair Collection %s" % image_file_name_stem,
-                    camera_image_plane_pair_collection)
-                
-                image_plane_name = image_file_name_stem + '_image_plane'
-                px, py = camera.get_principal_point()
-
-                # do not add image planes by default, this is slow !
-                image_plane_obj = add_camera_image_plane(
-                    matrix_world, 
-                    path_to_image, 
-                    camera.width, 
-                    camera.height, 
-                    camera.get_focal_length(), 
-                    px=px,
-                    py=py,
-                    name=image_plane_name,
-                    transparency=image_plane_transparency,
-                    add_image_plane_emission=add_image_plane_emission,
-                    image_planes_collection=image_planes_collection,
-                    op=op)
-                
-                camera_image_plane_pair_collection_current.objects.link(camera_object)
-                camera_image_plane_pair_collection_current.objects.link(image_plane_obj)
-
-        end_time = stop_watch.get_elapsed_time()
+            # do not add image planes by default, this is slow !
+            image_plane_obj = add_camera_image_plane(
+                matrix_world, 
+                blender_image, 
+                camera.width, 
+                camera.height, 
+                camera.get_focal_length(), 
+                px=px,
+                py=py,
+                name=image_plane_name,
+                transparency=image_plane_transparency,
+                add_image_plane_emission=add_image_plane_emission,
+                image_planes_collection=image_planes_collection,
+                op=op)
+            
+            camera_image_plane_pair_collection_current.objects.link(camera_object)
+            camera_image_plane_pair_collection_current.objects.link(image_plane_obj)
 
     op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
     op.report({'INFO'}, 'Adding Cameras: Done')
 
-def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_length, px, py, name, transparency, add_image_plane_emission, image_planes_collection, op):
+def add_camera_image_plane(matrix_world, 
+                           blender_image, 
+                           width, 
+                           height, 
+                           focal_length, 
+                           px, 
+                           py, 
+                           name, 
+                           transparency, 
+                           add_image_plane_emission, 
+                           image_planes_collection, 
+                           op):
     """
     Create mesh for image plane
     """
@@ -522,8 +543,7 @@ def add_camera_image_plane(matrix_world, path_to_image, width, height, focal_len
             shader_node_tex_image.outputs['Color'], 
             shader_node_principled_bsdf.inputs['Emission'])
     
-    bimage = bpy.data.images.load(path_to_image)
-    shader_node_tex_image.image = bimage
+    shader_node_tex_image.image = blender_image
     
     # Assign it to object
     if mesh_obj.data.materials:

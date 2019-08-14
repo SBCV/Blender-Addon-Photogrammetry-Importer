@@ -37,6 +37,10 @@ class CameraImportProperties():
         description = "Principal Point Y Component, which will be used if not contained in the NVM file. " + \
                       "If no value is provided, the principal point is set to the image center.", 
         default=float('nan'))
+    add_background_images: BoolProperty(
+        name="Add a Background Image for each Camera",
+        description = "The background image is only visible by viewing the scene from a specific camera.", 
+        default=False)
     add_image_planes: BoolProperty(
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera", 
@@ -134,6 +138,7 @@ class CameraImportProperties():
                         cameras, 
                         parent_collection,
                         path_to_images=self.path_to_images, 
+                        add_background_images=self.add_background_images,
                         add_image_planes=self.add_image_planes, 
                         camera_scale=self.camera_extent,
                         image_plane_transparency=self.image_plane_transparency,
