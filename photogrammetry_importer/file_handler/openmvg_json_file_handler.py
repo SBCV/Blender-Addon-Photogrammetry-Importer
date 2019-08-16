@@ -11,68 +11,73 @@ class OpenMVGJSONFileHandler:
     @staticmethod
     def parse_cameras(json_data, op):
 
-        views = json_data['views']
-        intrinsics = json_data['intrinsics']
-        extrinsics = json_data['extrinsics']
+        views = {item['key']:item for item in json_data['views']}
+        intrinsics = {item['key']:item for item in json_data['intrinsics']}
+        extrinsics = {item['key']:item for item in json_data['extrinsics']}
 
         # IMPORTANT:
-        # Views contain the number of input images  
+        # Views contain the description about the dataset and attribute to Pose and Intrinsic data.
+        # View -> id_pose, id_intrinsic
+        # Since sometimes some views cannot be localized, there is some missing pose and intrinsic data.
         # Extrinsics may contain only a subset of views! (Potentially not all views are contained in the reconstruction)
-        # Matching entries are determined by view['key'] == extrinsics['key']
 
         cams = []
-        image_index_to_camera_index = {}
-        for rec_index, extrinsic in enumerate(extrinsics):    # Iterate over extrinsics, not views!
+        # Iterate over views, and create camera if Intrinsic and Pose data exist
+        for id, view in views.items():    # Iterate over views
 
-            camera = Camera()
-            # The key is defined w.r.t. view indices (NOT reconstructed camera indices)
-            view_index = int(extrinsic['key'])
-            image_index_to_camera_index[view_index] = rec_index
-            corresponding_view = views[view_index]
+            id_view = view['key'] # Should be equal to view['value']['ptr_wrapper']['data']['id_view']
+            id_pose = view['value']['ptr_wrapper']['data']['id_pose']
+            id_intrinsic = view['value']['ptr_wrapper']['data']['id_intrinsic']
 
-            camera.file_name = corresponding_view['value']['ptr_wrapper']['data']['filename']
-            camera.width = corresponding_view['value']['ptr_wrapper']['data']['width']
-            camera.height = corresponding_view['value']['ptr_wrapper']['data']['height']
-            id_intrinsic = corresponding_view['value']['ptr_wrapper']['data']['id_intrinsic']
+            # Check if the view is having corresponding Pose and Intrinsic data
+            if id_pose in extrinsics.keys() and \
+               id_intrinsic in intrinsics.keys():
 
-            # handle intrinsic params
-            intrinsic_params = intrinsics[int(id_intrinsic)]['value']['ptr_wrapper']['data']
-            focal_length = intrinsic_params['focal_length']
-            principal_point = intrinsic_params['principal_point']
-            cx = principal_point[0]
-            cy = principal_point[1]
- 
-            if 'disto_k3' in intrinsic_params:
-                op.report({'INFO'},'3 Radial Distortion Parameters are not supported')
-                assert False
+                camera = Camera()
 
-            # For Radial there are several options: "None", disto_k1, disto_k3
-            if 'disto_k1' in intrinsic_params:
-                radial_distortion = float(intrinsic_params['disto_k1'][0])
-            else:  # No radial distortion, i.e. pinhole camera model
-                radial_distortion = 0
+                camera.file_name = view['value']['ptr_wrapper']['data']['filename']
+                camera.width = view['value']['ptr_wrapper']['data']['width']
+                camera.height = view['value']['ptr_wrapper']['data']['height']
+                id_intrinsic = view['value']['ptr_wrapper']['data']['id_intrinsic']
 
-            camera_calibration_matrix = np.array([
-                [focal_length, 0, cx],
-                [0, focal_length, cy],
-                [0, 0, 1]])
+                # handle intrinsic params
+                intrinsic_params = intrinsics[int(id_intrinsic)]['value']['ptr_wrapper']['data']
+                focal_length = intrinsic_params['focal_length']
+                principal_point = intrinsic_params['principal_point']
+                cx = principal_point[0]
+                cy = principal_point[1]
+     
+                if 'disto_k3' in intrinsic_params:
+                    op.report({'INFO'},'3 Radial Distortion Parameters are not supported')
+                    assert False
 
-            camera.set_calibration(
-                camera_calibration_matrix,
-                radial_distortion)
-            extrinsic_params = extrinsic['value']
-            cam_rotation_list = extrinsic_params['rotation']
-            camera.set_rotation_mat(np.array(cam_rotation_list, dtype=float))
-            camera.set_camera_center_after_rotation(
-                np.array(extrinsic_params['center'], dtype=float))
-            camera.view_index = view_index
+                # For Radial there are several options: "None", disto_k1, disto_k3
+                if 'disto_k1' in intrinsic_params:
+                    radial_distortion = float(intrinsic_params['disto_k1'][0])
+                else:  # No radial distortion, i.e. pinhole camera model
+                    radial_distortion = 0
 
-            cams.append(camera)
-        return cams, image_index_to_camera_index
+                camera_calibration_matrix = np.array([
+                    [focal_length, 0, cx],
+                    [0, focal_length, cy],
+                    [0, 0, 1]])
+
+                camera.set_calibration(
+                    camera_calibration_matrix,
+                    radial_distortion)
+                extrinsic_params = extrinsics[id_pose]
+                cam_rotation_list = extrinsic_params['value']['rotation']
+                camera.set_rotation_mat(np.array(cam_rotation_list, dtype=float))
+                camera.set_camera_center_after_rotation(
+                    np.array(extrinsic_params['value']['center'], dtype=float))
+                camera.view_index = id_view
+
+                cams.append(camera)
+        return cams
 
 
     @staticmethod
-    def parse_points(json_data, image_index_to_camera_index, op, path_to_input_files=None, view_index_to_file_name=None):
+    def parse_points(json_data, op, path_to_input_files=None, view_index_to_file_name=None):
 
         compute_color = (not path_to_input_files is None) and (not view_index_to_file_name is None)
         structure = json_data['structure']
@@ -142,10 +147,10 @@ class OpenMVGJSONFileHandler:
         input_file = open(input_openMVG_file_path, 'r')
         json_data = json.load(input_file)
 
-        cams, image_index_to_camera_index = OpenMVGJSONFileHandler.parse_cameras(json_data, op)
+        cams = OpenMVGJSONFileHandler.parse_cameras(json_data, op)
         view_index_to_file_name = {cam.view_index: cam.file_name for cam in cams}
         points = OpenMVGJSONFileHandler.parse_points(
-            json_data, image_index_to_camera_index, op, path_to_images, view_index_to_file_name)
+            json_data, op, path_to_images, view_index_to_file_name)
         op.report({'INFO'},'parse_openmvg_file: Done')
         return cams, points
 
