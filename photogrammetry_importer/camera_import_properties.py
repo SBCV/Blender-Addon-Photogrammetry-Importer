@@ -108,6 +108,38 @@ class CameraImportProperties():
         description = "Initial Camera Extent (Visualization)",
         default=1)
 
+    def draw_camera_options(self, layout, draw_size_and_pp=False):
+        camera_box = layout.box()
+        camera_box.prop(self, "path_to_images")
+
+        if draw_size_and_pp:
+            image_box = camera_box.box()
+            image_box.prop(self, "default_width")
+            image_box.prop(self, "default_height")
+            image_box.prop(self, "default_pp_x")
+            image_box.prop(self, "default_pp_y")
+
+        import_camera_box = camera_box.box()
+        import_camera_box.prop(self, "import_cameras")
+        if self.import_cameras:
+            import_camera_box.prop(self, "camera_extent")
+            import_camera_box.prop(self, "add_background_images")
+
+            image_plane_box = import_camera_box.box()
+            image_plane_box.prop(self, "add_image_planes")
+            if self.add_image_planes:
+                image_plane_box.prop(self, "add_image_plane_emission")
+                image_plane_box.prop(self, "image_plane_transparency")
+
+        box = camera_box.box()
+        box.prop(self, "add_camera_motion_as_animation")
+        if self.add_camera_motion_as_animation:
+            box.prop(self, "number_interpolation_frames")
+            box.prop(self, "interpolation_type")
+            box.prop(self, "consider_missing_cameras_during_animation")
+
+        camera_box.prop(self, "adjust_render_settings")
+
     def enhance_camera_with_images(self, cameras):
         # This function should be overwritten, 
         # if image size is not part of the reconstruction data

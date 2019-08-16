@@ -86,6 +86,12 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
+    def draw(self, context):
+        layout = self.layout
+        self.draw_camera_options(layout)
+        self.draw_point_options(layout)
+
+
 class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
     
     """Blender import operator for NVM files. """
@@ -124,6 +130,11 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
         self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
+
+    def draw(self, context):
+        layout = self.layout
+        self.draw_camera_options(layout, draw_size_and_pp=True)
+        self.draw_point_options(layout)
 
     
 class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
@@ -167,6 +178,11 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
 
         return {'FINISHED'}
 
+    def draw(self, context):
+        layout = self.layout
+        self.draw_camera_options(layout)
+        self.draw_point_options(layout)
+
 class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
 
     """Blender import operator for OpenMVG JSON files. """
@@ -208,6 +224,11 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
 
         return {'FINISHED'}
 
+    def draw(self, context):
+        layout = self.layout
+        self.draw_camera_options(layout)
+        self.draw_point_options(layout)
+
 class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
 
     """Blender import operator for PLY files. """
@@ -233,3 +254,6 @@ class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
 
         return {'FINISHED'}
 
+    def draw(self, context):
+        layout = self.layout
+        self.draw_point_options(layout)
