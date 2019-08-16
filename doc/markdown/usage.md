@@ -15,6 +15,9 @@ There is an option to represent the point cloud with a particle system. This all
 The addon automatically looks for the fixed calibration line in the NVM file (i.e. "NVM_V3 FixedK fx cx fy cy r"  (first line)).
 Without the fixed calibration line the addon assumes that the principal point is at the image center. NVM files contain no information about the size of the images. Use the import dialog to adjust the "image path" to automatically read the image size from disc or set the default "width" and "height" values.
 
+#### JSON (OpenMVG and Meshroom)
+The JSON files contain no color information. The addon uses the input images (if provided) to compute the color of the triangulated 3D points.
+
 ### Limitations
 Blender supports only global render settings (which define the ratio of all cameras). If the reconstruction file contains cameras with different aspect ratios, it is not possible to visualize the camera cones correctly. Furthermore, radial distortions of the camera model used to compute the reconstruction will result in small misalignment of the cameras and the particle system in Blender.
 
