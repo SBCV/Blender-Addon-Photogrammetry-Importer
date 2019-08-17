@@ -24,6 +24,7 @@ Tested for Blender 2.81. There is an older version of the addon available for Bl
 - [Installation Instructions](doc/markdown/installation.md)
 - [Usage (Import/Export)](doc/markdown/usage.md)
 - [Adjust Results (Scale cameras and points)](doc/markdown/adjustment.md)
+- [Contribution](doc/markdown/contribution.md)
 
 ## Example
 This repository contains an example NVM file. The imported result looks as follows.
