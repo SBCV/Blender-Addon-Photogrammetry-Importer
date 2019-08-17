@@ -317,6 +317,7 @@ def add_camera_animation(op,
                         number_interpolation_frames, 
                         interpolation_type,
                         consider_missing_cameras_during_animation,
+                        remove_rotation_discontinuities,
                         path_to_images):
     op.report({'INFO'}, 'Adding Camera Animation: ...')
 
@@ -364,8 +365,10 @@ def add_camera_animation(op,
             data_path="rotation_quaternion", 
             index=-1, 
             frame=current_keyframe_index)
-        # q and -q represent the same rotation
-        remove_quaternion_discontinuities(cam_obj)
+
+        if remove_rotation_discontinuities:
+            # q and -q represent the same rotation
+            remove_quaternion_discontinuities(cam_obj)
 
         set_fcurve_interpolation(
             cam_obj,

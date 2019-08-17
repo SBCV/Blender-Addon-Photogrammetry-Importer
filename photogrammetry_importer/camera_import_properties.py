@@ -97,6 +97,14 @@ class CameraImportProperties():
         description =   "Assume there are three consecutive images A,B and C, but only A and C have been reconstructed. " + 
                         "This option adjusts the number of interpolation frames between camera A and C.",
         default=True)
+
+    remove_rotation_discontinuities: BoolProperty(
+        name="Remove rotation discontinuities",
+        description =   "The addon uses quaternions q to represent the rotation." + 
+                        "A quaternion q and its negative -q describe the same rotation. " + 
+                        "This option allows to remove different signs.",
+        default=False)
+
     adjust_render_settings: BoolProperty(
         name="Adjust Render Settings",
         description = "Adjust the render settings according to the corresponding images. "  +
@@ -137,6 +145,7 @@ class CameraImportProperties():
             box.prop(self, "number_interpolation_frames")
             box.prop(self, "interpolation_type")
             box.prop(self, "consider_missing_cameras_during_animation")
+            box.prop(self, "remove_rotation_discontinuities")
 
         camera_box.prop(self, "adjust_render_settings")
 
@@ -184,6 +193,7 @@ class CameraImportProperties():
                         self.number_interpolation_frames,
                         self.interpolation_type,
                         self.consider_missing_cameras_during_animation,
+                        self.remove_rotation_discontinuities,
                         self.path_to_images)
             else:
                 return {'FINISHED'}
