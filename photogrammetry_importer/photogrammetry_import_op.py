@@ -65,6 +65,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
         # By default search for the images on the same level than the colmap model directory
         if self.path_to_images == '':
             self.path_to_images = os.path.dirname(path)
+        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
         
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(path, self)
 
@@ -119,9 +120,9 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
         # by default search for the images in the nvm directory
         if self.path_to_images == '':
             self.path_to_images = os.path.dirname(path)
-        
+        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
+
         cameras, points = NVMFileHandler.parse_nvm_file(path, self)
-        
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
         
@@ -165,6 +166,7 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
         # by default search for the images in the nvm directory
         if self.path_to_images == '':
             self.path_to_images = os.path.dirname(path)
+        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
         
         cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
             path, self.path_to_images, self)
@@ -207,10 +209,11 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
 
         path = os.path.join(self.directory, self.filepath)
         self.report({'INFO'}, 'path: ' + str(path))
-    
+
         # by default search for the images in the nvm directory
         if self.path_to_images == '':
             self.path_to_images = os.path.dirname(path)
+        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
         
         cameras, points = MeshroomJSONFileHandler.parse_meshroom_file(
             path, self.path_to_images, self)

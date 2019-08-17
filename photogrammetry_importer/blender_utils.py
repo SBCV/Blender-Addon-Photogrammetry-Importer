@@ -282,22 +282,29 @@ class DummyCamera(object):
     def __init__(self):
         self.file_name = None
 
-def is_image_file(fn):
-    image_ext = ['.jpg', '.png']
-    return os.path.splitext(fn)[1].lower() in image_ext
+def is_image_file(file_path):
+    img_ext_list = ['.rgb', '.gif', '.pbm', '.pgm', '.ppm', '.pnm', '.tiff', '.tif', 
+                    '.rast', '.xbm', '.jpg', '.jpeg', '.png', '.bmp', '.png',
+                    '.webp', '.exr', '.hdr', '.svg']
+    return os.path.splitext(file_path)[1].lower() in img_ext_list
 
-def enhance_cameras_with_dummy_cameras(cameras, path_to_images):
-    all_image_names = [
-        image_name for image_name in os.listdir(path_to_images) 
-        if is_image_file(image_name)]
-    rec_image_names = [camera.file_name for camera in cameras]
-    non_rec_image_names = [
-        image_name for image_name in all_image_names 
-        if image_name not in rec_image_names]
-    for non_rec_image_name in non_rec_image_names:
+def enhance_cameras_with_dummy_cameras(op, cameras, path_to_images):
+    
+    rec_image_names = [os.path.basename(camera.file_name) for camera in cameras]
+    file_paths = [os.path.join(path_to_images, fn) for fn in os.listdir(path_to_images) 
+                  if os.path.isfile(os.path.join(path_to_images, fn))] 
+    all_image_paths = [
+        image_path for image_path in file_paths
+        if is_image_file(image_path)]
+    non_rec_image_paths = [
+        image_path for image_path in all_image_paths 
+        if os.path.basename(image_path) not in rec_image_names]
+
+    for non_rec_image_path in non_rec_image_paths:
         cam = DummyCamera()
-        cam.file_name = non_rec_image_name
+        cam.file_name = non_rec_image_path
         cameras.append(cam)
+
     return cameras
 
 def set_fcurve_interpolation(some_obj, interpolation_type='LINEAR'):
@@ -326,7 +333,7 @@ def add_camera_animation(op,
 
     if consider_missing_cameras_during_animation:
         cameras = enhance_cameras_with_dummy_cameras(
-            cameras, path_to_images)
+            op, cameras, path_to_images)
 
     some_cam = cameras[0]
     bcamera = add_single_camera(op, "Animated Camera", some_cam)
@@ -337,7 +344,7 @@ def add_camera_animation(op,
     step_size = number_interpolation_frames + 1
     scn.frame_end = step_size * len(cameras) 
 
-    cameras_sorted = sorted(cameras, key=lambda x: x.file_name)
+    cameras_sorted = sorted(cameras, key=lambda x: os.path.basename(x.file_name))
 
     for index, camera in enumerate(cameras_sorted):
         #op.report({'INFO'}, 'index: ' + str(index))
@@ -439,7 +446,7 @@ def add_cameras(op,
         blender_image = bpy.data.images.load(path_to_image)
 
         if add_background_images:
-            op.report({'INFO'}, 'Adding background image for: ' + camera_name)
+            # op.report({'INFO'}, 'Adding background image for: ' + camera_name)
 
             camera_data = bpy.data.objects[camera_name].data
             camera_data.show_background_images = True
@@ -447,7 +454,7 @@ def add_cameras(op,
             background_image.image = blender_image
 
         if add_image_planes:
-            op.report({'INFO'}, 'Adding image plane for: ' + camera_name)
+            # op.report({'INFO'}, 'Adding image plane for: ' + camera_name)
 
             # Group image plane and camera:
             camera_image_plane_pair_collection_current = add_collection(
@@ -493,8 +500,8 @@ def add_camera_image_plane(matrix_world,
     """
     Create mesh for image plane
     """
-    op.report({'INFO'}, 'add_camera_image_plane: ...')
-    op.report({'INFO'}, 'name: ' + str(name))
+    # op.report({'INFO'}, 'add_camera_image_plane: ...')
+    # op.report({'INFO'}, 'name: ' + str(name))
 
     assert width is not None and height is not None
 
@@ -515,8 +522,8 @@ def add_camera_image_plane(matrix_world,
     relative_shift_x = float((width / 2.0 - px) / float(width))
     relative_shift_y = float((height / 2.0 - py) / float(height))
     
-    op.report({'INFO'}, 'relative_shift_x: ' + str(relative_shift_x))
-    op.report({'INFO'}, 'relative_shift_y:' + str(relative_shift_y))
+    # op.report({'INFO'}, 'relative_shift_x: ' + str(relative_shift_x))
+    # op.report({'INFO'}, 'relative_shift_y:' + str(relative_shift_y))
 
     corners = ((-0.5, -0.5), (+0.5, -0.5), (+0.5, +0.5), (-0.5, +0.5))
     points = [(plane_center + (c[0] + relative_shift_x) * right + (c[1] + relative_shift_y) * up)[0:3] for c in corners]
@@ -560,7 +567,7 @@ def add_camera_image_plane(matrix_world,
     mesh_obj.matrix_world = matrix_world
     mesh.update()
     mesh.validate()
-    op.report({'INFO'}, 'add_camera_image_plane: Done')
+    # op.report({'INFO'}, 'add_camera_image_plane: Done')
     return mesh_obj
 
 def set_principal_point_for_cameras(cameras, default_pp_x, default_pp_y, op):

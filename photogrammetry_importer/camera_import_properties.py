@@ -48,7 +48,7 @@ class CameraImportProperties():
     path_to_images: StringProperty(
         name="Image Directory",
         description = "Path to the directory of images. If no path is provided, the paths in the nvm file are used.", 
-        default="",
+        default=""
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
     add_image_plane_emission: BoolProperty(
