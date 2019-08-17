@@ -18,6 +18,12 @@ Without the fixed calibration line the addon assumes that the principal point is
 #### JSON (OpenMVG and Meshroom)
 The JSON files contain no color information. The addon uses the input images (if provided) to compute the color of the triangulated 3D points.
 
+#### Meshroom
+The native file format Alembic (*.abc) of Meshroom is currently not supported, since parsing *.abc files requires building additional dependencies, e.g. ![this](https://github.com/alembic/alembic) library. In order to write the reconstruction result to *.SfM / *.json files, one can can add a ConvertSfMFormat node in Meshroom (see image below). 
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/images/meshroom_export_json.jpg)
+
+
+
 ### Limitations
 Blender supports only global render settings (which define the ratio of all cameras). If the reconstruction file contains cameras with different aspect ratios, it is not possible to visualize the camera cones correctly. Furthermore, radial distortions of the camera model used to compute the reconstruction will result in small misalignment of the cameras and the particle system in Blender.
 
