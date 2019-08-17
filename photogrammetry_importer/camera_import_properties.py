@@ -93,13 +93,13 @@ class CameraImportProperties():
         items=interpolation_items)
 
     consider_missing_cameras_during_animation: BoolProperty(
-        name="Consider Missing Cameras During Camera Animation",
+        name="Adjust Frame Numbers of Camera Animation",
         description =   "Assume there are three consecutive images A,B and C, but only A and C have been reconstructed. " + 
-                        "This option adjusts the number of interpolation frames between camera A and C.",
+                        "This option adjusts the frame number of C and the number of interpolation frames between camera A and C.",
         default=True)
 
     remove_rotation_discontinuities: BoolProperty(
-        name="Remove rotation discontinuities",
+        name="Remove Rotation Discontinuities",
         description =   "The addon uses quaternions q to represent the rotation." + 
                         "A quaternion q and its negative -q describe the same rotation. " + 
                         "This option allows to remove different signs.",
