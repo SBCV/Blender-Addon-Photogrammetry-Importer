@@ -23,7 +23,8 @@ Tested for Blender 2.81. There is an older version of the addon available for Bl
 ## Getting Started
 - [Installation Instructions](doc/markdown/installation.md)
 - [Usage (Import/Export)](doc/markdown/usage.md)
-- [Adjust Results (Scale cameras and points)](doc/markdown/adjustment.md)
+- [Adjust Results (Scale Cameras and Points)](doc/markdown/adjustment.md)
+- [Reconstruction Representation with Blender Objects](doc/markdown/representation.md)
 - [Contribution](doc/markdown/contribution.md)
 
 ## Example
