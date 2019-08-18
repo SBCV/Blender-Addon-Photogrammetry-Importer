@@ -38,6 +38,16 @@ from bpy_extras.io_utils import (ImportHelper,
                                  axis_conversion)
 
 
+def get_default_image_path(reconstruction_fp, image_dp):
+    if image_dp == '':
+        image_default_same_dp = os.path.dirname(reconstruction_fp)
+        image_default_sub_dp = os.path.join(image_default_same_dp, 'images')
+        if os.path.isdir(image_default_sub_dp):
+            image_dp = image_default_sub_dp
+        else:
+            image_dp = image_default_same_dp
+    return image_dp
+
 class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Operator):
     
     """Blender import operator for colmap model folders. """
@@ -62,9 +72,8 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
         path = os.path.dirname(path)
         self.report({'INFO'}, 'path: ' + str(path))
 
-        # By default search for the images on the same level than the colmap model directory
-        if self.path_to_images == '':
-            self.path_to_images = os.path.dirname(path)
+        self.path_to_images = get_default_image_path(
+            path, self.path_to_images)
         self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
         
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(path, self)
@@ -117,9 +126,8 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
         path = os.path.join(self.directory, self.filepath)
         self.report({'INFO'}, 'path: ' + str(path))
 
-        # by default search for the images in the nvm directory
-        if self.path_to_images == '':
-            self.path_to_images = os.path.dirname(path)
+        self.path_to_images = get_default_image_path(
+            path, self.path_to_images)
         self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
 
         cameras, points = NVMFileHandler.parse_nvm_file(path, self)
@@ -163,9 +171,8 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
         path = os.path.join(self.directory, self.filepath)
         self.report({'INFO'}, 'path: ' + str(path))
  
-        # by default search for the images in the nvm directory
-        if self.path_to_images == '':
-            self.path_to_images = os.path.dirname(path)
+        self.path_to_images = get_default_image_path(
+            path, self.path_to_images)
         self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
         
         cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
@@ -210,9 +217,8 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
         path = os.path.join(self.directory, self.filepath)
         self.report({'INFO'}, 'path: ' + str(path))
 
-        # by default search for the images in the nvm directory
-        if self.path_to_images == '':
-            self.path_to_images = os.path.dirname(path)
+        self.path_to_images = get_default_image_path(
+            path, self.path_to_images)
         self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
         
         cameras, points = MeshroomJSONFileHandler.parse_meshroom_file(

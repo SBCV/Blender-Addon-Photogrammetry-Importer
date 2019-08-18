@@ -47,7 +47,8 @@ class CameraImportProperties():
         default=True)
     path_to_images: StringProperty(
         name="Image Directory",
-        description = "Path to the directory of images. If no path is provided, the paths in the nvm file are used.", 
+        description =   "Assuming the reconstruction result is located in <some/path/rec.ext> or <some/path/colmap_model>. " + 
+                        "The addons uses <some/path/images> (if available) or <some/path> as default image path." , 
         default=""
         # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
         )
