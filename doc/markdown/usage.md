@@ -20,7 +20,7 @@ The JSON files contain no color information. The addon uses the input images (if
 
 #### Meshroom
 The native file format Alembic (*.abc) of Meshroom is currently not supported, since parsing *.abc files requires building additional dependencies, e.g. ![this](https://github.com/alembic/alembic) library. In order to write the reconstruction result to *.SfM / *.json files, one can can add a ConvertSfMFormat node in Meshroom (see image below). 
-![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/images/meshroom_export_json.jpg)
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/meshroom_export_json.jpg)
 
 
 
@@ -29,7 +29,7 @@ Blender supports only global render settings (which define the ratio of all came
 
 ### Visualization
 Sometimes Blender draws boundaries around the particles of the point cloud. In oder to improve the visualization of the point cloud one can disable "Extras" under "Overlays" in the "3D view". The following image shows the corresponding options. 
-![Disable Object Overlays](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/images/disable_object_extras_overlay_annotation.jpg)
+![Disable Object Overlays](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/disable_object_extras_overlay_annotation.jpg)
 
 ### Export
 In Blender use File/Export/VSFM NVM Export (.nvm) to export the NVM file. 
