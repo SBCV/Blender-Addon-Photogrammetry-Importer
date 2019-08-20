@@ -90,7 +90,7 @@ class MeshroomJSONFileHandler:
 
 
     @staticmethod
-    def parse_points(json_data, image_index_to_camera_index, op, path_to_input_files=None, view_index_to_file_name=None):
+    def parse_points(json_data, image_index_to_camera_index, op):
 
         points = []
         is_valid_file = 'structure' in json_data
@@ -102,54 +102,12 @@ class MeshroomJSONFileHandler:
             return points
 
         structure = json_data['structure']
-
-        compute_color = (not path_to_input_files is None) and (not view_index_to_file_name is None)
-
-        if compute_color:
-            op.report({'INFO'},'Computing color information from files: ...')
-            view_index_to_image = {}
-            for view_index, file_name in view_index_to_file_name.items():
-                image_path = os.path.join(path_to_input_files, file_name)
-                if not os.path.isfile(image_path):
-                    compute_color = False
-                    break
-                pil_image = Image.open(image_path)
-                view_index_to_image[view_index] = pil_image
-
-            op.report({'INFO'},'Computing color information from files: Done')
-
-
         for json_point in structure:
-
-            r = g = b = 0
-
-            # color information can only be computed if input files are provided
-            if compute_color:
-                for observation in json_point['observations']:
-                    view_index = int(observation['observationId'])
-
-                    # REMARK: pil/pillow: image.size == (width, height)
-                    x_in_json_file = float(observation['x'][0])    # x has index 0
-                    y_in_json_file = float(observation['x'][1])    # y has index 1
-
-                    current_image = view_index_to_image[view_index]
-                    current_r, current_g, current_b = current_image.getpixel((x_in_json_file, y_in_json_file))
-                    r += current_r
-                    g += current_g
-                    b += current_b
-
-                # normalize the rgb values
-                amount_observations = len(json_point['observations'])
-                r /= amount_observations
-                g /= amount_observations
-                b /= amount_observations
-
             custom_point = Point(
                 coord=np.array(json_point['X'], dtype=float),
-                color=np.array([r, g, b], dtype=int),
+                color=np.array(json_point['color'], dtype=int),
                 id=int(json_point['landmarkId']),
                 scalars=[])
-
             points.append(custom_point)
         return points
 
@@ -167,9 +125,8 @@ class MeshroomJSONFileHandler:
         json_data = json.load(input_file)
 
         cams, image_index_to_camera_index = MeshroomJSONFileHandler.parse_cameras(json_data, op)
-        view_index_to_file_name = {cam.view_index: cam.file_name for cam in cams}
         points = MeshroomJSONFileHandler.parse_points(
-            json_data, image_index_to_camera_index, op, path_to_images, view_index_to_file_name)
+            json_data, image_index_to_camera_index, op)
         op.report({'INFO'},'parse_meshroom_file: Done')
         return cams, points
 
