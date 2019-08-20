@@ -104,7 +104,7 @@ class CameraImportProperties():
         description =   "The addon uses quaternions q to represent the rotation." + 
                         "A quaternion q and its negative -q describe the same rotation. " + 
                         "This option allows to remove different signs.",
-        default=False)
+        default=True)
 
     adjust_render_settings: BoolProperty(
         name="Adjust Render Settings",
