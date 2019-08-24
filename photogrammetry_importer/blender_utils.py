@@ -214,12 +214,17 @@ def add_single_camera(op, camera_name, camera):
     # Add camera:
     bcamera = bpy.data.cameras.new(camera_name)
 
-    focal_length = camera.get_focal_length()
-
+    if camera.is_panoramic():
+        focal_length = 0.001 # minimal focal length
+        bcamera.type = 'PANO'
+        bcamera.cycles.panorama_type = camera.get_panoramic_type()
+    else:
+        focal_length = camera.get_focal_length()
+        
     #  Adjust field of view
     assert camera.width is not None and camera.height is not None
     bcamera.angle = math.atan(max(camera.width, camera.height) / (focal_length * 2.0)) * 2.0
-
+   
     # Adjust principal point
     p_x, p_y = camera.get_principal_point()
     
@@ -453,7 +458,7 @@ def add_cameras(op,
             background_image = camera_data.background_images.new()
             background_image.image = blender_image
 
-        if add_image_planes:
+        if add_image_planes and not camera.is_panoramic():
             # op.report({'INFO'}, 'Adding image plane for: ' + camera_name)
 
             # Group image plane and camera:

@@ -26,8 +26,9 @@ class OpenMVGJSONFileHandler:
         for id, view in views.items():    # Iterate over views
 
             id_view = view['key'] # Should be equal to view['value']['ptr_wrapper']['data']['id_view']
-            id_pose = view['value']['ptr_wrapper']['data']['id_pose']
-            id_intrinsic = view['value']['ptr_wrapper']['data']['id_intrinsic']
+            view_data = view['value']['ptr_wrapper']['data']
+            id_pose = view_data['id_pose']
+            id_intrinsic = view_data['id_intrinsic']
 
             # Check if the view is having corresponding Pose and Intrinsic data
             if id_pose in extrinsics.keys() and \
@@ -35,25 +36,35 @@ class OpenMVGJSONFileHandler:
 
                 camera = Camera()
 
-                camera.file_name = view['value']['ptr_wrapper']['data']['filename']
-                camera.width = view['value']['ptr_wrapper']['data']['width']
-                camera.height = view['value']['ptr_wrapper']['data']['height']
-                id_intrinsic = view['value']['ptr_wrapper']['data']['id_intrinsic']
+                camera.file_name = view_data['filename']
+                camera.width = view_data['width']
+                camera.height = view_data['height']
+                id_intrinsic = view_data['id_intrinsic']
 
                 # handle intrinsic params
-                intrinsic_params = intrinsics[int(id_intrinsic)]['value']['ptr_wrapper']['data']
-                focal_length = intrinsic_params['focal_length']
-                principal_point = intrinsic_params['principal_point']
-                cx = principal_point[0]
-                cy = principal_point[1]
-     
-                if 'disto_k3' in intrinsic_params:
+                intrinsic_data = intrinsics[int(id_intrinsic)]['value']['ptr_wrapper']['data']
+                polymorphic_name = intrinsics[int(id_intrinsic)]['value']['polymorphic_name']
+
+                if polymorphic_name == 'spherical':
+                    camera.set_panoramic_type(Camera.panoramic_type_equirectangular)
+                    # create some dummy values
+                    focal_length = 0     
+                    cx = camera.width / 2
+                    cy = camera.height / 2
+                else:
+
+                    focal_length = intrinsic_data['focal_length']
+                    principal_point = intrinsic_data['principal_point']
+                    cx = principal_point[0]
+                    cy = principal_point[1]
+        
+                if 'disto_k3' in intrinsic_data:
                     op.report({'INFO'},'3 Radial Distortion Parameters are not supported')
                     assert False
 
                 # For Radial there are several options: "None", disto_k1, disto_k3
-                if 'disto_k1' in intrinsic_params:
-                    radial_distortion = float(intrinsic_params['disto_k1'][0])
+                if 'disto_k1' in intrinsic_data:
+                    radial_distortion = float(intrinsic_data['disto_k1'][0])
                 else:  # No radial distortion, i.e. pinhole camera model
                     radial_distortion = 0
 

@@ -43,7 +43,7 @@ class CameraImportProperties():
         default=False)
     add_image_planes: BoolProperty(
         name="Add an Image Plane for each Camera",
-        description = "Add an Image Plane for each Camera", 
+        description = "Add an Image Plane for each Camera - only for non-panoramic cameras.", 
         default=True)
     path_to_images: StringProperty(
         name="Image Directory",

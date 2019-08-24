@@ -8,6 +8,8 @@ class Camera:
     This class represents a reconstructed camera and provides functionality to manage
     intrinsic and extrinsic camera parameters as well as image information. 
     """
+    panoramic_type_equirectangular = "EQUIRECTANGULAR" 
+
     def __init__(self):
         self._center = np.array([0, 0, 0], dtype=float)              # C = -R^T t
         self._translation_vec = np.array([0, 0, 0], dtype=float)     # t = -R C
@@ -23,6 +25,7 @@ class Camera:
         self.file_name = None
         self.width = None
         self.height = None
+        self.panoramic_type = None
 
         self.id = None  # an unique identifier (natural number)
 
@@ -37,6 +40,9 @@ class Camera:
         self._radial_distortion = radial_distortion
         assert self._radial_distortion is not None
         
+    def has_focal_length(self):
+        return self._calibration_mat[0][0] > 0
+
     def get_focal_length(self):
         return self._calibration_mat[0][0]
     
@@ -65,6 +71,15 @@ class Camera:
         cy_zero = np.isclose(self._calibration_mat[1][2], 0.0)
         initialized = (not cx_zero) and (not cy_zero)
         return initialized
+
+    def is_panoramic(self):
+        return self.panoramic_type is not None
+
+    def set_panoramic_type(self, panoramic_type):
+        self.panoramic_type = panoramic_type
+
+    def get_panoramic_type(self):
+        return self.panoramic_type
 
     @staticmethod
     def compute_calibration_mat(focal_length, cx, cy):
