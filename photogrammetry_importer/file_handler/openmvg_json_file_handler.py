@@ -1,7 +1,6 @@
 import json
 import numpy as np
 import os
-from PIL import Image
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
@@ -90,7 +89,12 @@ class OpenMVGJSONFileHandler:
     @staticmethod
     def parse_points(json_data, op, path_to_input_files=None, view_index_to_file_name=None):
 
-        compute_color = (not path_to_input_files is None) and (not view_index_to_file_name is None)
+        try:
+            from PIL import Image
+            compute_color = (not path_to_input_files is None) and (not view_index_to_file_name is None)
+        except ImportError:
+            compute_color = False
+            
         structure = json_data['structure']
 
         if compute_color:

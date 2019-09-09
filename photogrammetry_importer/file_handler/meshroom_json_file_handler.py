@@ -1,7 +1,6 @@
 import json
 import numpy as np
 import os
-from PIL import Image
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
