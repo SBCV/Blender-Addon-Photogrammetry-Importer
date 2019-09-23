@@ -37,5 +37,6 @@ The input images of the NVM file are located here: [https://github.com/openMVG/I
 There is an import option that interpolates the reconstructed camera poses to compute a camera animation.
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/camera_animation.gif)
 
-
+You can also overlay the (sparse) point cloud with the corresponding mesh - see [Usage (Import/Export)](doc/markdown/usage.md). 
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/point_cloud_mesh_overlay.jpg)
 
