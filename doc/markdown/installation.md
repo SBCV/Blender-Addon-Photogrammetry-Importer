@@ -22,6 +22,8 @@ This addon uses Pillow (https://python-pillow.org/) to compute missing informati
 - For VisualSFM (NVM) the addon uses pillow to read the (missing) image sizes from disc.
 - For OpenMVG (JSON) the addon uses pillow to compute the (missing) colors for the 3D points in the point cloud.
 
+Using Pillow instead of Blender's image API significantly improves processing time. 
+
 If you haven't installed pip for blender already, download https://bootstrap.pypa.io/get-pip.py and copy the file to 
 ```
 <Blender_Root>/<Version>/python/bin
