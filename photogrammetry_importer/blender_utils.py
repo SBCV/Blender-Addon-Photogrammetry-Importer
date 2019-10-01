@@ -234,7 +234,9 @@ def add_single_camera(op, camera_name, camera):
     # a frame shift if 1 unit will shift exactly 1920 pixels in any direction, that is up/down/left/right.
     max_extent = max(camera.width, camera.height)
     bcamera.shift_x = (camera.width / 2.0 - p_x) / float(max_extent)
-    bcamera.shift_y = (camera.height / 2.0 - p_y) / float(max_extent)
+     # Note, that the direction of the y coordinate is inverted 
+    # (Difference between computer vision vs computer graphics coordinate system)
+    bcamera.shift_y = -(camera.height / 2.0 - p_y) / float(max_extent)
 
     # op.report({'INFO'}, 'focal_length: ' + str(focal_length))
     # op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
@@ -525,7 +527,9 @@ def add_camera_image_plane(matrix_world,
     plane_center = view_dir
     
     relative_shift_x = float((width / 2.0 - px) / float(width))
-    relative_shift_y = float((height / 2.0 - py) / float(height))
+    # Note, that the direction of the y coordinate is inverted 
+    # (Difference between computer vision vs computer graphics coordinate system)
+    relative_shift_y = -float((height / 2.0 - py) / float(height))
     
     # op.report({'INFO'}, 'relative_shift_x: ' + str(relative_shift_x))
     # op.report({'INFO'}, 'relative_shift_y:' + str(relative_shift_y))
