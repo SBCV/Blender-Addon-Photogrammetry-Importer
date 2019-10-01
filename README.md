@@ -20,6 +20,8 @@ Thus, it is possible to import reconstruction results of the following libraries
 
 Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
+If you experience problems aligning the cameras with the point cloud, make sure to use the *latest* version and read [Ensure Camera and Point Alignment](doc/markdown/alignment.md).
+
 ## Getting Started
 - [Tutorial Video](https://www.youtube.com/watch?v=BwwaT2scoP0) 
 - [Installation Instructions](doc/markdown/installation.md)
