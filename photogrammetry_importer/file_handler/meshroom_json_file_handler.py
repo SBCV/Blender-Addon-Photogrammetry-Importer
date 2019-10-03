@@ -50,6 +50,7 @@ class MeshroomJSONFileHandler:
                 views, "poseId", view_index, op)
 
             camera.file_name = str(corresponding_view['path'])
+            camera.undistorted_file_name = (str(extrinsic['poseId']) + '.exr')
             camera.width = int(corresponding_view['width'])
             camera.height = int(corresponding_view['height'])
             id_intrinsic = int(corresponding_view['intrinsicId'])

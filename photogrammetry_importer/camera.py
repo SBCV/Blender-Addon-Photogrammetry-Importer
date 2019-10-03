@@ -23,6 +23,7 @@ class Camera:
         self._calibration_mat = np.zeros((3, 3), dtype=float)
         
         self.file_name = None
+        self.undistorted_file_name = None
         self.width = None
         self.height = None
         self.panoramic_type = None

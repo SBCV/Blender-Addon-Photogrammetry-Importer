@@ -446,10 +446,20 @@ def add_cameras(op,
         if not add_image_planes and not add_background_images:
             continue 
 
-        path_to_image = os.path.join(
-            path_to_images, os.path.basename(camera.file_name))
+        use_original_image = True
+        if camera.undistorted_file_name is not None:
+            path_to_image = os.path.join(
+                path_to_images, os.path.basename(camera.undistorted_file_name))
+            if os.path.isfile(path_to_image):
+                use_original_image = False
+
+        if use_original_image:
+            path_to_image = os.path.join(
+                path_to_images, os.path.basename(camera.file_name))
+
         if not os.path.isfile(path_to_image):
             continue
+
         blender_image = bpy.data.images.load(path_to_image)
 
         if add_background_images:
