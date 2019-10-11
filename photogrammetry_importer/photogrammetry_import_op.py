@@ -11,9 +11,11 @@ from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenM
 from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
 from photogrammetry_importer.file_handler.ply_file_handler import PLYFileHandler
+from photogrammetry_importer.file_handler.transformation_file_handler import TransformationFileHandler
 
 from photogrammetry_importer.camera_import_properties import CameraImportProperties
 from photogrammetry_importer.point_import_properties import PointImportProperties
+from photogrammetry_importer.transformation_import_properties import TransformationImportProperties
 
 # Notes:
 #   http://sinestesia.co/blog/tutorials/using-blenders-filebrowser-with-python/
@@ -238,7 +240,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
 
-class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
+class ImportPLY(PointImportProperties, TransformationImportProperties, bpy.types.Operator, ImportHelper):
 
     """Blender import operator for PLY files. """
     bl_idname = "import_scene.ply"
@@ -258,11 +260,15 @@ class ImportPLY(PointImportProperties, bpy.types.Operator, ImportHelper):
         points = PLYFileHandler.parse_ply_file(path)
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
 
+        transformations_sorted = TransformationFileHandler.parse_transformation_folder(
+            self.path_to_transformations, self)
+
         reconstruction_collection = add_collection('Reconstruction Collection')
-        self.import_photogrammetry_points(points, reconstruction_collection)
+        self.import_photogrammetry_points(points, reconstruction_collection, transformations_sorted)
 
         return {'FINISHED'}
 
     def draw(self, context):
         layout = self.layout
         self.draw_point_options(layout)
+        self.draw_transformation_options(layout)

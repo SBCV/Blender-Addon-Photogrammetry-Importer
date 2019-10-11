@@ -1,8 +1,8 @@
 import bpy
 
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty)
-
-from photogrammetry_importer.blender_utils import add_points_as_mesh
+from photogrammetry_importer.blender_animation_utils import add_animation
+from photogrammetry_importer.blender_point_utils import add_points_as_mesh
 
 class PointImportProperties():
     """ This class encapsulates Blender UI properties that are required to visualize the reconstructed points correctly. """
@@ -44,13 +44,23 @@ class PointImportProperties():
                 particle_box.prop(self, "point_extent")
     
 
-    def import_photogrammetry_points(self, points, reconstruction_collection):
+    def import_photogrammetry_points(self, points, reconstruction_collection, transformations_sorted=None):
         if self.import_points:
-            add_points_as_mesh(
+            point_cloud_obj_name = add_points_as_mesh(
                 self, 
                 points, 
                 self.add_points_as_particle_system, 
                 self.mesh_type, 
                 self.point_extent,
                 self.add_particle_color_emission,
-                reconstruction_collection)
+                reconstruction_collection) 
+
+            if transformations_sorted is not None:
+                add_animation(
+                    self,
+                    point_cloud_obj_name,
+                    transformations_sorted, 
+                    number_interpolation_frames=1, 
+                    interpolation_type=None,
+                    remove_rotation_discontinuities=False)
+

@@ -1,0 +1,104 @@
+import bpy
+from mathutils import Quaternion
+from mathutils import Matrix
+
+def remove_quaternion_discontinuities(target_obj):
+
+    # the interpolation of quaternions may lead to discontinuities 
+    # if the quaternions show different signs
+
+    # https://blender.stackexchange.com/questions/58866/keyframe-interpolation-instability
+    action = target_obj.animation_data.action
+
+    # quaternion curves
+    fqw = action.fcurves.find('rotation_quaternion', index = 0)
+    fqx = action.fcurves.find('rotation_quaternion', index = 1)
+    fqy = action.fcurves.find('rotation_quaternion', index = 2)
+    fqz = action.fcurves.find('rotation_quaternion', index = 3)  
+
+    # invert quaternion so that interpolation takes the shortest path
+    if (len(fqw.keyframe_points) > 0):
+        current_quat = Quaternion((
+            fqw.keyframe_points[0].co[1],
+            fqx.keyframe_points[0].co[1],
+            fqy.keyframe_points[0].co[1],
+            fqz.keyframe_points[0].co[1]))
+
+        for i in range(len(fqw.keyframe_points)-1):
+            last_quat = current_quat
+            current_quat = Quaternion((
+                fqw.keyframe_points[i+1].co[1],
+                fqx.keyframe_points[i+1].co[1],
+                fqy.keyframe_points[i+1].co[1],
+                fqz.keyframe_points[i+1].co[1]))
+
+            if last_quat.dot(current_quat) < 0:
+                current_quat.negate()
+                fqw.keyframe_points[i+1].co[1] = -fqw.keyframe_points[i+1].co[1]
+                fqx.keyframe_points[i+1].co[1] = -fqx.keyframe_points[i+1].co[1]
+                fqy.keyframe_points[i+1].co[1] = -fqy.keyframe_points[i+1].co[1]
+                fqz.keyframe_points[i+1].co[1] = -fqz.keyframe_points[i+1].co[1]
+
+
+def set_fcurve_interpolation(some_obj, interpolation_type='LINEAR'):
+
+    # interpolation_string: ['CONSTANT', 'LINEAR', 'BEZIER', 'SINE',
+    # 'QUAD', 'CUBIC', 'QUART', 'QUINT', 'EXPO', 'CIRC',
+    # 'BACK', 'BOUNCE', 'ELASTIC']
+    fcurves = some_obj.animation_data.action.fcurves
+    for fcurve in fcurves:
+        for kf in fcurve.keyframe_points:
+            kf.interpolation = interpolation_type
+
+
+def add_animation(  op,
+                    animated_obj_name,
+                    transformations_sorted, 
+                    number_interpolation_frames, 
+                    interpolation_type=None,
+                    remove_rotation_discontinuities=True):
+    op.report({'INFO'}, 'Adding Animation: ...')
+
+    scn = bpy.context.scene
+    scn.frame_start = 0
+    step_size = number_interpolation_frames + 1
+    scn.frame_end = step_size * len(transformations_sorted) 
+    animated_obj = bpy.data.objects[animated_obj_name]
+
+    for index, transformation in enumerate(transformations_sorted):
+        # op.report({'INFO'}, 'index: ' + str(index))
+        # op.report({'INFO'}, 'transformation: ' + str(transformation))
+
+        current_keyframe_index = index * step_size
+
+        if transformation is None:
+            continue 
+
+        animated_obj.matrix_world = Matrix(transformation)
+
+        animated_obj.keyframe_insert(
+            data_path="location", 
+            index=-1, 
+            frame=current_keyframe_index)
+
+        # Don't use euler rotations, they show too many discontinuties
+        #animated_obj.keyframe_insert(
+        #   data_path="rotation_euler", 
+        #   index=-1, 
+        #   frame=current_keyframe_index)
+
+        animated_obj.rotation_mode = 'QUATERNION'
+        animated_obj.keyframe_insert(
+            data_path="rotation_quaternion", 
+            index=-1, 
+            frame=current_keyframe_index)
+
+        if remove_rotation_discontinuities:
+            # q and -q represent the same rotation
+            remove_quaternion_discontinuities(animated_obj)
+
+        if interpolation_type is not None:
+            set_fcurve_interpolation(
+                animated_obj,
+                interpolation_type)
+
