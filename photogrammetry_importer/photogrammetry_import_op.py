@@ -224,7 +224,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
         self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
         
         cameras, points = MeshroomJSONFileHandler.parse_meshroom_file(
-            path, self.path_to_images, self)
+            path, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))

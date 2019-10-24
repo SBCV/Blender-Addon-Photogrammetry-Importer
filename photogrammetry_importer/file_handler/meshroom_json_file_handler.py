@@ -112,11 +112,10 @@ class MeshroomJSONFileHandler:
         return points
 
     @staticmethod
-    def parse_meshroom_file(input_meshroom_file_path, path_to_images, op):
+    def parse_meshroom_file(input_meshroom_file_path, op):
         """
         The path_to_input_files parameter is optional, if provided the returned points carry also color information
         :param input_meshroom_file_path:
-        :param path_to_images: Path to the input images (used to infer the color of the structural points)
         :return:
         """
         op.report({'INFO'}, 'parse_meshroom_file: ...')
