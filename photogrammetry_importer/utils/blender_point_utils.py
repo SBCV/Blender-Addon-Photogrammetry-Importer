@@ -1,7 +1,7 @@
 import bpy
 
-from photogrammetry_importer.blender_utils import add_obj
-from photogrammetry_importer.stop_watch import StopWatch
+from photogrammetry_importer.utils.blender_utils import add_obj
+from photogrammetry_importer.utils.stop_watch import StopWatch
 
 def add_points_as_mesh(op, points, add_points_as_particle_system, mesh_type, point_extent, add_particle_color_emission, reconstruction_collection):
     op.report({'INFO'}, 'Adding Points: ...')

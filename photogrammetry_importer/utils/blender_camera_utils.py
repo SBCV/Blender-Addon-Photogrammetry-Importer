@@ -3,11 +3,11 @@ import math
 import bpy
 from mathutils import Vector
 
-from photogrammetry_importer.blender_utils import compute_camera_matrix_world
-from photogrammetry_importer.blender_utils import add_collection
-from photogrammetry_importer.blender_utils import add_obj
-from photogrammetry_importer.blender_animation_utils import add_animation
-from photogrammetry_importer.stop_watch import StopWatch
+from photogrammetry_importer.utils.blender_utils import compute_camera_matrix_world
+from photogrammetry_importer.utils.blender_utils import add_collection
+from photogrammetry_importer.utils.blender_utils import add_obj
+from photogrammetry_importer.utils.blender_animation_utils import add_animation
+from photogrammetry_importer.utils.stop_watch import StopWatch
 
 class DummyCamera(object):
     def __init__(self):

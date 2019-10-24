@@ -4,7 +4,7 @@ import bpy
 
 # from photogrammetry_importer.point import Point
 
-from photogrammetry_importer.blender_utils import add_collection
+from photogrammetry_importer.utils.blender_utils import add_collection
 
 from photogrammetry_importer.file_handler.meshroom_json_file_handler import MeshroomJSONFileHandler
 from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler

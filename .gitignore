@@ -15,3 +15,4 @@ photogrammetry_importer.zip
 /.vscode/.ropeproject/config.py
 /.vscode/.ropeproject/objectdb
 /.vscode/settings.json
+/photogrammetry_importer/utils/__pycache__/

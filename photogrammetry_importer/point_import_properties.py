@@ -1,8 +1,8 @@
 import bpy
 
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty)
-from photogrammetry_importer.blender_animation_utils import add_animation
-from photogrammetry_importer.blender_point_utils import add_points_as_mesh
+from photogrammetry_importer.utils.blender_animation_utils import add_animation
+from photogrammetry_importer.utils.blender_point_utils import add_points_as_mesh
 
 class PointImportProperties():
     """ This class encapsulates Blender UI properties that are required to visualize the reconstructed points correctly. """
