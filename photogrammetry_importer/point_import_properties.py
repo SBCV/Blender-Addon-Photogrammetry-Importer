@@ -1,6 +1,6 @@
 import bpy
 
-from bpy.props import (BoolProperty, EnumProperty, FloatProperty)
+from bpy.props import (BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty)
 from photogrammetry_importer.utils.blender_animation_utils import add_animation
 from photogrammetry_importer.utils.blender_point_utils import add_points_as_mesh
 
@@ -28,10 +28,22 @@ class PointImportProperties():
         description = "Initial Point Extent for meshes at vertex positions",
         default=0.01)
     add_particle_color_emission: BoolProperty(
-        name="Add particle color emission",
+        name="Add Particle Color Emission",
         description = "Add particle color emission to increase the visibility of the individual objects of the particle system.", 
         default=True)
-        
+    set_particle_color_flag: BoolProperty(
+        name="Set Fixed Particle Color",
+        description="Overwrite the colors in the file with a single color.", 
+        default=False
+    )
+    particle_overwrite_color: FloatVectorProperty(
+        name="Particle Color",
+        description="Single fixed particle color.", 
+        default=(0.0, 1.0, 0.0),
+        min=0.0,
+        max=1.0
+    )
+
     def draw_point_options(self, layout):
         point_box = layout.box()
         point_box.prop(self, "import_points")
@@ -42,7 +54,10 @@ class PointImportProperties():
                 particle_box.prop(self, "mesh_type")
                 particle_box.prop(self, "add_particle_color_emission")
                 particle_box.prop(self, "point_extent")
-    
+                particle_box.prop(self, "set_particle_color_flag")
+                if self.set_particle_color_flag:
+                    particle_box.prop(self, "particle_overwrite_color")
+                    
 
     def import_photogrammetry_points(self, points, reconstruction_collection, transformations_sorted=None):
         if self.import_points:
@@ -53,7 +68,9 @@ class PointImportProperties():
                 self.mesh_type, 
                 self.point_extent,
                 self.add_particle_color_emission,
-                reconstruction_collection) 
+                reconstruction_collection,
+                self.set_particle_color_flag,
+                self.particle_overwrite_color) 
 
             if transformations_sorted is not None:
                 add_animation(
