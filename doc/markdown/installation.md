@@ -1,12 +1,9 @@
 ## Installation
-Clone the addon for Blender 2.80:
+Clone the addon for Blender 2.80 (or newer):
 ```
 git clone https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer.git
 ```
-or for Blender 2.79:
-```
-git clone -b blender279 https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer.git
-```
+
 Compress the folder "photogrammetry_importer" in "Blender-Addon-Photogrammetry-Importer" to a zip archive. 
 The final structure must look as follows:
 - photogrammetry_importer.zip /  
@@ -15,6 +12,14 @@ The final structure must look as follows:
 		- file_handler  
 		- blender_utils.py
 		- ...  
+
+Install the addon by 
+- Opening the preferences of Blender (`Edit / Preferences ...`)  
+- Select `Add-ons` in the left toolbar
+- Click on `Install...` in the top toolbar
+- Navigate to the `photogrammetry_importer.zip` file, select it and click on `Install Add-on` 
+- Scroll down to **ACTIVATE the addon** (i.e. check the bounding box left of `Import-Export: Photogrammetry Import Export Addon`)
+
 
 
 ## Optional Dependency for VisualSfM and OpenMVG files
