@@ -6,6 +6,7 @@
 
 #### General
 In Blender use File/Import/\<Import Function\> to import the corresponding file. 
+<img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/import_file_formats.jpg" width="400">
 
 For each camera one can add the corresponding image plane. Pillow is required to read the images from disc. Use the import dialog to adjust the "image path". By default the addon searches for the images in the in the folder where the reconstruction file is located. **This addon uses the node system of Cycles to visualize the image planes. Thus, the addon switches automatically to Cycles, if image planes are added.** 
 
