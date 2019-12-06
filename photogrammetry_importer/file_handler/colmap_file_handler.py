@@ -82,12 +82,12 @@ class ColmapFileHandler(object):
             current_camera.set_quaternion(col_image.qvec)
             current_camera.set_camera_translation_vector_after_rotation(col_image.tvec)
             current_camera.file_name = col_image.name
-            camera_models = list(id_to_col_cameras.values())
-            # Blender supports only one camera model for all images
-            assert len(camera_models) == 1
-            camera_model = camera_models[0]
-
-            op.report({'INFO'}, 'camera_model: ' + str(camera_model))
+            
+            camera_model = id_to_col_cameras[col_image.camera_id]
+    
+            # op.report({'INFO'}, 'image_id: ' + str(col_image.id))
+            # op.report({'INFO'}, 'camera_id: ' + str(col_image.camera_id))
+            # op.report({'INFO'}, 'camera_model: ' + str(camera_model))
 
             current_camera.width = camera_model.width
             current_camera.height = camera_model.height

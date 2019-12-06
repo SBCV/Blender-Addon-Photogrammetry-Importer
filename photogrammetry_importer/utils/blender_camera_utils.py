@@ -92,6 +92,7 @@ def add_camera_animation(op,
         cameras = enhance_cameras_with_dummy_cameras(
             op, cameras, path_to_images)
 
+    op.report({'INFO'}, 'Using the first reconstructed camera as template for the animated camera.')
     some_cam = cameras[0]
     bcamera = add_single_camera(op, "Animated Camera", some_cam)
     cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)

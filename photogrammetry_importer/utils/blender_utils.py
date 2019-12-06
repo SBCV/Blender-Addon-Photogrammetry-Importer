@@ -79,10 +79,16 @@ def adjust_render_settings_if_possible(op, cameras):
     possible = True
     width = cameras[0].width
     height = cameras[0].height
+
+    # Check if the cameras have same resolution
     for cam in cameras:
         if cam.width != width or cam.height != height:
             possible = False
             break
+
     if possible:
         bpy.context.scene.render.resolution_x = width
         bpy.context.scene.render.resolution_y = height
+    else:
+        op.report({'WARNING'}, 'Adjustment of render settings not possible, ' + 
+                    'since the reconstructed cameras show different resolutions.')
