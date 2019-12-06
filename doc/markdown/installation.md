@@ -18,8 +18,8 @@ Install the addon by
 - Select `Add-ons` in the left toolbar
 - Click on `Install...` in the top toolbar
 - Navigate to the `photogrammetry_importer.zip` file, select it and click on `Install Add-on` 
-- Scroll down to **ACTIVATE the addon** (i.e. check the bounding box left of `Import-Export: Photogrammetry Import Export Addon`)
-
+- Scroll down to **ACTIVATE the addon**, i.e. check the bounding box left of `Import-Export: Photogrammetry Import Export Addon` (see image below)
+<img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/activated.jpg" width="500">
 
 
 ## Optional Dependency for VisualSfM and OpenMVG files
