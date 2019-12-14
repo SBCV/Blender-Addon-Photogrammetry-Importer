@@ -47,6 +47,11 @@ class Camera:
     def get_focal_length(self):
         return self._calibration_mat[0][0]
     
+    def get_field_of_view(self):
+        assert self.width is not None and self.height is not None
+        angle = math.atan(max(self.width, self.height) / (self.get_focal_length() * 2.0)) * 2.0
+        return angle
+
     def check_calibration_mat(self):
         assert self.is_principal_point_initialized()
     

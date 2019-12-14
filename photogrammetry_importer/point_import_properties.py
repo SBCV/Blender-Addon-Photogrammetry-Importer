@@ -1,7 +1,7 @@
 import bpy
 
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty)
-from photogrammetry_importer.utils.blender_animation_utils import add_animation
+from photogrammetry_importer.utils.blender_animation_utils import add_transformation_animation
 from photogrammetry_importer.utils.blender_point_utils import add_points_as_mesh
 
 class PointImportProperties():
@@ -73,7 +73,7 @@ class PointImportProperties():
                 self.particle_overwrite_color) 
 
             if transformations_sorted is not None:
-                add_animation(
+                add_transformation_animation(
                     self,
                     point_cloud_obj_name,
                     transformations_sorted, 

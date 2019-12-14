@@ -51,13 +51,13 @@ def set_fcurve_interpolation(some_obj, interpolation_type='LINEAR'):
             kf.interpolation = interpolation_type
 
 
-def add_animation(  op,
-                    animated_obj_name,
-                    transformations_sorted, 
-                    number_interpolation_frames, 
-                    interpolation_type=None,
-                    remove_rotation_discontinuities=True):
-    op.report({'INFO'}, 'Adding Animation: ...')
+def add_transformation_animation(   op,
+                                    animated_obj_name,
+                                    transformations_sorted, 
+                                    number_interpolation_frames, 
+                                    interpolation_type=None,
+                                    remove_rotation_discontinuities=True):
+    op.report({'INFO'}, 'Adding transformation animation: ...')
 
     scn = bpy.context.scene
     scn.frame_start = 0
@@ -102,3 +102,40 @@ def add_animation(  op,
                 animated_obj,
                 interpolation_type)
 
+    op.report({'INFO'}, 'Adding transformation animation: Done')           
+
+
+def add_camera_intrinsics_animation(op,
+                                    animated_obj_name,
+                                    intrinsics_sorted, 
+                                    number_interpolation_frames):
+
+    op.report({'INFO'}, 'Adding camera intrinsic parameter animation: ...')
+
+    step_size = number_interpolation_frames + 1
+    animated_obj = bpy.data.objects[animated_obj_name]
+
+    for index, intrinsics in enumerate(intrinsics_sorted):
+        current_keyframe_index = index * step_size
+
+        if intrinsics is None:
+            continue 
+
+        animated_obj.data.angle = intrinsics.field_of_view    
+        animated_obj.data.shift_x = intrinsics.shift_x
+        animated_obj.data.shift_y = intrinsics.shift_y
+
+        animated_obj.data.keyframe_insert(
+            data_path="lens", 
+            index=-1, 
+            frame=current_keyframe_index)
+        animated_obj.data.keyframe_insert(
+            data_path="shift_x", 
+            index=-1, 
+            frame=current_keyframe_index)
+        animated_obj.data.keyframe_insert(
+            data_path="shift_y", 
+            index=-1, 
+            frame=current_keyframe_index)
+
+    op.report({'INFO'}, 'Adding camera intrinsic parameter animation: Done')

@@ -2,16 +2,48 @@ import os
 import math
 import bpy
 from mathutils import Vector
+from collections import namedtuple
 
 from photogrammetry_importer.utils.blender_utils import compute_camera_matrix_world
 from photogrammetry_importer.utils.blender_utils import add_collection
 from photogrammetry_importer.utils.blender_utils import add_obj
-from photogrammetry_importer.utils.blender_animation_utils import add_animation
+from photogrammetry_importer.utils.blender_animation_utils import add_transformation_animation
+from photogrammetry_importer.utils.blender_animation_utils import add_camera_intrinsics_animation
 from photogrammetry_importer.utils.stop_watch import StopWatch
 
 class DummyCamera(object):
     def __init__(self):
         self.file_name = None
+
+CameraIntrinsics = namedtuple('CameraIntrinsics', 'field_of_view shift_x shift_y')
+
+def compute_shift(camera, relativ_to_largest_extend):
+    # https://blender.stackexchange.com/questions/58235/what-are-the-units-for-camera-shift
+    # This is measured however in relation to the largest dimension of the rendered frame size. 
+    # So lets say you are rendering in Full HD, that is 1920 x 1080 pixel image; 
+    # a frame shift if 1 unit will shift exactly 1920 pixels in any direction, that is up/down/left/right.
+    
+    width = camera.width 
+    height = camera.height 
+    p_x, p_y = camera.get_principal_point()
+
+    if relativ_to_largest_extend:
+        width_denominator = max(width, height)
+        height_denominator = max(width, height)
+    else:
+        width_denominator = width
+        height_denominator = height
+
+    # Note, that the direction of the y coordinate is inverted 
+    # (Difference between computer vision vs computer graphics coordinate system)
+    shift_x = float((width / 2.0 - p_x) / float(width_denominator))
+    shift_y = -float((height / 2.0 - p_y) / float(height_denominator))
+
+    # op.report({'INFO'}, 'shift_x: ' + str(shift_x))
+    # op.report({'INFO'}, 'shift_y: ' + str(shift_y))
+
+    return shift_x, shift_y
+
 
 def add_single_camera(op, camera_name, camera):
     # Add camera:
@@ -25,21 +57,10 @@ def add_single_camera(op, camera_name, camera):
         focal_length = camera.get_focal_length()
         
     #  Adjust field of view
-    assert camera.width is not None and camera.height is not None
-    bcamera.angle = math.atan(max(camera.width, camera.height) / (focal_length * 2.0)) * 2.0
-   
-    # Adjust principal point
-    p_x, p_y = camera.get_principal_point()
+    bcamera.angle = camera.get_field_of_view()
     
-    # https://blender.stackexchange.com/questions/58235/what-are-the-units-for-camera-shift
-    # This is measured however in relation to the largest dimension of the rendered frame size. 
-    # So lets say you are rendering in Full HD, that is 1920 x 1080 pixel image; 
-    # a frame shift if 1 unit will shift exactly 1920 pixels in any direction, that is up/down/left/right.
-    max_extent = max(camera.width, camera.height)
-    bcamera.shift_x = (camera.width / 2.0 - p_x) / float(max_extent)
-     # Note, that the direction of the y coordinate is inverted 
-    # (Difference between computer vision vs computer graphics coordinate system)
-    bcamera.shift_y = -(camera.height / 2.0 - p_y) / float(max_extent)
+    bcamera.shift_x, bcamera.shift_y = compute_shift(
+        camera, relativ_to_largest_extend=True)
 
     # op.report({'INFO'}, 'focal_length: ' + str(focal_length))
     # op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
@@ -92,27 +113,43 @@ def add_camera_animation(op,
         cameras = enhance_cameras_with_dummy_cameras(
             op, cameras, path_to_images)
 
-    op.report({'INFO'}, 'Using the first reconstructed camera as template for the animated camera.')
+    # Using the first reconstructed camera as template for the animated camera. The values
+    # are adjusted with add_transformation_animation() and add_camera_intrinsics_animation().
     some_cam = cameras[0]
     bcamera = add_single_camera(op, "Animated Camera", some_cam)
     cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)
     cameras_sorted = sorted(cameras, key=lambda camera: os.path.basename(camera.file_name))
 
     transformations_sorted = []
+    camera_intrinsics_sorted = []
     for camera in cameras_sorted:
         if isinstance(camera, DummyCamera):
             matrix_world = None
+            camera_intrinsics = None
         else:
             matrix_world = compute_camera_matrix_world(camera)
+            shift_x, shift_y = compute_shift(
+                camera, relativ_to_largest_extend=True)
+            camera_intrinsics = CameraIntrinsics(
+                camera.get_field_of_view(), shift_x, shift_y)
+        
         transformations_sorted.append(matrix_world)
+        camera_intrinsics_sorted.append(camera_intrinsics)
 
-    add_animation(
+    add_transformation_animation(
         op=op,
         animated_obj_name=cam_obj.name,
         transformations_sorted=transformations_sorted, 
         number_interpolation_frames=number_interpolation_frames, 
         interpolation_type=interpolation_type,
         remove_rotation_discontinuities=remove_rotation_discontinuities)
+
+    add_camera_intrinsics_animation(
+        op=op,
+        animated_obj_name=cam_obj.name,
+        intrinsics_sorted=camera_intrinsics_sorted, 
+        number_interpolation_frames=number_interpolation_frames
+    )
 
 def add_cameras(op, 
                 cameras,
@@ -205,17 +242,12 @@ def add_cameras(op,
                 camera_image_plane_pair_collection)
             
             image_plane_name = image_file_name_stem + '_image_plane'
-            px, py = camera.get_principal_point()
 
             # do not add image planes by default, this is slow !
             image_plane_obj = add_camera_image_plane(
                 matrix_world, 
                 blender_image, 
-                camera.width, 
-                camera.height, 
-                camera.get_focal_length(), 
-                px=px,
-                py=py,
+                camera=camera,
                 name=image_plane_name,
                 transparency=image_plane_transparency,
                 add_image_plane_emission=add_image_plane_emission,
@@ -230,11 +262,7 @@ def add_cameras(op,
 
 def add_camera_image_plane(matrix_world, 
                            blender_image, 
-                           width, 
-                           height, 
-                           focal_length, 
-                           px, 
-                           py, 
+                           camera,
                            name, 
                            transparency, 
                            add_image_plane_emission, 
@@ -245,6 +273,11 @@ def add_camera_image_plane(matrix_world,
     """
     # op.report({'INFO'}, 'add_camera_image_plane: ...')
     # op.report({'INFO'}, 'name: ' + str(name))
+
+    width = camera.width 
+    height = camera.height 
+    focal_length = camera.get_focal_length() 
+    p_x, p_y = camera.get_principal_point()
 
     assert width is not None and height is not None
 
@@ -262,16 +295,11 @@ def add_camera_image_plane(matrix_world,
     view_dir = -Vector((0, 0, 1)) * plane_distance
     plane_center = view_dir
     
-    relative_shift_x = float((width / 2.0 - px) / float(width))
-    # Note, that the direction of the y coordinate is inverted 
-    # (Difference between computer vision vs computer graphics coordinate system)
-    relative_shift_y = -float((height / 2.0 - py) / float(height))
-    
-    # op.report({'INFO'}, 'relative_shift_x: ' + str(relative_shift_x))
-    # op.report({'INFO'}, 'relative_shift_y:' + str(relative_shift_y))
+    shift_x, shift_y = compute_shift(
+        camera, relativ_to_largest_extend=False)
 
     corners = ((-0.5, -0.5), (+0.5, -0.5), (+0.5, +0.5), (-0.5, +0.5))
-    points = [(plane_center + (c[0] + relative_shift_x) * right + (c[1] + relative_shift_y) * up)[0:3] for c in corners]
+    points = [(plane_center + (c[0] + shift_x) * right + (c[1] + shift_y) * up)[0:3] for c in corners]
     mesh.from_pydata(points, [], [[0, 1, 2, 3]])
     mesh.uv_layers.new()
     
