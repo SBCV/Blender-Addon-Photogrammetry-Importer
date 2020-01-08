@@ -127,7 +127,7 @@ class ExportNVM(bpy.types.Operator, ExportHelper):
     """Export a NVM file"""
     bl_idname = "export_scene.nvm"
     bl_label = "Export NVM"
-    bl_options = {'UNDO'}
+    bl_options = {'PRESET'}
     
     directory: StringProperty()
 

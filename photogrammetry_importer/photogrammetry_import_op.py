@@ -55,7 +55,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
     """Blender import operator for colmap model folders. """
     bl_idname = "import_scene.colmap_model"
     bl_label = "Import Colmap Model Folder"
-    bl_options = {'REGISTER'}
+    bl_options = {'PRESET'}
 
     directory = StringProperty()
     #filter_folder = BoolProperty(default=True, options={'HIDDEN'})
@@ -109,7 +109,7 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
     """Blender import operator for NVM files. """
     bl_idname = "import_scene.nvm"
     bl_label = "Import NVM"
-    bl_options = {'UNDO'}
+    bl_options = {'PRESET'}
 
     filepath: StringProperty(
         name="NVM File Path",
@@ -153,7 +153,7 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
     """Blender import operator for OpenMVG JSON files. """
     bl_idname = "import_scene.openmvg_json"
     bl_label = "Import OpenMVG JSON"
-    bl_options = {'UNDO'}
+    bl_options = {'PRESET'}
 
     filepath: StringProperty(
         name="OpenMVG JSON File Path",
@@ -199,7 +199,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
     """Blender import operator for OpenMVG JSON files. """
     bl_idname = "import_scene.meshroom_sfm_json"
     bl_label = "Import Meshroom SfM/JSON"
-    bl_options = {'UNDO'}
+    bl_options = {'PRESET'}
 
     filepath: StringProperty(
         name="Meshroom JSON File Path",
@@ -245,7 +245,7 @@ class ImportPLY(PointImportProperties, TransformationImportProperties, bpy.types
     """Blender import operator for PLY files. """
     bl_idname = "import_scene.ply"
     bl_label = "Import PLY"
-    bl_options = {'UNDO'}
+    bl_options = {'PRESET'}
 
     filepath: StringProperty(
         name="PLY File Path",
