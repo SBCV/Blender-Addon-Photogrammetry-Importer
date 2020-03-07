@@ -67,7 +67,7 @@ def parse_camera_param_list(cam):
 class ColmapFileHandler(object):
 
     @staticmethod
-    def convert_cameras(id_to_col_cameras, id_to_col_images, op):
+    def convert_cameras(id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, op):
         # CameraModel = collections.namedtuple(
         #   "CameraModel", ["model_id", "model_name", "num_params"])
         # Camera = collections.namedtuple(
@@ -81,7 +81,10 @@ class ColmapFileHandler(object):
             current_camera.id = col_image.id
             current_camera.set_quaternion(col_image.qvec)
             current_camera.set_camera_translation_vector_after_rotation(col_image.tvec)
-            current_camera.file_name = col_image.name
+
+            current_camera.image_fp_type = image_fp_type
+            current_camera.image_dp = image_dp
+            current_camera._relative_fp = col_image.name
             
             camera_model = id_to_col_cameras[col_image.camera_id]
     
@@ -122,7 +125,7 @@ class ColmapFileHandler(object):
         return points3D
 
     @staticmethod
-    def parse_colmap_model_folder(model_idp, op):
+    def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, op):
 
         op.report({'INFO'}, 'Parse Colmap model folder: ' + model_idp)
 
@@ -143,7 +146,7 @@ class ColmapFileHandler(object):
         op.report({'INFO'}, 'id_to_col_cameras: ' + str(id_to_col_cameras))
 
         cameras = ColmapFileHandler.convert_cameras(
-            id_to_col_cameras, id_to_col_images, op)
+            id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, op)
 
         points3D = ColmapFileHandler.convert_points(
             id_to_col_points3D)

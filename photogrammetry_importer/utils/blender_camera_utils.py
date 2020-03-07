@@ -4,6 +4,9 @@ import bpy
 from mathutils import Vector
 from collections import namedtuple
 
+from photogrammetry_importer.camera import Camera
+
+from photogrammetry_importer.utils.os_utils import get_image_file_paths_in_dir
 from photogrammetry_importer.utils.blender_utils import compute_camera_matrix_world
 from photogrammetry_importer.utils.blender_utils import add_collection
 from photogrammetry_importer.utils.blender_utils import add_obj
@@ -13,7 +16,10 @@ from photogrammetry_importer.utils.stop_watch import StopWatch
 
 class DummyCamera(object):
     def __init__(self):
-        self.file_name = None
+        self._relative_fp = None
+
+    def get_relative_fp(self):
+        return self._relative_fp
 
 CameraIntrinsics = namedtuple('CameraIntrinsics', 'field_of_view shift_x shift_y')
 
@@ -71,27 +77,24 @@ def add_single_camera(op, camera_name, camera):
 
     return bcamera
 
-def is_image_file(file_path):
-    img_ext_list = ['.rgb', '.gif', '.pbm', '.pgm', '.ppm', '.pnm', '.tiff', '.tif', 
-                    '.rast', '.xbm', '.jpg', '.jpeg', '.png', '.bmp', '.png',
-                    '.webp', '.exr', '.hdr', '.svg']
-    return os.path.splitext(file_path)[1].lower() in img_ext_list
-
-def enhance_cameras_with_dummy_cameras(op, cameras, path_to_images):
+def enhance_cameras_with_dummy_cameras(op, cameras, image_dp, image_fp_type):
     
-    rec_image_names = [os.path.basename(camera.file_name) for camera in cameras]
-    file_paths = [os.path.join(path_to_images, fn) for fn in os.listdir(path_to_images) 
-                  if os.path.isfile(os.path.join(path_to_images, fn))] 
-    all_image_paths = [
-        image_path for image_path in file_paths
-        if is_image_file(image_path)]
-    non_rec_image_paths = [
-        image_path for image_path in all_image_paths 
-        if os.path.basename(image_path) not in rec_image_names]
+    rec_image_relative_fp = [camera.get_relative_fp() for camera in cameras]
 
-    for non_rec_image_path in non_rec_image_paths:
+    all_image_relative_paths = get_image_file_paths_in_dir(
+        image_dp,
+        base_name_only=image_fp_type == Camera.IMAGE_FP_TYPE_NAME,
+        relative_path_only=image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE,
+        sort_result=True,
+        recursive=True)
+
+    non_rec_image_relative_paths = [
+        image_path for image_path in all_image_relative_paths 
+        if os.path.basename(image_path) not in rec_image_relative_fp]
+
+    for non_rec_image_path in non_rec_image_relative_paths:
         cam = DummyCamera()
-        cam.file_name = non_rec_image_path
+        cam._relative_fp = non_rec_image_path
         cameras.append(cam)
 
     return cameras
@@ -103,7 +106,8 @@ def add_camera_animation(op,
                         interpolation_type,
                         consider_missing_cameras_during_animation,
                         remove_rotation_discontinuities,
-                        path_to_images):
+                        image_dp,
+                        image_fp_type):
     op.report({'INFO'}, 'Adding Camera Animation: ...')
 
     if len(cameras) == 0:
@@ -111,14 +115,14 @@ def add_camera_animation(op,
 
     if consider_missing_cameras_during_animation:
         cameras = enhance_cameras_with_dummy_cameras(
-            op, cameras, path_to_images)
+            op, cameras, image_dp, image_fp_type)
 
     # Using the first reconstructed camera as template for the animated camera. The values
     # are adjusted with add_transformation_animation() and add_camera_intrinsics_animation().
     some_cam = cameras[0]
     bcamera = add_single_camera(op, "Animated Camera", some_cam)
     cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)
-    cameras_sorted = sorted(cameras, key=lambda camera: os.path.basename(camera.file_name))
+    cameras_sorted = sorted(cameras, key=lambda camera: camera.get_relative_fp())
 
     transformations_sorted = []
     camera_intrinsics_sorted = []
@@ -154,7 +158,7 @@ def add_camera_animation(op,
 def add_cameras(op, 
                 cameras,
                 parent_collection,
-                path_to_images=None,
+                image_dp=None,
                 add_background_images=False,
                 add_image_planes=False,
                 convert_camera_coordinate_system=True,
@@ -169,7 +173,7 @@ def add_cameras(op,
     ======== Make sure to enable TEXTURE SHADING in the 3D view to make the images visible ========
 
     :param cameras:
-    :param path_to_images:
+    :param image_dp:
     :param add_image_planes:
     :param convert_camera_coordinate_system:
     :param camera_collection_name:
@@ -198,8 +202,8 @@ def add_cameras(op,
 
         # camera_name = "Camera %d" % index     # original code
         # Replace the camera name so it matches the image name (without extension)
-        image_file_name_stem = os.path.splitext(os.path.basename(camera.file_name))[0]
-        camera_name = image_file_name_stem + '_cam'
+        blender_image_name_stem = camera.get_blender_obj_gui_str()
+        camera_name = blender_image_name_stem + '_cam'
         bcamera = add_single_camera(op, camera_name, camera)
         camera_object = add_obj(bcamera, camera_name, camera_collection)
         matrix_world = compute_camera_matrix_world(camera)
@@ -209,16 +213,10 @@ def add_cameras(op,
         if not add_image_planes and not add_background_images:
             continue 
 
-        use_original_image = True
-        if camera.undistorted_file_name is not None:
-            path_to_image = os.path.join(
-                path_to_images, os.path.basename(camera.undistorted_file_name))
-            if os.path.isfile(path_to_image):
-                use_original_image = False
-
-        if use_original_image:
-            path_to_image = os.path.join(
-                path_to_images, os.path.basename(camera.file_name))
+        if camera.has_undistorted_absolute_fp():
+            path_to_image = camera.get_undistored_absolute_fp()
+        else:
+            path_to_image = camera.get_absolute_fp()
 
         if not os.path.isfile(path_to_image):
             continue
@@ -238,10 +236,10 @@ def add_cameras(op,
 
             # Group image plane and camera:
             camera_image_plane_pair_collection_current = add_collection(
-                "Camera Image Plane Pair Collection %s" % image_file_name_stem,
+                "Camera Image Plane Pair Collection %s" % blender_image_name_stem,
                 camera_image_plane_pair_collection)
             
-            image_plane_name = image_file_name_stem + '_image_plane'
+            image_plane_name = blender_image_name_stem + '_image_plane'
 
             # do not add image planes by default, this is slow !
             image_plane_obj = add_camera_image_plane(

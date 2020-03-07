@@ -8,7 +8,7 @@ from photogrammetry_importer.point import Point
 class OpenMVGJSONFileHandler:
 
     @staticmethod
-    def parse_cameras(json_data, op):
+    def parse_cameras(json_data, image_dp, image_fp_type, op):
 
         views = {item['key']:item for item in json_data['views']}
         intrinsics = {item['key']:item for item in json_data['intrinsics']}
@@ -35,7 +35,12 @@ class OpenMVGJSONFileHandler:
 
                 camera = Camera()
 
-                camera.file_name = view_data['filename']
+                camera.image_fp_type = image_fp_type
+                camera.image_dp = image_dp
+                camera._relative_fp = os.path.join(
+                    view_data['local_path'], view_data['filename'])
+                camera._absolute_fp = os.path.join(
+                    json_data['root_path'], view_data['local_path'], view_data['filename'])
                 camera.width = view_data['width']
                 camera.height = view_data['height']
                 id_intrinsic = view_data['id_intrinsic']
@@ -87,11 +92,11 @@ class OpenMVGJSONFileHandler:
 
 
     @staticmethod
-    def parse_points(json_data, op, path_to_input_files=None, view_index_to_file_name=None):
+    def parse_points(json_data, op, view_index_to_absolute_fp=None):
 
         try:
             from PIL import Image
-            compute_color = (not path_to_input_files is None) and (not view_index_to_file_name is None)
+            compute_color = (not view_index_to_absolute_fp is None)
         except ImportError:
             compute_color = False
             
@@ -100,9 +105,8 @@ class OpenMVGJSONFileHandler:
         if compute_color:
             op.report({'INFO'},'Computing color information from files: ...')
             view_index_to_image = {}
-            for view_index, file_name in view_index_to_file_name.items():
-                image_path = os.path.join(path_to_input_files, file_name)
-                pil_image = Image.open(image_path)
+            for view_index, absolute_fp in view_index_to_absolute_fp.items():
+                pil_image = Image.open(absolute_fp)
                 view_index_to_image[view_index] = pil_image
 
             op.report({'INFO'},'Computing color information from files: Done')
@@ -150,7 +154,7 @@ class OpenMVGJSONFileHandler:
         return points
 
     @staticmethod
-    def parse_openmvg_file(input_openMVG_file_path, path_to_images, op):
+    def parse_openmvg_file(input_openMVG_file_path, image_dp, image_fp_type, op):
         """
         The path_to_input_files parameter is optional, if provided the returned points carry also color information
         :param input_openMVG_file_path:
@@ -162,10 +166,11 @@ class OpenMVGJSONFileHandler:
         input_file = open(input_openMVG_file_path, 'r')
         json_data = json.load(input_file)
 
-        cams = OpenMVGJSONFileHandler.parse_cameras(json_data, op)
-        view_index_to_file_name = {cam.view_index: cam.file_name for cam in cams}
+        cams = OpenMVGJSONFileHandler.parse_cameras(json_data, image_dp, image_fp_type, op)
+        view_index_to_absolute_fp = {
+            cam.view_index: cam.get_absolute_fp() for cam in cams}
         points = OpenMVGJSONFileHandler.parse_points(
-            json_data, op, path_to_images, view_index_to_file_name)
+            json_data, op, view_index_to_absolute_fp)
         op.report({'INFO'},'parse_openmvg_file: Done')
         return cams, points
 

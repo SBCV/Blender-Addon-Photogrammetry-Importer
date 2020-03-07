@@ -11,6 +11,7 @@ from photogrammetry_importer.utils.blender_camera_utils import principal_points_
 from photogrammetry_importer.utils.blender_camera_utils import set_principal_point_for_cameras
 from photogrammetry_importer.utils.blender_camera_utils import add_cameras
 from photogrammetry_importer.utils.blender_camera_utils import add_camera_animation
+from photogrammetry_importer.camera import Camera
 
 class CameraImportProperties():
     """ This class encapsulates Blender UI properties that are required to visualize the reconstructed cameras correctly. """
@@ -44,7 +45,16 @@ class CameraImportProperties():
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera - only for non-panoramic cameras.", 
         default=True)
-    path_to_images: StringProperty(
+    image_fp_items = [
+        (Camera.IMAGE_FP_TYPE_NAME, "File Name", "", 1),
+        (Camera.IMAGE_FP_TYPE_RELATIVE, "Relative Path", "", 2),
+        (Camera.IMAGE_FP_TYPE_ABSOLUTE, "Absolute Path", "", 3)
+        ]
+    image_fp_type: EnumProperty(
+        name="Image File Path Type",
+        description = "Choose how image file paths are treated, i.e. absolute path, relative path or file name.", 
+        items=image_fp_items)
+    image_dp: StringProperty(
         name="Image Directory",
         description =   "Assuming the reconstruction result is located in <some/path/rec.ext> or <some/path/colmap_model>. " + 
                         "The addons uses <some/path/images> (if available) or <some/path> as default image path." , 
@@ -118,7 +128,10 @@ class CameraImportProperties():
 
     def draw_camera_options(self, layout, draw_size_and_pp=False):
         camera_box = layout.box()
-        camera_box.prop(self, "path_to_images")
+
+        camera_box.prop(self, "image_fp_type")
+        if self.image_fp_type == "NAME" or self.image_fp_type == "RELATIVE":
+            camera_box.prop(self, "image_dp")
 
         if draw_size_and_pp:
             image_box = camera_box.box()
@@ -178,7 +191,7 @@ class CameraImportProperties():
                         self, 
                         cameras, 
                         parent_collection,
-                        path_to_images=self.path_to_images, 
+                        image_dp=self.image_dp, 
                         add_background_images=self.add_background_images,
                         add_image_planes=self.add_image_planes, 
                         camera_scale=self.camera_extent,
@@ -194,6 +207,7 @@ class CameraImportProperties():
                         self.interpolation_type,
                         self.consider_missing_cameras_during_animation,
                         self.remove_rotation_discontinuities,
-                        self.path_to_images)
+                        self.image_dp,
+                        self.image_fp_type)
             else:
                 return {'FINISHED'}

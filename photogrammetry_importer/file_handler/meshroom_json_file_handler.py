@@ -17,7 +17,7 @@ def get_element(data_list, id_string, query_id, op):
 class MeshroomJSONFileHandler:
 
     @staticmethod
-    def parse_cameras(json_data, op):
+    def parse_cameras(json_data, image_dp, image_fp_type, op):
 
         cams = []
         image_index_to_camera_index = {}
@@ -49,8 +49,17 @@ class MeshroomJSONFileHandler:
             corresponding_view = get_element(
                 views, "poseId", view_index, op)
 
-            camera.file_name = str(corresponding_view['path'])
-            camera.undistorted_file_name = (str(extrinsic['poseId']) + '.exr')
+            camera.image_fp_type = image_fp_type
+            camera.image_dp = image_dp
+            camera._absolute_fp = str(corresponding_view['path'])
+            camera._relative_fp = os.path.basename(str(corresponding_view['path']))
+            camera._undistorted_relative_fp = str(extrinsic['poseId']) + '.exr'
+            if image_dp is None:
+                camera._undistorted_absolute_fp = None
+            else:
+                camera._undistorted_absolute_fp = os.path.join(
+                    image_dp, camera._undistorted_relative_fp)
+                
             camera.width = int(corresponding_view['width'])
             camera.height = int(corresponding_view['height'])
             id_intrinsic = int(corresponding_view['intrinsicId'])
@@ -112,7 +121,7 @@ class MeshroomJSONFileHandler:
         return points
 
     @staticmethod
-    def parse_meshroom_file(input_meshroom_file_path, op):
+    def parse_meshroom_file(input_meshroom_file_path, image_dp, image_fp_type, op):
         """
         The path_to_input_files parameter is optional, if provided the returned points carry also color information
         :param input_meshroom_file_path:
@@ -123,7 +132,8 @@ class MeshroomJSONFileHandler:
         input_file = open(input_meshroom_file_path, 'r')
         json_data = json.load(input_file)
 
-        cams, image_index_to_camera_index = MeshroomJSONFileHandler.parse_cameras(json_data, op)
+        cams, image_index_to_camera_index = MeshroomJSONFileHandler.parse_cameras(
+            json_data, image_dp, image_fp_type, op)
         points = MeshroomJSONFileHandler.parse_points(
             json_data, image_index_to_camera_index, op)
         op.report({'INFO'},'parse_meshroom_file: Done')

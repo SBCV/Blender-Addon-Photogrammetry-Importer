@@ -2,6 +2,7 @@ __author__ = 'sebastian'
 
 import numpy as np
 import math
+import os
 
 class Camera:
     """ 
@@ -9,6 +10,10 @@ class Camera:
     intrinsic and extrinsic camera parameters as well as image information. 
     """
     panoramic_type_equirectangular = "EQUIRECTANGULAR" 
+
+    IMAGE_FP_TYPE_NAME = "NAME"
+    IMAGE_FP_TYPE_RELATIVE = "RELATIVE"
+    IMAGE_FP_TYPE_ABSOLUTE = "ABSOLUTE"
 
     def __init__(self):
         self._center = np.array([0, 0, 0], dtype=float)              # C = -R^T t
@@ -22,8 +27,12 @@ class Camera:
         
         self._calibration_mat = np.zeros((3, 3), dtype=float)
         
-        self.file_name = None
-        self.undistorted_file_name = None
+        self.image_fp_type = None
+        self.image_dp = None
+        self._relative_fp = None
+        self._absolute_fp = None
+        self._undistorted_relative_fp = None
+        self._undistorted_absolute_fp = None
         self.width = None
         self.height = None
         self.panoramic_type = None
@@ -34,7 +43,84 @@ class Camera:
         return self.__str__()
 
     def __str__(self):
-        return str('Camera: ' + self.file_name + ' ' + str(self._center) + ' ' + str(self.normal))
+        return str('Camera: ' + self._relative_fp + ' ' + str(self._center) + ' ' + str(self.normal))
+
+    def get_file_name(self):
+        return os.path.basename(self.get_absolute_fp())
+
+    def get_relative_fp(self):
+        return self._get_relative_fp(
+            self._relative_fp, self._absolute_fp)
+
+    def get_undistorted_relative_fp(self):
+        return self._get_relative_fp(
+            self._undistorted_relative_fp, self._undistorted_absolute_fp)
+
+    def _get_relative_fp(self, relative_fp, absolute_fp):
+        if self.image_fp_type == Camera.IMAGE_FP_TYPE_NAME:
+            assert relative_fp is not None
+            return os.path.basename(relative_fp)
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE:
+            assert relative_fp is not None
+            return relative_fp
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
+            assert absolute_fp is not None
+            return absolute_fp 
+        else:
+            assert FALSE
+
+    def get_absolute_fp(self):
+        return self._get_absolute_fp(
+            self._relative_fp, self._absolute_fp)
+
+    def get_undistored_absolute_fp(self):
+        if self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
+            assert False # Not supported for undistorted images
+        return self._get_absolute_fp(
+            self._undistorted_relative_fp, self._undistorted_absolute_fp)    
+
+    def _get_absolute_fp(self, relative_fp, absolute_fp):
+        if self.image_fp_type == Camera.IMAGE_FP_TYPE_NAME:
+            assert self.image_dp is not None 
+            assert relative_fp is not None
+            return os.path.join(self.image_dp, os.path.basename(relative_fp))
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE:
+            assert self.image_dp is not None 
+            assert relative_fp is not None
+            return os.path.join(self.image_dp, relative_fp)
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
+            assert absolute_fp is not None
+            return absolute_fp 
+        else:
+            assert FALSE
+
+    def has_undistorted_absolute_fp(self):
+        requirements = False
+        if self.image_fp_type == Camera.IMAGE_FP_TYPE_NAME:
+            requirements = (self.image_dp is not None) and (self._undistorted_relative_fp is not None)
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE:
+            requirements = (self.image_dp is not None) and (self._undistorted_relative_fp is not None)
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
+            requirements = (self._undistorted_absolute_fp is not None)
+
+        has_fp = False
+        if requirements:
+            fp = self._get_absolute_fp(
+                self._undistorted_relative_fp, 
+                self._undistorted_absolute_fp) 
+            if os.path.isfile(fp):
+                has_fp = True
+        return has_fp
+
+    def get_blender_obj_gui_str(self):
+        # Replace special characters
+        #image_fp_clean = image_fp.replace("/", "_").replace("\\", "_").replace(":", "_")
+        image_fp_stem = os.path.splitext(self.get_relative_fp())[0]
+        # Blender supports only object names with length 63
+        # However, we need also space for additional suffixes
+        image_fp_suffix = image_fp_stem[-40:]
+        return image_fp_suffix 
+        
 
     def set_calibration(self, calibration_mat, radial_distortion):
         self._calibration_mat = np.asarray(calibration_mat, dtype=float)

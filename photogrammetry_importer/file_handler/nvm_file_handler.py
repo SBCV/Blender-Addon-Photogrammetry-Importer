@@ -14,11 +14,11 @@ from photogrammetry_importer.point import Point
 class NVMFileHandler(object):
 
     @staticmethod
-    def parse_camera_image_files(cameras, path_to_images, default_width, default_height, op):
-        op.report({'INFO'}, 'parse_camera_image_files: ' + path_to_images)
+    def parse_camera_image_files(cameras, default_width, default_height, op):
+        op.report({'INFO'}, 'parse_camera_image_files: ')
         success = True 
         for camera in cameras:
-            image_path = os.path.join(path_to_images, camera.file_name)
+            image_path = camera.get_absolute_fp()
             if PILImage is not None and os.path.isfile(image_path):
                 # this does NOT load the data into memory -> should be fast!
                 image = PILImage.open(image_path)
@@ -49,7 +49,7 @@ class NVMFileHandler(object):
 
 
     @staticmethod
-    def _parse_cameras(input_file, num_cameras, camera_calibration_matrix, op):
+    def _parse_cameras(input_file, num_cameras, camera_calibration_matrix, image_dp, image_fp_type, op):
 
         """
         VisualSFM CAMERA coordinate system is the standard CAMERA coordinate system in computer vision (not the same
@@ -73,7 +73,7 @@ class NVMFileHandler(object):
             # From the docs:
             # <Camera> = <File name> <focal length> <quaternion WXYZ> <camera center> <radial distortion> 0
             line_values = line.split()
-            file_name = os.path.basename(line_values[0])
+            relative_path = line_values[0].replace('/', os.sep)
             focal_length = float(line_values[1])
 
             quaternion_w = float(line_values[2])
@@ -122,7 +122,10 @@ class NVMFileHandler(object):
             current_camera.set_calibration(camera_calibration_matrix, radial_distortion=radial_distortion)
             # op.report({'INFO'}, 'Calibration mat:')
             # op.report({'INFO'}, str(camera_calibration_matrix))
-            current_camera.file_name = file_name
+
+            current_camera.image_fp_type = image_fp_type
+            current_camera.image_dp = image_dp
+            current_camera._relative_fp = relative_path
             current_camera.id = i
             cameras.append(current_camera)
         # op.report({'INFO'}, '_parse_cameras: Done')
@@ -166,7 +169,7 @@ class NVMFileHandler(object):
         return calib_mat
 
     @staticmethod
-    def parse_nvm_file(input_visual_fsm_file_name, op):
+    def parse_nvm_file(input_visual_fsm_file_name, image_dp, image_fp_type, op):
 
         op.report({'INFO'}, 'Parse NVM file: ' + input_visual_fsm_file_name)
         input_file = open(input_visual_fsm_file_name, 'r')
@@ -189,7 +192,7 @@ class NVMFileHandler(object):
         print('Amount Cameras (Images in NVM file): ' + str(amount_cameras))
 
         cameras = NVMFileHandler._parse_cameras(
-            input_file, amount_cameras, calibration_matrix, op)
+            input_file, amount_cameras, calibration_matrix, image_dp, image_fp_type, op)
         current_line = (input_file.readline()).rstrip()
         assert current_line == ''
         current_line = (input_file.readline()).rstrip()
@@ -265,7 +268,7 @@ class NVMFileHandler(object):
             #quaternion = TransformationFunctions.rotation_matrix_to_quaternion(camera.rotation_mat)
             quaternion = camera.get_quaternion()
 
-            current_line = camera.file_name
+            current_line = camera._relative_fp
             current_line += '\t' + str(camera.get_calibration_mat()[0][0])
             current_line += ' ' + ' '.join(list(map(str, quaternion)))
             current_line += ' ' + ' '.join(list(map(str, camera.get_camera_center())))

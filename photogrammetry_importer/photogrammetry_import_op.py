@@ -41,7 +41,9 @@ from bpy_extras.io_utils import (ImportHelper,
 
 
 def get_default_image_path(reconstruction_fp, image_dp):
-    if image_dp == '':
+    if image_dp is None:
+        return None
+    elif image_dp == '':
         image_default_same_dp = os.path.dirname(reconstruction_fp)
         image_default_sub_dp = os.path.join(image_default_same_dp, 'images')
         if os.path.isdir(image_default_sub_dp):
@@ -57,15 +59,8 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
     bl_label = "Import Colmap Model Folder"
     bl_options = {'PRESET'}
 
-    directory = StringProperty()
-    #filter_folder = BoolProperty(default=True, options={'HIDDEN'})
-
-    # The following properties of CameraImportProperties are not required, 
-    # since the corresponding data is always part of the colmap reconstruction result
-    default_width: IntProperty(options={'HIDDEN'})
-    default_height: IntProperty(options={'HIDDEN'})
-    default_pp_x: FloatProperty(options={'HIDDEN'})
-    default_pp_y: FloatProperty(options={'HIDDEN'})
+    directory : StringProperty()
+    #filter_folder : BoolProperty(default=True, options={'HIDDEN'})
 
     def execute(self, context):
 
@@ -74,11 +69,12 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
         path = os.path.dirname(path)
         self.report({'INFO'}, 'path: ' + str(path))
 
-        self.path_to_images = get_default_image_path(
-            path, self.path_to_images)
-        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
+        self.image_dp = get_default_image_path(
+            path, self.image_dp)
+        self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
-        cameras, points = ColmapFileHandler.parse_colmap_model_folder(path, self)
+        cameras, points = ColmapFileHandler.parse_colmap_model_folder(
+            path, self.image_dp, self.image_fp_type, self)
 
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
@@ -120,7 +116,7 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
     def enhance_camera_with_images(self, cameras):
         # Overwrites CameraImportProperties.enhance_camera_with_images()
         cameras, success = NVMFileHandler.parse_camera_image_files(
-        cameras, self.path_to_images, self.default_width, self.default_height, self)
+            cameras, self.default_width, self.default_height, self)
         return cameras, success
 
     def execute(self, context):
@@ -128,11 +124,12 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
         path = os.path.join(self.directory, self.filepath)
         self.report({'INFO'}, 'path: ' + str(path))
 
-        self.path_to_images = get_default_image_path(
-            path, self.path_to_images)
-        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
+        self.image_dp = get_default_image_path(
+            path, self.image_dp)
+        self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
 
-        cameras, points = NVMFileHandler.parse_nvm_file(path, self)
+        cameras, points = NVMFileHandler.parse_nvm_file(
+            path, self.image_dp, self.image_fp_type, self)
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
         
@@ -161,24 +158,17 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
     directory: StringProperty()
     filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
 
-    # The following properties of CameraImportProperties are not required, 
-    # since the corresponding data is always part of the openmvg reconstruction result
-    default_width: IntProperty(options={'HIDDEN'})
-    default_height: IntProperty(options={'HIDDEN'})
-    default_pp_x: FloatProperty(options={'HIDDEN'})
-    default_pp_y: FloatProperty(options={'HIDDEN'})
-
     def execute(self, context):
 
         path = os.path.join(self.directory, self.filepath)
         self.report({'INFO'}, 'path: ' + str(path))
  
-        self.path_to_images = get_default_image_path(
-            path, self.path_to_images)
-        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
+        self.image_dp = get_default_image_path(
+            path, self.image_dp)
+        self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
         cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
-            path, self.path_to_images, self)
+            path, self.image_dp, self.image_fp_type, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
@@ -207,24 +197,17 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
     directory: StringProperty()
     filter_glob: StringProperty(default="*sfm;*.json", options={'HIDDEN'})
 
-    # The following properties of CameraImportProperties are not required, 
-    # since the corresponding data is always part of the openmvg reconstruction result
-    default_width: IntProperty(options={'HIDDEN'})
-    default_height: IntProperty(options={'HIDDEN'})
-    default_pp_x: FloatProperty(options={'HIDDEN'})
-    default_pp_y: FloatProperty(options={'HIDDEN'})
-
     def execute(self, context):
 
         path = os.path.join(self.directory, self.filepath)
         self.report({'INFO'}, 'path: ' + str(path))
 
-        self.path_to_images = get_default_image_path(
-            path, self.path_to_images)
-        self.report({'INFO'}, 'path_to_images: ' + str(self.path_to_images))
+        self.image_dp = get_default_image_path(
+            path, self.image_dp)
+        self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
         cameras, points = MeshroomJSONFileHandler.parse_meshroom_file(
-            path, self)
+            path, self.image_dp, self.image_fp_type, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
