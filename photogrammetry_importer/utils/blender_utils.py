@@ -48,6 +48,11 @@ def compute_camera_matrix_world(camera, convert_coordinate_system=True):
         translation_vec = invert_y_and_z_axis(translation_vec)
     return get_world_matrix_from_translation_vec(translation_vec, rotation_mat)
 
+def add_empty(empty_name):
+    empty_obj = bpy.data.objects.new(empty_name, None)
+    bpy.context.collection.objects.link(empty_obj)
+    return empty_obj
+
 def add_obj(data, obj_name, collection=None):
     
     if collection is None:

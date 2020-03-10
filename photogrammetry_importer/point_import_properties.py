@@ -10,9 +10,13 @@ class PointImportProperties():
         name="Import Points",
         description = "Import Points", 
         default=True)
+    draw_points_with_gpu : BoolProperty(
+       name="Draw Points in the 3D View with OpenGL.",
+        description="Draw Points in the 3D View. Allows to visualize point clouds with many elements. These are not visible in eevee/cycles renderings.",
+        default=False)
     add_points_as_particle_system: BoolProperty(
         name="Add Points as Particle System",
-        description="Use a particle system to represent vertex positions with objects",
+        description="Use a particle system to represent vertex positions with objects. Can be rendered with eevee/cycles.",
         default=True)
     mesh_items = [
         ("CUBE", "Cube", "", 1),
@@ -49,6 +53,7 @@ class PointImportProperties():
         point_box.prop(self, "import_points")
         if self.import_points:
             particle_box = point_box.box()
+            particle_box.prop(self, "draw_points_with_gpu")
             particle_box.prop(self, "add_points_as_particle_system")
             if self.add_points_as_particle_system:
                 particle_box.prop(self, "mesh_type")
@@ -61,6 +66,11 @@ class PointImportProperties():
 
     def import_photogrammetry_points(self, points, reconstruction_collection, transformations_sorted=None):
         if self.import_points:
+
+            if self.draw_points_with_gpu:
+                from photogrammetry_importer.utils.visualization_utils import draw_points
+                draw_points(self, points)
+
             point_cloud_obj_name = add_points_as_mesh(
                 self, 
                 points, 

@@ -63,6 +63,24 @@ def menu_func_import(self, context):
 def menu_func_export(self, context):
     self.layout.operator(ExportNVM.bl_idname, text="VSFM NVM Export (.nvm)")
 
+# =========================================================================
+# === Uncomment for fast debugging ===
+# from bpy.app.handlers import persistent
+# @persistent
+# def load_handler(dummy):
+#     from photogrammetry_importer.file_handler.ply_file_handler import PLYFileHandler
+#     from photogrammetry_importer.utils.visualization_utils import draw_points
+#     points = PLYFileHandler.parse_ply_file('path/to/file.ply')
+
+#     class LogOp():
+#         def report(sef, arg1, arg2):
+#             print(arg1, arg2)
+
+#     log_op = LogOp()
+#     draw_points(log_op, points)
+# =========================================================================
+
+
 def register():
     bpy.utils.register_class(ImportMeshroom)
     bpy.utils.register_class(ImportOpenMVG)
@@ -73,6 +91,9 @@ def register():
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
+
+    # === Uncomment for fast debugging ===
+    # bpy.app.handlers.load_post.append(load_handler)
 
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
     
@@ -89,6 +110,7 @@ def unregister():
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
 
     print("Unregistered {}".format(bl_info["name"]))
+
 
 if __name__ == '__main__':
     print('main called')
