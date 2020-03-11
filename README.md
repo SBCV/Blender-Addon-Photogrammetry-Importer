@@ -44,3 +44,5 @@ There is an import option that interpolates the reconstructed camera poses to co
 You can also overlay the (sparse) point cloud with the corresponding mesh - see [Usage (Import/Export)](doc/markdown/usage.md). 
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/point_cloud_mesh_overlay.jpg)
 
+Also, the addon provides an option to draw big point clouds with OpenGL to reduce computational requirements.  
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/import_result_opengl.jpg)
