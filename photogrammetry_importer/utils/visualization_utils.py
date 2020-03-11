@@ -88,7 +88,8 @@ class DrawCallBackHandler():
         colors = []
         for point in points:
             positions.append(point.coord)
-            color_with_alpha = (point.color / 255.0).tolist() + [1.0]
+            color_with_alpha = [
+                point.color[0] / 255.0, point.color[1] / 255.0, point.color[2] / 255.0, 1.0]
             colors.append(color_with_alpha)
         return positions, colors
 
