@@ -7,21 +7,13 @@ Supported libraries / data formats:
 - [x] VisualSFM reconstructions ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
 	* NVM
 - [x] Colmap reconstructions ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) 
-	* Colmap model folders (binary and txt format)
-	* NVM
-	* PLY 
+	* Colmap model folders (binary and txt format), NVM, PLY 
 - [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-	* JSON
-	* NVM
-	* PLY
+	* JSON, NVM, PLY
 - [x] Meshroom reconstructions ([https://alicevision.github.io/](https://alicevision.github.io/))
-	* JSON
-	* SfM
-	* PLY
+	* JSON, SfM, PLY
 - [x] Open3D reconstructions ([http://www.open3d.org/](http://www.open3d.org/))
-	* JSON
-	* LOG
-	* PLY
+	* JSON, LOG, PLY
 
 
 Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
