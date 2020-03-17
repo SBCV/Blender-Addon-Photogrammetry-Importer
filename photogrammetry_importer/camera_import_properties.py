@@ -27,14 +27,18 @@ class CameraImportProperties():
         name="Default Height", 
         description = "Height, which will be used used if corresponding image is not found.",
         default=-1)
+    default_focal_length: FloatProperty(
+        name="Focal length in pixel",
+        description = "Value for missing focal length in LOG (Open3D) file. ", 
+        default=float('nan'))
     default_pp_x: FloatProperty(
         name="Principal Point X Component",
-        description = "Principal Point X Component, which will be used if not contained in the NVM file. " + \
+        description = "Principal Point X Component, which will be used if not contained in the NVM (VisualSfM) / LOG (Open3D) file. " + \
                       "If no value is provided, the principal point is set to the image center.", 
         default=float('nan'))
     default_pp_y: FloatProperty(
         name="Principal Point Y Component", 
-        description = "Principal Point Y Component, which will be used if not contained in the NVM file. " + \
+        description = "Principal Point Y Component, which will be used if not contained in the NVM (VisualSfM) / LOG (Open3D) file. " + \
                       "If no value is provided, the principal point is set to the image center.", 
         default=float('nan'))
     add_background_images: BoolProperty(
@@ -126,7 +130,7 @@ class CameraImportProperties():
         description = "Initial Camera Extent (Visualization)",
         default=1)
 
-    def draw_camera_options(self, layout, draw_size_and_pp=False):
+    def draw_camera_options(self, layout, draw_size_and_pp=False, draw_focal_length=False):
         camera_box = layout.box()
 
         camera_box.prop(self, "image_fp_type")
@@ -135,6 +139,8 @@ class CameraImportProperties():
 
         if draw_size_and_pp:
             image_box = camera_box.box()
+            if draw_focal_length:
+                image_box.prop(self, "default_focal_length")
             image_box.prop(self, "default_width")
             image_box.prop(self, "default_height")
             image_box.prop(self, "default_pp_x")
@@ -162,6 +168,13 @@ class CameraImportProperties():
 
         camera_box.prop(self, "adjust_render_settings")
 
+    def enhance_camera_with_intrinsics(self, cameras):
+        # This function should be overwritten, 
+        # if the intrinsic parameters are not part of the reconstruction data
+        # (e.g. log file)
+        success = True
+        return cameras, success
+
     def enhance_camera_with_images(self, cameras):
         # This function should be overwritten, 
         # if image size is not part of the reconstruction data
@@ -172,6 +185,8 @@ class CameraImportProperties():
     def import_photogrammetry_cameras(self, cameras, parent_collection):
         if self.import_cameras or self.add_camera_motion_as_animation:
             cameras, success = self.enhance_camera_with_images(cameras)
+            if success:
+                cameras, success = self.enhance_camera_with_intrinsics(cameras)
             if success:
                 # The principal point information may be provided in the reconstruction data
                 if not principal_points_initialized(cameras):

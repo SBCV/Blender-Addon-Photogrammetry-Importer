@@ -47,6 +47,7 @@ from photogrammetry_importer.photogrammetry_import_op import ImportMeshroom
 from photogrammetry_importer.photogrammetry_import_op import ImportOpenMVG
 from photogrammetry_importer.photogrammetry_import_op import ImportColmap
 from photogrammetry_importer.photogrammetry_import_op import ImportNVM
+from photogrammetry_importer.photogrammetry_import_op import ImportOpen3D
 from photogrammetry_importer.photogrammetry_import_op import ImportPLY
 from photogrammetry_importer.photogrammetry_export_op import ExportNVM
 
@@ -58,6 +59,7 @@ def menu_func_import(self, context):
     self.layout.operator(ImportOpenMVG.bl_idname, text="OpenMVG Import (.json)")
     self.layout.operator(ImportColmap.bl_idname, text="Colmap Import (folder)")
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
+    self.layout.operator(ImportOpen3D.bl_idname, text="Open3D Import (.log/.json)")
     self.layout.operator(ImportPLY.bl_idname, text="Point Cloud PLY Import (.ply)")
     
 def menu_func_export(self, context):
@@ -80,12 +82,12 @@ def menu_func_export(self, context):
 #     draw_points(log_op, points)
 # =========================================================================
 
-
 def register():
     bpy.utils.register_class(ImportMeshroom)
     bpy.utils.register_class(ImportOpenMVG)
     bpy.utils.register_class(ImportColmap)
     bpy.utils.register_class(ImportNVM)
+    bpy.utils.register_class(ImportOpen3D)
     bpy.utils.register_class(ImportPLY)
     bpy.utils.register_class(ExportNVM)
 
@@ -103,6 +105,7 @@ def unregister():
     bpy.utils.unregister_class(ImportOpenMVG)
     bpy.utils.unregister_class(ImportColmap)
     bpy.utils.unregister_class(ImportNVM)
+    bpy.utils.unregister_class(ImportOpen3D)
     bpy.utils.unregister_class(ImportPLY)
     bpy.utils.unregister_class(ExportNVM)
 

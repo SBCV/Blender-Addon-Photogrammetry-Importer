@@ -67,7 +67,7 @@ class Camera:
             assert absolute_fp is not None
             return absolute_fp 
         else:
-            assert FALSE
+            assert False
 
     def get_absolute_fp(self):
         return self._get_absolute_fp(
@@ -92,7 +92,7 @@ class Camera:
             assert absolute_fp is not None
             return absolute_fp 
         else:
-            assert FALSE
+            assert False
 
     def has_undistorted_absolute_fp(self):
         requirements = False
@@ -138,8 +138,11 @@ class Camera:
         angle = math.atan(max(self.width, self.height) / (self.get_focal_length() * 2.0)) * 2.0
         return angle
 
+    def has_intrinsics(self):
+        return self.has_focal_length() and self.is_principal_point_initialized()
+
     def check_calibration_mat(self):
-        assert self.is_principal_point_initialized()
+        assert self.has_focal_length() and self.is_principal_point_initialized()
     
     def get_calibration_mat(self):
         self.check_calibration_mat()
@@ -182,19 +185,22 @@ class Camera:
         # we must change the rotation matrixes as well
         self._rotation_mat = Camera.quaternion_to_rotation_matrix(quaternion)
 
-    def set_rotation_mat(self, rotation_mat):
-        assert Camera.is_rotation_mat_valid(rotation_mat)
+    def set_rotation_mat(self, rotation_mat, check_rotation=True):
+        if check_rotation:
+            assert Camera.is_rotation_mat_valid(rotation_mat)
         self._rotation_mat = rotation_mat
         # we must change the quaternion as well
         self._quaternion = Camera.rotation_matrix_to_quaternion(rotation_mat)
 
-    def set_camera_center_after_rotation(self, center):
-        assert Camera.is_rotation_mat_valid(self._rotation_mat)
+    def set_camera_center_after_rotation(self, center, check_rotation=True):
+        if check_rotation:
+            assert Camera.is_rotation_mat_valid(self._rotation_mat)
         self._center = center
         self._translation_vec = - np.dot(self._rotation_mat, center)    # t = -R C
 
-    def set_camera_translation_vector_after_rotation(self, translation_vector):
-        assert Camera.is_rotation_mat_valid(self._rotation_mat)
+    def set_camera_translation_vector_after_rotation(self, translation_vector, check_rotation=True):
+        if check_rotation:
+            assert Camera.is_rotation_mat_valid(self._rotation_mat)
         self._translation_vec = translation_vector
         self._center = - np.dot(self._rotation_mat.transpose(), translation_vector) # C = -R^T t
 
@@ -210,14 +216,18 @@ class Camera:
     def get_camera_center(self):
         return self._center
     
-    def set_4x4_cam_to_world_mat(self, cam_to_world_mat):
-        self.set_rotation_mat(cam_to_world_mat[0:3, 0:3].transpose())
-        self.set_camera_center_after_rotation(cam_to_world_mat[0:3, 3])
+    def set_4x4_cam_to_world_mat(self, cam_to_world_mat, check_rotation=True):
+        self.set_rotation_mat(
+            cam_to_world_mat[0:3, 0:3].transpose(), check_rotation=check_rotation)
+        self.set_camera_center_after_rotation(
+            cam_to_world_mat[0:3, 3], check_rotation=check_rotation)
 
     @staticmethod
     def is_rotation_mat_valid(some_mat):
-        # test if rotation_mat is really a rotation matrix (i.e. det = -1 or det = 1)
-        return np.isclose(np.linalg.det(some_mat), 1) or np.isclose(np.linalg.det(some_mat), -1)
+        # Test if rotation_mat is really a rotation matrix (i.e. det = -1 or det = 1)
+        det = np.linalg.det(some_mat)
+        res = np.isclose(det, 1) or np.isclose(det, -1)
+        return res
 
     @staticmethod
     def quaternion_to_rotation_matrix(q):

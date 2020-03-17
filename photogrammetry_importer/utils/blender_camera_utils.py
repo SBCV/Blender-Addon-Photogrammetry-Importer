@@ -347,6 +347,7 @@ def set_principal_point_for_cameras(cameras, default_pp_x, default_pp_y, op):
         op.report({'WARNING'}, 'Setting principal points to default values!')
     else:
         op.report({'WARNING'}, 'Setting principal points to image centers!')
+        assert cameras[0].width is not None and cameras[0].height is not None
         default_pp_x = cameras[0].width / 2.0
         default_pp_y = cameras[0].height / 2.0
     
