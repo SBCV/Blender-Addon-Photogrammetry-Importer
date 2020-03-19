@@ -4,6 +4,8 @@ import numpy as np
 from photogrammetry_importer.point import Point
 from photogrammetry_importer.camera import Camera
 
+from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
+
 from bpy.props import (CollectionProperty,
                        StringProperty,
                        BoolProperty,
@@ -100,7 +102,8 @@ def export_selected_cameras_and_vertices_of_meshes(op):
             camera_matrix_computer_vision = get_computer_vision_camera_matrix(op, obj)
             
             cam = Camera()
-            cam.file_name = str('camera_index')
+            cam.set_relative_fp('camera_index', Camera.IMAGE_FP_TYPE_NAME)
+
             cam.set_calibration(calibration_mat, radial_distortion=0)
             cam.set_4x4_cam_to_world_mat(camera_matrix_computer_vision)
             cameras.append(cam)
@@ -110,12 +113,13 @@ def export_selected_cameras_and_vertices_of_meshes(op):
             if obj.data is not None:
                 obj_points = []
                 for vert in obj.data.vertices:
-                    coord_world = obj.matrix_world * vert.co
-                    obj_points.append(Point(coord=coord_world, 
-                                            color=[255,255,255],
-                                            measurements=[],
-                                            id=point_index,
-                                            scalars=[]))
+                    coord_world = obj.matrix_world @ vert.co
+                    obj_points.append(
+                        Point(
+                            coord=coord_world,
+                            color=[0, 255, 0],
+                            id=point_index,
+                            scalars=[]))
                                             
                     point_index += 1
                 points += obj_points
@@ -153,7 +157,6 @@ class ExportNVM(bpy.types.Operator, ExportHelper):
         for cam in cameras:            
             assert cam.get_calibration_mat() is not None
         
-        from nvm_import_export.nvm_file_handler import NVMFileHandler
         NVMFileHandler.write_nvm_file(self, paths[0], cameras, points)
                 
                  

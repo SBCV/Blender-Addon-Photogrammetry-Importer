@@ -233,7 +233,7 @@ class NVMFileHandler(object):
             #quaternion = TransformationFunctions.rotation_matrix_to_quaternion(camera.rotation_mat)
             quaternion = camera.get_quaternion()
 
-            current_line = camera._relative_fp
+            current_line = camera.get_relative_fp()
             current_line += '\t' + str(camera.get_calibration_mat()[0][0])
             current_line += ' ' + ' '.join(list(map(str, quaternion)))
             current_line += ' ' + ' '.join(list(map(str, camera.get_camera_center())))
@@ -246,14 +246,24 @@ class NVMFileHandler(object):
         nvm_content.append(str(number_points) + ' ' + os.linesep)
         print('Found ' + str(number_points) + ' object points')
 
+        num_features = 2
+        image_idx = 0
+        feature_idx = 0
+        x = 0.0
+        y = 0.0
+
         for point in points:
             # From the VSFM docs:
             # <Point>  = <XYZ> <RGB> <number of measurements> <List of Measurements>
             current_line = ' '.join(list(map(str, point.coord)))
             current_line += ' ' + ' '.join(list(map(str, point.color)))
-            current_line += ' ' + str(len(point.measurements))
-            for measurement in point.measurements:
-                current_line += ' ' + str(measurement)
+            
+            # current_line += ' ' + str(len(point.measurements))
+            # for measurement in point.measurements:
+            #     current_line += ' ' + str(measurement)
+            current_line += ' ' + str(num_features)
+            for feature in range(num_features):
+                current_line += ' ' + str(image_idx) + ' ' + str(feature_idx) + ' ' + str(x) + ' ' + str(y)
 
             nvm_content.append(current_line + ' ' + os.linesep)
 
