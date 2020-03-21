@@ -73,6 +73,9 @@ class Camera:
         else:
             assert False
 
+    def set_absolute_fp(self, absolute_fp):
+        self._absolute_fp = absolute_fp
+
     def get_absolute_fp(self):
         return self._get_absolute_fp(
             self._relative_fp, self._absolute_fp)
