@@ -49,7 +49,9 @@ from photogrammetry_importer.photogrammetry_import_op import ImportColmap
 from photogrammetry_importer.photogrammetry_import_op import ImportNVM
 from photogrammetry_importer.photogrammetry_import_op import ImportOpen3D
 from photogrammetry_importer.photogrammetry_import_op import ImportPLY
+
 from photogrammetry_importer.photogrammetry_export_op import ExportNVM
+from photogrammetry_importer.photogrammetry_export_op import ExportColmap
 
 # register
 ##################################
@@ -64,6 +66,7 @@ def menu_func_import(self, context):
     
 def menu_func_export(self, context):
     self.layout.operator(ExportNVM.bl_idname, text="VSFM NVM Export (.nvm)")
+    self.layout.operator(ExportColmap.bl_idname, text="Colmap Export (folder)")
 
 # =========================================================================
 # === Uncomment for fast debugging ===
@@ -89,7 +92,9 @@ def register():
     bpy.utils.register_class(ImportNVM)
     bpy.utils.register_class(ImportOpen3D)
     bpy.utils.register_class(ImportPLY)
+
     bpy.utils.register_class(ExportNVM)
+    bpy.utils.register_class(ExportColmap)
 
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
@@ -107,7 +112,9 @@ def unregister():
     bpy.utils.unregister_class(ImportNVM)
     bpy.utils.unregister_class(ImportOpen3D)
     bpy.utils.unregister_class(ImportPLY)
+
     bpy.utils.unregister_class(ExportNVM)
+    bpy.utils.unregister_class(ExportColmap)
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)

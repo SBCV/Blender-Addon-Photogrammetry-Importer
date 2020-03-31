@@ -4,6 +4,9 @@ import numpy as np
 from photogrammetry_importer.point import Point
 from photogrammetry_importer.camera import Camera
 
+from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
+from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
+
 from bpy.props import (CollectionProperty,
                        StringProperty,
                        BoolProperty,
@@ -83,7 +86,7 @@ def get_computer_vision_camera_matrix(op, blender_camera):
     return rotated_camera_matrix_around_x_by_180
 
 
-def export_selected_cameras_and_vertices_of_meshes(op):
+def export_selected_cameras_and_vertices_of_meshes(op, odp):
     op.report({'INFO'}, 'export_selected_cameras_and_vertices_of_meshes: ...')
     cameras = []
     points = []
@@ -100,7 +103,12 @@ def export_selected_cameras_and_vertices_of_meshes(op):
             camera_matrix_computer_vision = get_computer_vision_camera_matrix(op, obj)
             
             cam = Camera()
-            cam.file_name = str('camera_index')
+            cam.id = camera_index
+            cam.set_relative_fp(str(obj.name), Camera.IMAGE_FP_TYPE_NAME)
+            cam.image_dp = odp
+            cam.width = bpy.context.scene.render.resolution_x
+            cam.height = bpy.context.scene.render.resolution_y
+
             cam.set_calibration(calibration_mat, radial_distortion=0)
             cam.set_4x4_cam_to_world_mat(camera_matrix_computer_vision)
             cameras.append(cam)
@@ -110,12 +118,13 @@ def export_selected_cameras_and_vertices_of_meshes(op):
             if obj.data is not None:
                 obj_points = []
                 for vert in obj.data.vertices:
-                    coord_world = obj.matrix_world * vert.co
-                    obj_points.append(Point(coord=coord_world, 
-                                            color=[255,255,255],
-                                            measurements=[],
-                                            id=point_index,
-                                            scalars=[]))
+                    coord_world = obj.matrix_world @ vert.co
+                    obj_points.append(
+                        Point(
+                            coord=coord_world,
+                            color=[0, 255, 0],
+                            id=point_index,
+                            scalars=[]))
                                             
                     point_index += 1
                 points += obj_points
@@ -140,21 +149,46 @@ class ExportNVM(bpy.types.Operator, ExportHelper):
     filter_glob: StringProperty(default="*.nvm", options={'HIDDEN'})
         
     def execute(self, context):
-        paths = [os.path.join(self.directory, name.name)
-                 for name in self.files]
-                 
-        assert len(paths) == 1
+        assert len(self.files) == 1
+        ofp = os.path.join(self.directory, self.files[0].name)
+
+        cameras, points = export_selected_cameras_and_vertices_of_meshes(self, "")
+        for cam in cameras:            
+            assert cam.get_calibration_mat() is not None
+
+        NVMFileHandler.write_nvm_file(self, ofp, cameras, points)
+                    
+        return {'FINISHED'}
+
+class ExportColmap(bpy.types.Operator, ExportHelper):
+    """Export a Colmap model """
+    bl_idname = "export_scene.colmap"
+    bl_label = "Export Colmap"
+    bl_options = {'PRESET'}
+
+    # https://docs.blender.org/api/current/bpy.types.FileSelectParams.html
+
+    
+    directory: StringProperty()
+
+    files: CollectionProperty(
+        name="Directory Path",
+        description="Directory path used for exporting the Colmap model",
+        type=bpy.types.OperatorFileListElement)
         
-        # https://blender.stackexchange.com/questions/717/is-it-possible-to-print-to-the-report-window-in-the-info-view
-        #   The color depends on the type enum: INFO gets green, WARNING light red, and ERROR dark red
-        # https://docs.blender.org/api/blender_python_api_2_78_release/bpy.types.Operator.html?highlight=report#bpy.types.Operator.report
-        cameras, points = export_selected_cameras_and_vertices_of_meshes(self)
+    filename_ext = ""
+    #filter_folder : BoolProperty(default=True, options={'HIDDEN'})
         
+    def execute(self, context):
+        
+        assert len(self.files) == 1
+        odp = os.path.join(self.directory, self.files[0].name)
+
+        cameras, points = export_selected_cameras_and_vertices_of_meshes(self, odp)
         for cam in cameras:            
             assert cam.get_calibration_mat() is not None
         
-        from nvm_import_export.nvm_file_handler import NVMFileHandler
-        NVMFileHandler.write_nvm_file(self, paths[0], cameras, points)
-                
+        ColmapFileHandler.write_colmap_model(
+            odp, cameras, points, self) 
                  
         return {'FINISHED'}

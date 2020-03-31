@@ -48,6 +48,10 @@ class Camera:
     def get_file_name(self):
         return os.path.basename(self.get_absolute_fp())
 
+    def set_relative_fp(self, relative_fp, image_fp_type):
+        self._relative_fp = relative_fp
+        self.image_fp_type = image_fp_type
+
     def get_relative_fp(self):
         return self._get_relative_fp(
             self._relative_fp, self._absolute_fp)
@@ -68,6 +72,9 @@ class Camera:
             return absolute_fp 
         else:
             assert False
+
+    def set_absolute_fp(self, absolute_fp):
+        self._absolute_fp = absolute_fp
 
     def get_absolute_fp(self):
         return self._get_absolute_fp(

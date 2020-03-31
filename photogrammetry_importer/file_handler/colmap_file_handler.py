@@ -1,12 +1,17 @@
 import os
 import numpy as np
-from photogrammetry_importer.ext.read_model import read_model
+from photogrammetry_importer.ext.read_write_model import read_model
+from photogrammetry_importer.ext.read_write_model import write_model
+
+from photogrammetry_importer.ext.read_write_model import Camera as ColmapCamera
+from photogrammetry_importer.ext.read_write_model import Image as ColmapImage
+from photogrammetry_importer.ext.read_write_model import Point3D as ColmapPoint3D
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
 
 
-# From photogrammetry_importer\ext\read_model.py
+# From photogrammetry_importer\ext\read_write_model.py
 # CAMERA_MODELS = {
 #     CameraModel(model_id=0, model_name="SIMPLE_PINHOLE", num_params=3),
 #     CameraModel(model_id=1, model_name="PINHOLE", num_params=4),
@@ -68,19 +73,21 @@ class ColmapFileHandler(object):
 
     @staticmethod
     def convert_cameras(id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, op):
-        # CameraModel = collections.namedtuple(
-        #   "CameraModel", ["model_id", "model_name", "num_params"])
-        # Camera = collections.namedtuple(
-        #    "Camera", ["id", "model", "width", "height", "params"])
-        # BaseImage = collections.namedtuple(
-        #    "Image", ["id", "qvec", "tvec", "camera_id", "name", "xys", "point3D_ids"])
+        # From photogrammetry_importer\ext\read_write_model.py
+        #   CameraModel = collections.namedtuple(
+        #       "CameraModel", ["model_id", "model_name", "num_params"])
+        #   Camera = collections.namedtuple(
+        #       "Camera", ["id", "model", "width", "height", "params"])
+        #   BaseImage = collections.namedtuple(
+        #       "Image", ["id", "qvec", "tvec", "camera_id", "name", "xys", "point3D_ids"])
 
         cameras = []
         for col_image in id_to_col_images.values():
             current_camera = Camera()
             current_camera.id = col_image.id
             current_camera.set_quaternion(col_image.qvec)
-            current_camera.set_camera_translation_vector_after_rotation(col_image.tvec)
+            current_camera.set_camera_translation_vector_after_rotation(
+                col_image.tvec)
 
             current_camera.image_fp_type = image_fp_type
             current_camera.image_dp = image_dp
@@ -96,9 +103,10 @@ class ColmapFileHandler(object):
             current_camera.height = camera_model.height
 
             focal_length, cx, cy = parse_camera_param_list(camera_model)
-            camera_calibration_matrix = np.array([[focal_length, 0, cx],
-                            [0, focal_length, cy],
-                            [0, 0, 1]])
+            camera_calibration_matrix = np.array([
+                [focal_length, 0, cx],
+                [0, focal_length, cy],
+                [0, 0, 1]])
             current_camera.set_calibration(
                 camera_calibration_matrix, 
                 radial_distortion=0)
@@ -109,8 +117,9 @@ class ColmapFileHandler(object):
 
     @staticmethod
     def convert_points(id_to_col_points3D):
-        # Point3D = collections.namedtuple(
-        #   "Point3D", ["id", "xyz", "rgb", "error", "image_ids", "point2D_idxs"])
+        # From photogrammetry_importer\ext\read_write_model.py
+        #   Point3D = collections.namedtuple(
+        #       "Point3D", ["id", "xyz", "rgb", "error", "image_ids", "point2D_idxs"])
         
         col_points3D = id_to_col_points3D.values()
         points3D = []
@@ -152,3 +161,69 @@ class ColmapFileHandler(object):
             id_to_col_points3D)
 
         return cameras, points3D
+
+
+    @staticmethod
+    def write_colmap_model(odp, cameras, points, op):
+        op.report({'INFO'}, 'Write Colmap model folder: ' + odp)
+
+        if not os.path.isdir(odp):
+            os.mkdir(odp)
+
+        # From photogrammetry_importer\ext\read_write_model.py
+        #   CameraModel = collections.namedtuple(
+        #       "CameraModel", ["model_id", "model_name", "num_params"])
+        #   Camera = collections.namedtuple(
+        #       "Camera", ["id", "model", "width", "height", "params"])
+        #   BaseImage = collections.namedtuple(
+        #       "Image", ["id", "qvec", "tvec", "camera_id", "name", "xys", "point3D_ids"])
+        #   Point3D = collections.namedtuple(
+        #       "Point3D", ["id", "xyz", "rgb", "error", "image_ids", "point2D_idxs"])
+
+        colmap_cams = {}
+        colmap_images = {}
+        for cam in cameras:
+
+            # TODO Support the "PINHOLE" camera model
+            colmap_camera_model_name = "SIMPLE_PINHOLE"
+
+            pp = cam.get_principal_point()
+            colmap_cam = ColmapCamera(
+                id=cam.id, 
+                model=colmap_camera_model_name, 
+                width=cam.width, 
+                height=cam.height, 
+                params=np.array([cam.get_focal_length(), pp[0], pp[1]]))
+            colmap_cams[cam.id] = colmap_cam
+
+            colmap_image = ColmapImage(
+                id=cam.id, 
+                qvec=cam.get_quaternion(), 
+                tvec=cam.get_translation_vec(),
+                camera_id=cam.id, 
+                name=cam.get_file_name(),
+                xys=[], 
+                point3D_ids=[])
+            colmap_images[cam.id] = colmap_image
+
+        colmap_points3D = {}
+        for point in points:
+            colmap_point = ColmapPoint3D(
+                id=point.id, 
+                xyz=point.coord, 
+                rgb=point.color,
+                error=0, 
+                # The default settings in Colmap show only points with 3+ observations
+                image_ids=[0, 1, 2],        
+                point2D_idxs=[0, 1, 2]
+            )
+            colmap_points3D[point.id] = colmap_point
+
+        write_model(
+            colmap_cams, 
+            colmap_images, 
+            colmap_points3D, 
+            odp, 
+            ext='.txt')
+
+        

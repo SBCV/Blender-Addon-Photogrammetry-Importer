@@ -1,22 +1,20 @@
 # Blender-Addon-Photogrammetry-Importer
-This repository contains a Blender addon to import and export Structure-from-Motion (SfM) reconstruction results.
+This repository contains a Blender addon to import reconstruction results of several libraries.
 
-This addon supports currently the following data formats: 
-- [x] PLY ([http://paulbourke.net/dataformats/ply/](http://paulbourke.net/dataformats/ply/))
-- [x] NVM ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
-- [x] Colmap Model Folders ([https://github.com/colmap/colmap](https://github.com/colmap/colmap))
-- [x] OpenMVG JSON files ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-- [x] Meshroom SfM/JSON files ([https://alicevision.github.io/](https://alicevision.github.io/))
+Supported libraries / data formats:
+- [x] Polygon Files ([http://paulbourke.net/dataformats/ply/](http://paulbourke.net/dataformats/ply/))
+	* PLY
+- [x] VisualSFM reconstructions ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
+	* NVM
+- [x] Colmap reconstructions ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) 
+	* Colmap model folders (binary and txt format), NVM, PLY 
+- [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
+	* JSON, NVM, PLY
+- [x] Meshroom reconstructions ([https://alicevision.github.io/](https://alicevision.github.io/))
+	* JSON, SfM, PLY
+- [x] Open3D reconstructions ([http://www.open3d.org/](http://www.open3d.org/))
+	* JSON, LOG, PLY
 
-Thus, it is possible to import reconstruction results of the following libraries:
-- [x] VisualSFM's ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
-	* using NVM
-- [x] Colmap ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) 
-	* using Colmap model folders (binary and txt format), NVM and PLY 
-- [x] OpenMVG ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-	* using JSON (OpenMVG), NVM and PLY
-- [x] Meshroom ([https://alicevision.github.io/](https://alicevision.github.io/))
-	* using SfM, JSON (Meshroom) and PLY
 
 Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
