@@ -30,7 +30,7 @@ If you experience problems aligning the cameras with the point cloud, make sure 
 - [Usage (Import/Export)](doc/markdown/usage.md)
 - [Adjust Results (Scale Cameras and Points)](doc/markdown/adjustment.md)
 - [Ensure Camera and Point Alignment](doc/markdown/alignment.md)
-- [Reconstruction Representation with Blender Objects](doc/markdown/representation.md)
+- [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md)
 - [Contribution](doc/markdown/contribution.md)
 
 ## Example
