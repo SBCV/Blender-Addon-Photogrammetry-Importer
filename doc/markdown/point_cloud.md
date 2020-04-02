@@ -1,9 +1,12 @@
 ### Point Cloud Visualization and Rendering
 
 Currently, this addon supports the following 3 point cloud visualization options:
-* Representing the points with vertices of a Blender object
-* Representing the points with a Blender particle system 
-* Rendering the points with OpenGL 
+* Representing the points with vertices of a Blender object (default)
+* Draw the points with OpenGL 
+* Representing the points with a Blender particle system (default)
+
+
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/import_point_options.jpg)
 
 Each option has different advantages / disadvantages.
 
