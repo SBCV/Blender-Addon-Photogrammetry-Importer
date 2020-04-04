@@ -4,6 +4,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 from random import random
 from photogrammetry_importer.utils.blender_utils import add_empty
+import bgl
 
 draw_manager = None
 
@@ -42,8 +43,6 @@ class DrawCallBackHandler():
         if handle_is_valid:
             if object_handle_name in bpy.data.objects:
 
-                current_obj = bpy.data.objects[object_handle_name]
-
                 # Use the visibility of the object to enable / 
                 # disable the drawing of the point cloud
                 if bpy.data.objects[object_handle_name].visible_get():
@@ -53,7 +52,7 @@ class DrawCallBackHandler():
                         self.object_anchor_pose_previous, object_handle.matrix_world)
                     if  self.batch_cached is None or object_anchor_has_changed:
                         
-                        self.object_anchor_pose_previous = np.copy(current_obj.matrix_world)
+                        self.object_anchor_pose_previous = np.copy(object_handle.matrix_world)
 
                         pos_arr = np.asarray(positions)
                         ones_arr = np.ones((pos_arr.shape[0],1))
@@ -63,7 +62,7 @@ class DrawCallBackHandler():
                         # so they can be transformed with a single matrix multiplication
                         pos_hom_arr_transposed = np.transpose(pos_hom_arr)
                         transf_pos_hom_transposed_arr = np.matmul(
-                            current_obj.matrix_world, pos_hom_arr_transposed)
+                            object_handle.matrix_world, pos_hom_arr_transposed)
                         transf_pos_arr_hom = transf_pos_hom_transposed_arr.T
 
                         # Delete the homogeneous entries
@@ -74,6 +73,10 @@ class DrawCallBackHandler():
                             self.shader, "POINTS", {"pos": transf_pos_list, "color": colors})
 
                     self.shader.bind()
+
+                    bgl.glEnable(bgl.GL_DEPTH_TEST)
+                    bgl.glDepthMask(bgl.GL_TRUE)
+
                     self.batch_cached.draw(self.shader)
 
         else:
@@ -107,6 +110,7 @@ def draw_points(op, points):
     global draw_manager
     if draw_manager is None:
         draw_manager = DrawManager()
+
     object_anchor_handle = add_empty("point_cloud_drawing_handle")
     call_back_handler = draw_manager.get_call_back_handler()
     call_back_handler.register_points_draw_call_back(
