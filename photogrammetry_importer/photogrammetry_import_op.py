@@ -59,7 +59,7 @@ def get_default_image_path(reconstruction_fp, image_dp):
 
 class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Operator):
     
-    """Blender import operator for colmap model folders. """
+    """Import a colmap model folder (.txt/.bin)"""
     bl_idname = "import_scene.colmap_model"
     bl_label = "Import Colmap Model Folder"
     bl_options = {'PRESET'}
@@ -107,7 +107,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
 
 class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
     
-    """Blender import operator for NVM files. """
+    """Import a VisualSfM NVM file"""
     bl_idname = "import_scene.nvm"
     bl_label = "Import NVM"
     bl_options = {'PRESET'}
@@ -152,7 +152,7 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
     
 class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
 
-    """Blender import operator for OpenMVG JSON files. """
+    """Import an OpenMVG JSON file"""
     bl_idname = "import_scene.openmvg_json"
     bl_label = "Import OpenMVG JSON"
     bl_options = {'PRESET'}
@@ -191,7 +191,7 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
 
 class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
 
-    """Blender import operator for Meshroom JSON files. """
+    """Import a Meshroom SfM/JSON file"""
     bl_idname = "import_scene.meshroom_sfm_json"
     bl_label = "Import Meshroom SfM/JSON"
     bl_options = {'PRESET'}
@@ -231,7 +231,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
 
 class ImportOpen3D(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
 
-    """Blender import operator for Open3D LOG/JSON files. """
+    """Import an Open3D LOG/JSON file"""
     bl_idname = "import_scene.open3d_log_json"
     bl_label = "Import Open3D LOG/JSON"
     bl_options = {'PRESET'}
@@ -308,7 +308,7 @@ class ImportOpen3D(CameraImportProperties, PointImportProperties, bpy.types.Oper
 
 class ImportPLY(PointImportProperties, TransformationImportProperties, bpy.types.Operator, ImportHelper):
 
-    """Blender import operator for PLY files. """
+    """Import a PLY file as point cloud"""
     bl_idname = "import_scene.ply"
     bl_label = "Import PLY"
     bl_options = {'PRESET'}
