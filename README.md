@@ -11,7 +11,7 @@ Supported libraries / data formats:
 - [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
 	* JSON, NVM, PLY
 - [x] Meshroom reconstructions ([https://alicevision.github.io/](https://alicevision.github.io/))
-	* JSON, SfM, PLY
+	* MG, JSON, SfM, PLY
 - [x] Open3D reconstructions ([http://www.open3d.org/](http://www.open3d.org/))
 	* JSON, LOG, PLY
 
@@ -25,7 +25,8 @@ If you experience problems aligning the cameras with the point cloud, make sure 
 - [Tutorial Video](https://www.youtube.com/watch?v=BwwaT2scoP0) 
 - [Installation Instructions](doc/markdown/installation.md)
 - [Examples](doc/markdown/example.md)
-- [Usage (Import/Export)](doc/markdown/usage.md)
+- [Import Data](doc/markdown/import.md)
+- [Export Data](doc/markdown/export.md)
 - [Adjust Results (Scale Cameras and Points)](doc/markdown/adjustment.md)
 - [Ensure Camera and Point Alignment](doc/markdown/alignment.md)
 - [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md)
@@ -39,7 +40,7 @@ The input images of the NVM file are located here: [https://github.com/openMVG/I
 There is an import option that interpolates the reconstructed camera poses to compute a camera animation.
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/camera_animation.gif)
 
-You can also overlay the (sparse) point cloud with the corresponding mesh - see [Usage (Import/Export)](doc/markdown/usage.md). 
+You can also overlay the (sparse) point cloud with the corresponding mesh - see [Import Data](doc/markdown/import.md). 
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/point_cloud_mesh_overlay.jpg)
 
 Also, the addon provides an option to draw big point clouds with OpenGL to reduce computational requirements.  

@@ -17,6 +17,11 @@ If selected, the addon adds a blender object with a vertex for each point in the
 * Advantage: Low computational costs for visualization / rendering. 
 * Disadvantage: Contains no color information.
 
+### Rendering the points with Opengl 
+If selected, the point cloud is shown in the Viewport with OpenGL. That means, there is NO Blender object representing the points in the point cloud. The pose (i.e. rotation and translation) of the object can be changed by adjusting the corresponding "anchor" object.
+* Advantage: Allows to show huge point clouds in the viewport - including color information. 
+* Disadvantage: It is not possible to render these points (not even with OpenGL rendering). 
+
 ### Representing the points with a particle system 
 
 If selected, the point cloud is represented with two objects.
@@ -31,7 +36,5 @@ Note: The second input "Value" in the "Divide" node represents the number of par
 * Advantage: Contains color information, which can be rendered using Cycles. 
 * Disadvantage: High computational costs for visualization / rendering, i.e. limited to medium-sized point clouds.
 
-### Rendering the points with Opengl 
-If selected, the point cloud is shown in the Viewport with OpenGL. That means, there is NO Blender object representing the points in the point cloud. The pose (i.e. rotation and translation) of the object can be changed by adjusting the corresponding "anchor" object.
-* Advantage: Allows to show huge point clouds in the viewport - including color information. 
-* Disadvantage: It is not possible to render these points (not even with OpenGL rendering). 
+Sometimes Blender draws boundaries around the particles of the point cloud. In oder to improve the visualization of the point cloud one can disable "Extras" under "Overlays" in the "3D view". The following image shows the corresponding options. 
+![Disable Object Overlays](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/disable_object_extras_overlay_annotation.jpg)
