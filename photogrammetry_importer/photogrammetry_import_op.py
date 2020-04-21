@@ -8,7 +8,7 @@ import math
 from photogrammetry_importer.utils.blender_utils import add_collection
 
 from photogrammetry_importer.file_handler.image_file_handler import ImageFileHandler
-from photogrammetry_importer.file_handler.meshroom_json_file_handler import MeshroomJSONFileHandler
+from photogrammetry_importer.file_handler.meshroom_file_handler import MeshroomFileHandler
 from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler
 from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
@@ -18,6 +18,7 @@ from photogrammetry_importer.file_handler.transformation_file_handler import Tra
 
 from photogrammetry_importer.camera_import_properties import CameraImportProperties
 from photogrammetry_importer.point_import_properties import PointImportProperties
+from photogrammetry_importer.mesh_import_properties import MeshImportProperties
 from photogrammetry_importer.transformation_import_properties import TransformationImportProperties
 
 from photogrammetry_importer.camera import Camera
@@ -189,18 +190,18 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
 
-class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
+class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportProperties, bpy.types.Operator, ImportHelper):
 
-    """Import a Meshroom SfM/JSON file"""
+    """Import a Meshroom MG/SfM/JSON file"""
     bl_idname = "import_scene.meshroom_sfm_json"
-    bl_label = "Import Meshroom SfM/JSON"
+    bl_label = "Import Meshroom SfM/JSON/MG"
     bl_options = {'PRESET'}
 
     filepath: StringProperty(
         name="Meshroom JSON File Path",
-        description="File path used for importing the Meshroom SfM/JSON file")
+        description="File path used for importing the Meshroom SfM/JSON/MG file")
     directory: StringProperty()
-    filter_glob: StringProperty(default="*sfm;*.json", options={'HIDDEN'})
+    filter_glob: StringProperty(default="*.sfm;*.json;*.mg", options={'HIDDEN'})
 
     def execute(self, context):
 
@@ -211,7 +212,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
             path, self.image_dp)
         self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
-        cameras, points = MeshroomJSONFileHandler.parse_meshroom_file(
+        cameras, points, mesh_fp = MeshroomFileHandler.parse_meshroom_file(
             path, self.image_dp, self.image_fp_type, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
@@ -220,6 +221,8 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
+        self.import_photogrammetry_mesh(mesh_fp, reconstruction_collection)
+
 
         return {'FINISHED'}
 
@@ -227,6 +230,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, bpy.types.Op
         layout = self.layout
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
+        self.draw_mesh_options(layout)
 
 
 class ImportOpen3D(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
