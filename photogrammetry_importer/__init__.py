@@ -59,7 +59,7 @@ from photogrammetry_importer.photogrammetry_export_op import ExportColmap
 def menu_func_import(self, context):
     self.layout.operator(ImportMeshroom.bl_idname, text="Meshroom Import (.sfm/.json/.mg)")
     self.layout.operator(ImportOpenMVG.bl_idname, text="OpenMVG Import (.json)")
-    self.layout.operator(ImportColmap.bl_idname, text="Colmap Import (folder with .bin/.txt)")
+    self.layout.operator(ImportColmap.bl_idname, text="Colmap Import (model/workspace)")
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
     self.layout.operator(ImportOpen3D.bl_idname, text="Open3D Import (.log/.json)")
     self.layout.operator(ImportPLY.bl_idname, text="Point Cloud PLY Import (.ply)")

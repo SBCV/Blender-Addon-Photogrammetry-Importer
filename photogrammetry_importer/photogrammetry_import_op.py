@@ -58,9 +58,9 @@ def get_default_image_path(reconstruction_fp, image_dp):
             image_dp = image_default_same_dp
     return image_dp
 
-class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Operator):
+class ImportColmap(CameraImportProperties, PointImportProperties, MeshImportProperties, bpy.types.Operator):
     
-    """Import a colmap model folder (.txt/.bin)"""
+    """Import a Colmap model (folder with .txt/.bin) or a Colmap workspace folder with dense point clouds and meshes."""
     bl_idname = "import_scene.colmap_model"
     bl_label = "Import Colmap Model Folder"
     bl_options = {'PRESET'}
@@ -79,15 +79,17 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
             path, self.image_dp)
         self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
-        cameras, points = ColmapFileHandler.parse_colmap_model_folder(
+        cameras, points, mesh_ifp = ColmapFileHandler.parse_colmap_folder(
             path, self.image_dp, self.image_fp_type, self)
 
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        self.report({'INFO'}, 'Mesh file path: ' + str(mesh_ifp))
 
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
+        self.import_photogrammetry_mesh(mesh_ifp, reconstruction_collection, self)
 
         self.report({'INFO'}, 'Parse Colmap model folder: Done')
 
@@ -104,6 +106,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, bpy.types.Oper
         layout = self.layout
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
+        self.draw_mesh_options(layout)
 
 
 class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):

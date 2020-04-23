@@ -134,18 +134,39 @@ class ColmapFileHandler(object):
         return points3D
 
     @staticmethod
+    def get_model_folder_ext(idp):
+        ifp_s = os.listdir(idp)
+        if len(set(ifp_s).intersection(['cameras.txt', 'images.txt', 'points3D.txt'])) == 3:
+            ext = '.txt'
+        elif len(set(ifp_s).intersection(['cameras.bin', 'images.bin', 'points3D.bin'])) == 3:
+            ext = '.bin'
+        else:
+            ext = None
+        return ext
+
+    @staticmethod
+    def is_valid_model_folder(idp):
+        ext = ColmapFileHandler.get_model_folder_ext(idp)
+        return ext is not None
+
+    @staticmethod
+    def is_valid_workspace_folder(idp):
+        elements = os.listdir(idp)
+        valid = True
+        if 'sparse' in elements:
+            valid = ColmapFileHandler.is_valid_model_folder(
+                os.path.join(idp, 'sparse'))
+        else:
+            valid = False
+        return valid
+
+    @staticmethod
     def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, op):
 
         op.report({'INFO'}, 'Parse Colmap model folder: ' + model_idp)
 
-        ifp_s = os.listdir(model_idp)
-
-        if len(set(ifp_s).intersection(['cameras.bin', 'images.bin', 'points3D.bin'])) == 3:
-            ext = '.bin'
-        elif len(set(ifp_s).intersection(['cameras.txt', 'images.txt', 'points3D.txt'])) == 3:
-            ext = '.txt'
-        else:
-            assert False    # No valid model folder
+        assert ColmapFileHandler.is_valid_model_folder(model_idp)
+        ext = ColmapFileHandler.get_model_folder_ext(model_idp)
 
         # cameras represent information about the camera model
         # images contain pose information
@@ -161,6 +182,33 @@ class ColmapFileHandler(object):
             id_to_col_points3D)
 
         return cameras, points3D
+
+    @staticmethod
+    def parse_colmap_workspace_folder(workspace_idp):
+
+        assert ColmapFileHandler.is_valid_workspace_folder(workspace_idp)
+
+        model_idp = os.path.join(workspace_idp, 'sparse')
+        mesh_ifp = os.path.join(workspace_idp, 'meshed-poisson.ply')
+        if not os.path.isfile(mesh_ifp):
+            mesh_ifp = os.path.join(workspace_idp, 'meshed-delaunay.ply') 
+        return model_idp, mesh_ifp
+
+    @staticmethod
+    def parse_colmap_folder(idp, image_dp, image_fp_type, op):
+
+        op.report({'INFO'}, 'idp: ' + str(idp))
+
+        if ColmapFileHandler.is_valid_model_folder(idp):
+            model_idp = idp
+            mesh_ifp = None
+        elif ColmapFileHandler.is_valid_workspace_folder(idp):
+            model_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
+
+        cameras, points = ColmapFileHandler.parse_colmap_model_folder(
+            model_idp, image_dp, image_fp_type, op)
+
+        return cameras, points, mesh_ifp
 
 
     @staticmethod
