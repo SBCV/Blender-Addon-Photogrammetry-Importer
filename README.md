@@ -7,7 +7,7 @@ Supported libraries / data formats:
 - [x] VisualSFM reconstructions ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
 	* NVM
 - [x] Colmap reconstructions ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) 
-	* Colmap model folders (binary and txt format), NVM, PLY 
+	* Colmap model folders (binary and txt format), Colmap workspaces, NVM, PLY 
 - [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
 	* JSON, NVM, PLY
 - [x] Meshroom reconstructions ([https://alicevision.github.io/](https://alicevision.github.io/))
