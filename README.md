@@ -30,6 +30,7 @@ If you experience problems aligning the cameras with the point cloud, make sure 
 - [Adjust Results (Scale Cameras and Points)](doc/markdown/adjustment.md)
 - [Ensure Camera and Point Alignment](doc/markdown/alignment.md)
 - [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md)
+- [Addon Usage with Python](doc/markdown/python.md)
 - [Contribution](doc/markdown/contribution.md)
 
 ## Example
