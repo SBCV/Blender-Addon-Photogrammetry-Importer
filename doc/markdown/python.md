@@ -1,4 +1,4 @@
-## Addon Usage Within Python
+## Addon Usage with Python
 
 There are two ways to access the functionality of the addon with Blender's Python console / text editor (after installation and activation of the addon):
 * Import the addon as Python module
@@ -42,4 +42,9 @@ ply()
 bpy.ops.import_scene.ply(import_points=True, draw_points_with_gpu=False, add_points_as_particle_system=True, mesh_type='CUBE', point_extent=0.01, add_particle_color_emission=True, set_particle_color_flag=False, particle_overwrite_color=(0, 1, 0), path_to_transformations="", filepath="", directory="", filter_glob="*.ply")
 Import a PLY file as point cloud
 ```
+
+### Python Scripting with Blender
+
+I highly recommend to use [VS Code](https://code.visualstudio.com) with this [extension](https://marketplace.visualstudio.com/items?itemName=JacquesLucke.blender-development) instead of Blender's built-in text editor. [Here](https://www.youtube.com/watch?v=q06-hER7Y1Q) is an introduction / tutorial video.
+
 
