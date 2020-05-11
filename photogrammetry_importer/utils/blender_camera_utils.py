@@ -362,3 +362,13 @@ def principal_points_initialized(cameras):
             principal_points_initialized = False
             break
     return principal_points_initialized
+
+def get_selected_camera():
+    selection_names = [obj.name for obj in bpy.context.selected_objects]
+    if len(selection_names) == 0:
+        return None
+    selected_obj = bpy.data.objects[selection_names[0]]
+    if selected_obj.type == 'CAMERA':
+        return selected_obj
+    else:
+        return None

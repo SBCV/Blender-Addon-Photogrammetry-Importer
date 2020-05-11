@@ -53,6 +53,10 @@ from photogrammetry_importer.photogrammetry_import_op import ImportPLY
 from photogrammetry_importer.photogrammetry_export_op import ExportNVM
 from photogrammetry_importer.photogrammetry_export_op import ExportColmap
 
+from photogrammetry_importer.panel.opengl_panel import OpenGLPanel
+from photogrammetry_importer.panel.opengl_panel import SaveOpenGLRenderImageOperator
+from photogrammetry_importer.panel.opengl_panel import ExportOpenGLRenderImageOperator
+
 # register
 ##################################
 
@@ -99,6 +103,10 @@ def register():
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
+    bpy.utils.register_class(OpenGLPanel)
+    bpy.utils.register_class(SaveOpenGLRenderImageOperator)
+    bpy.utils.register_class(ExportOpenGLRenderImageOperator)
+
     # === Uncomment for fast debugging ===
     # bpy.app.handlers.load_post.append(load_handler)
 
@@ -118,6 +126,10 @@ def unregister():
 
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+
+    bpy.utils.unregister_class(OpenGLPanel)
+    bpy.utils.unregister_class(SaveOpenGLRenderImageOperator)
+    bpy.utils.unregister_class(ExportOpenGLRenderImageOperator)
 
     print("Unregistered {}".format(bl_info["name"]))
 

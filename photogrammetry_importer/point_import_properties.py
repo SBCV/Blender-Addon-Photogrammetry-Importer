@@ -3,6 +3,7 @@ import bpy
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty)
 from photogrammetry_importer.utils.blender_animation_utils import add_transformation_animation
 from photogrammetry_importer.utils.blender_point_utils import add_points_as_mesh
+from photogrammetry_importer.opengl.visualization_utils import draw_points
 
 class PointImportProperties():
     """ This class encapsulates Blender UI properties that are required to visualize the reconstructed points correctly. """
@@ -68,7 +69,6 @@ class PointImportProperties():
         if self.import_points:
 
             if self.draw_points_with_gpu:
-                from photogrammetry_importer.utils.visualization_utils import draw_points
                 draw_points(self, points)
 
             point_cloud_obj_name = add_points_as_mesh(
