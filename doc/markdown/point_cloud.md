@@ -20,7 +20,9 @@ If selected, the addon adds a blender object with a vertex for each point in the
 ### Rendering the points with Opengl 
 If selected, the point cloud is shown in the Viewport with OpenGL. That means, there is NO Blender object representing the points in the point cloud. The pose (i.e. rotation and translation) of the object can be changed by adjusting the corresponding "anchor" object.
 * Advantage: Allows to show huge point clouds in the viewport - including color information. 
-* Disadvantage: It is not possible to render these points (not even with OpenGL rendering). 
+* Disadvantage: It is not possible to render these points with the render functions provided by Blender. However, this addon provides a panel to save/export OpenGL renderings of the points using an offscreen buffer (see image below).
+
+![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/opengl_panel.jpg)
 
 ### Representing the points with a particle system 
 
