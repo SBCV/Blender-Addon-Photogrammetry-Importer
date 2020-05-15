@@ -1,4 +1,4 @@
-### Point Cloud Visualization and Rendering
+## Point Cloud Visualization and Rendering
 
 Currently, this addon supports the following 3 point cloud visualization options:
 * Representing the points with vertices of a Blender object (default)
