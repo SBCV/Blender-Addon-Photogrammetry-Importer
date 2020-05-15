@@ -18,9 +18,6 @@ Supported libraries / data formats:
 
 Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
-## Camera Alignment
-If you experience problems aligning the cameras with the point cloud, make sure to use the *latest* version and read [Ensure Camera and Point Alignment](doc/markdown/alignment.md).
-
 ## Getting Started
 - [Tutorial Video](https://www.youtube.com/watch?v=BwwaT2scoP0) 
 - [Installation Instructions](doc/markdown/installation.md)
@@ -32,6 +29,7 @@ If you experience problems aligning the cameras with the point cloud, make sure 
 - [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md)
 - [Addon Usage with Python](doc/markdown/python.md)
 - [Contribution](doc/markdown/contribution.md)
+- [Recent features / Changelog](doc/markdown/changelog.md)
 
 ## Example
 This repository contains an example NVM file. The imported result looks as follows.
