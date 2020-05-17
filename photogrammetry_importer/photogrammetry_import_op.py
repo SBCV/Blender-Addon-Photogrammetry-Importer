@@ -89,7 +89,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, MeshImportProp
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
-        self.import_photogrammetry_mesh(mesh_ifp, reconstruction_collection, self)
+        self.import_photogrammetry_mesh(mesh_ifp, reconstruction_collection)
 
         self.report({'INFO'}, 'Parse Colmap model folder: Done')
 
