@@ -16,7 +16,7 @@ class MeshImportProperties():
         mesh_box = layout.box()
         mesh_box.prop(self, "import_mesh")
                     
-    def import_photogrammetry_mesh(self, mesh_fp, reconstruction_collection, op):
+    def import_photogrammetry_mesh(self, mesh_fp, reconstruction_collection):
         if self.import_mesh and mesh_fp is not None:
             self.report({'INFO'}, 'Importing mesh: ...')
             previous_collection = bpy.context.collection
