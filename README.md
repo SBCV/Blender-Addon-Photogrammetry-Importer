@@ -12,7 +12,7 @@ Supported libraries / data formats:
 	* JSON, NVM, PLY
 - [x] Meshroom reconstructions ([https://alicevision.github.io/](https://alicevision.github.io/))
 	* MG, JSON, SfM, PLY
-- [x] Regard3D reconstructions [https://www.regard3d.org/](https://www.regard3d.org/)
+- [x] Regard3D reconstructions ([https://www.regard3d.org/](https://www.regard3d.org/))
 	* (OpenMVG) JSON
 - [x] Open3D reconstructions ([http://www.open3d.org/](http://www.open3d.org/))
 	* JSON, LOG, PLY
