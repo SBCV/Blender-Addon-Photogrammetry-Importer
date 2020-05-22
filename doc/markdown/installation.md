@@ -22,10 +22,10 @@ Install the addon by
 <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/activated.jpg" width="500">
 
 
-## Optional Dependency for VisualSfM and OpenMVG files
+## Optional Dependency for VisualSfM and OpenMVG/Regard3D files
 This addon uses Pillow (https://python-pillow.org/) to compute missing information for VisualSFM (NVM) and OpenMVG (JSON) files.
 - For VisualSFM (NVM) the addon uses pillow to read the (missing) image sizes from disc.
-- For OpenMVG (JSON) the addon uses pillow to compute the (missing) colors for the 3D points in the point cloud.
+- For OpenMVG/Regard3D (JSON) the addon uses pillow to compute the (missing) colors for the 3D points in the point cloud.
 
 Using Pillow instead of Blender's image API significantly improves processing time. 
 
