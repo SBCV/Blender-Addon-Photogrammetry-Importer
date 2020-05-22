@@ -5,6 +5,7 @@ import os
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
 from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
+from photogrammetry_importer.blender_logging import log_report
 
 class OpenMVGJSONFileHandler:
 
@@ -100,24 +101,34 @@ class OpenMVGJSONFileHandler:
     @staticmethod
     def parse_points(json_data, op, view_index_to_absolute_fp=None):
 
+        compute_color = True
         try:
             from PIL import Image
-            compute_color = (not view_index_to_absolute_fp is None)
         except ImportError:
+            log_report('WARNING', 'Can not compute point cloud color information, since Pillow is not installed.', op)
             compute_color = False
-            
-        structure = json_data['structure']
+
+        if view_index_to_absolute_fp is None:
+            log_report('WARNING', 'Can not compute point cloud color information, since path to images is not correctly set.', op)
+            compute_color = False
 
         if compute_color:
-            op.report({'INFO'},'Computing color information from files: ...')
+            log_report('INFO', 'Try to collect color information from files (this might take a while)', op)
             view_index_to_image = {}
             for view_index, absolute_fp in view_index_to_absolute_fp.items():
-                pil_image = Image.open(absolute_fp)
-                view_index_to_image[view_index] = pil_image
-
-            op.report({'INFO'},'Computing color information from files: Done')
+                if os.path.isfile(absolute_fp):
+                    pil_image = Image.open(absolute_fp)
+                    view_index_to_image[view_index] = pil_image
+                else:
+                    log_report('WARNING', 'Can not compute point cloud color information, since image file path is incorrect.', op)
+                    compute_color = False
+                    break
+        
+        if compute_color:
+            log_report('INFO', 'Compute color information from files (this might take a while)', op)
 
         points = []
+        structure = json_data['structure']
         for json_point in structure:
 
             r = g = b = 0
