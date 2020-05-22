@@ -14,11 +14,11 @@ class PointImportProperties():
     draw_points_with_gpu : BoolProperty(
        name="Draw Points in the 3D View with OpenGL.",
         description="Draw Points in the 3D View. Allows to visualize point clouds with many elements. These are not visible in eevee/cycles renderings.",
-        default=False)
+        default=True)
     add_points_as_particle_system: BoolProperty(
         name="Add Points as Particle System",
         description="Use a particle system to represent vertex positions with objects. Can be rendered with eevee/cycles.",
-        default=True)
+        default=False)
     mesh_items = [
         ("CUBE", "Cube", "", 1),
         ("SPHERE", "Sphere", "", 2),
