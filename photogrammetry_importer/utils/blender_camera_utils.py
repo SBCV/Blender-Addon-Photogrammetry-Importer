@@ -13,6 +13,8 @@ from photogrammetry_importer.utils.blender_utils import add_obj
 from photogrammetry_importer.utils.blender_animation_utils import add_transformation_animation
 from photogrammetry_importer.utils.blender_animation_utils import add_camera_intrinsics_animation
 from photogrammetry_importer.utils.stop_watch import StopWatch
+from photogrammetry_importer.blender_logging import log_report
+
 
 class DummyCamera(object):
     def __init__(self):
@@ -372,3 +374,18 @@ def get_selected_camera():
         return selected_obj
     else:
         return None
+
+def check_radial_distortion(radial_distortion, camera_name, op):
+    # TODO 
+    # Integrate lens distortion nodes
+    # https://docs.blender.org/manual/en/latest/compositing/types/distort/lens_distortion.html
+    # to properly support radial distortion consisting of a single parameter
+
+    if radial_distortion is None or radial_distortion == 0.0:
+        return
+
+    output = 'Blender does not support radial distortion of cameras in the 3D View.'
+    output += ' Distortion of camera ' + camera_name + ': ' + str(radial_distortion) + '.'
+    output += ' If possible, re-compute the reconstruction using a camera model without radial distortion parameters.'
+    output += ' Use "Suppress Distortion Warnings" in the import settings to suppress this message.'
+    log_report('WARNING', output, op)

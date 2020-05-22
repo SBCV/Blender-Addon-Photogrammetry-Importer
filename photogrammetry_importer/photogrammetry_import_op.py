@@ -80,7 +80,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, MeshImportProp
         self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
         cameras, points, mesh_ifp = ColmapFileHandler.parse_colmap_folder(
-            path, self.image_dp, self.image_fp_type, self)
+            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, self)
 
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
@@ -138,7 +138,7 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
         self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
 
         cameras, points = NVMFileHandler.parse_nvm_file(
-            path, self.image_dp, self.image_fp_type, self)
+            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, self)
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
         
@@ -177,7 +177,7 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
         self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
         cameras, points = OpenMVGJSONFileHandler.parse_openmvg_file(
-            path, self.image_dp, self.image_fp_type, self)
+            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
@@ -216,7 +216,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
         self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
         cameras, points, mesh_fp = MeshroomFileHandler.parse_meshroom_file(
-            path, self.image_dp, self.image_fp_type, self)
+            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))

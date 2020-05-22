@@ -5,6 +5,7 @@ import numpy as np
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
+from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion 
 
 class NVMFileHandler(object):
 
@@ -14,7 +15,7 @@ class NVMFileHandler(object):
 
 
     @staticmethod
-    def _parse_cameras(input_file, num_cameras, camera_calibration_matrix, image_dp, image_fp_type, op):
+    def _parse_cameras(input_file, num_cameras, camera_calibration_matrix, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
         """
         VisualSFM CAMERA coordinate system is the standard CAMERA coordinate system in computer vision (not the same
@@ -53,6 +54,8 @@ class NVMFileHandler(object):
             center_vec = np.array([camera_center_x, camera_center_y, camera_center_z])
 
             radial_distortion = float(line_values[9])
+            if not suppress_distortion_warnings:
+                check_radial_distortion(radial_distortion, relative_path, op)
 
             if camera_calibration_matrix is None:
                 # In this case, we have no information about the principal point
@@ -84,7 +87,9 @@ class NVMFileHandler(object):
             translation_vec = NVMFileHandler.compute_camera_coordinate_system_translation_vector(center_vec, current_camera.get_rotation_mat())
             current_camera._translation_vec = translation_vec
 
-            current_camera.set_calibration(camera_calibration_matrix, radial_distortion=radial_distortion)
+            current_camera.set_calibration(
+                camera_calibration_matrix, 
+                radial_distortion=radial_distortion)
             # op.report({'INFO'}, 'Calibration mat:')
             # op.report({'INFO'}, str(camera_calibration_matrix))
 
@@ -134,7 +139,7 @@ class NVMFileHandler(object):
         return calib_mat
 
     @staticmethod
-    def parse_nvm_file(input_visual_fsm_file_name, image_dp, image_fp_type, op):
+    def parse_nvm_file(input_visual_fsm_file_name, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
         op.report({'INFO'}, 'Parse NVM file: ' + input_visual_fsm_file_name)
         input_file = open(input_visual_fsm_file_name, 'r')
@@ -157,7 +162,7 @@ class NVMFileHandler(object):
         print('Amount Cameras (Images in NVM file): ' + str(amount_cameras))
 
         cameras = NVMFileHandler._parse_cameras(
-            input_file, amount_cameras, calibration_matrix, image_dp, image_fp_type, op)
+            input_file, amount_cameras, calibration_matrix, image_dp, image_fp_type, suppress_distortion_warnings, op)
         current_line = (input_file.readline()).rstrip()
         assert current_line == ''
         current_line = (input_file.readline()).rstrip()

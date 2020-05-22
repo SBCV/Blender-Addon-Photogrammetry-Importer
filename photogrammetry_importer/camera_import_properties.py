@@ -119,12 +119,20 @@ class CameraImportProperties():
                         "This option allows to remove different signs.",
         default=True)
 
+    suppress_distortion_warnings: BoolProperty(
+        name="Suppress Distortion Warnings",
+        description = "Radial distortion might lead to incorrect alignments of cameras and points. "  +
+                      "Enable this option to suppress corresponding warnings. " +
+                      "If possible, consider to re-compute the reconstruction using a camera model without radial distortion.", 
+        default=False)
+    
     adjust_render_settings: BoolProperty(
         name="Adjust Render Settings",
         description = "Adjust the render settings according to the corresponding images. "  +
                       "All images have to be captured with the same device). " +
                       "If disabled the visualization of the camera cone in 3D view might be incorrect.", 
         default=True)
+
     camera_extent: FloatProperty(
         name="Initial Camera Extent (in Blender Units)", 
         description = "Initial Camera Extent (Visualization)",
@@ -166,6 +174,7 @@ class CameraImportProperties():
             box.prop(self, "consider_missing_cameras_during_animation")
             box.prop(self, "remove_rotation_discontinuities")
 
+        camera_box.prop(self, "suppress_distortion_warnings")
         camera_box.prop(self, "adjust_render_settings")
 
     def enhance_camera_with_intrinsics(self, cameras):

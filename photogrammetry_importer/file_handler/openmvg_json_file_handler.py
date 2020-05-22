@@ -4,11 +4,12 @@ import os
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
+from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
 
 class OpenMVGJSONFileHandler:
 
     @staticmethod
-    def parse_cameras(json_data, image_dp, image_fp_type, op):
+    def parse_cameras(json_data, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
         views = {item['key']:item for item in json_data['views']}
         intrinsics = {item['key']:item for item in json_data['intrinsics']}
@@ -62,15 +63,20 @@ class OpenMVGJSONFileHandler:
                     cx = principal_point[0]
                     cy = principal_point[1]
         
-                if 'disto_k3' in intrinsic_data:
-                    op.report({'INFO'},'3 Radial Distortion Parameters are not supported')
-                    assert False
-
+                
                 # For Radial there are several options: "None", disto_k1, disto_k3
-                if 'disto_k1' in intrinsic_data:
+                if 'disto_k3' in intrinsic_data:
+                    radial_distortion = [
+                        float(intrinsic_data['disto_k3'][0]), 
+                        float(intrinsic_data['disto_k3'][1]), 
+                        float(intrinsic_data['disto_k3'][2])]
+                elif 'disto_k1' in intrinsic_data:
                     radial_distortion = float(intrinsic_data['disto_k1'][0])
                 else:  # No radial distortion, i.e. pinhole camera model
                     radial_distortion = 0
+                
+                if not suppress_distortion_warnings:
+                    check_radial_distortion(radial_distortion, camera._relative_fp, op)
 
                 camera_calibration_matrix = np.array([
                     [focal_length, 0, cx],
@@ -154,7 +160,7 @@ class OpenMVGJSONFileHandler:
         return points
 
     @staticmethod
-    def parse_openmvg_file(input_openMVG_file_path, image_dp, image_fp_type, op):
+    def parse_openmvg_file(input_openMVG_file_path, image_dp, image_fp_type, suppress_distortion_warnings, op):
         """
         The path_to_input_files parameter is optional, if provided the returned points carry also color information
         :param input_openMVG_file_path:
@@ -166,7 +172,8 @@ class OpenMVGJSONFileHandler:
         input_file = open(input_openMVG_file_path, 'r')
         json_data = json.load(input_file)
 
-        cams = OpenMVGJSONFileHandler.parse_cameras(json_data, image_dp, image_fp_type, op)
+        cams = OpenMVGJSONFileHandler.parse_cameras(
+            json_data, image_dp, image_fp_type, suppress_distortion_warnings, op)
         view_index_to_absolute_fp = {
             cam.view_index: cam.get_absolute_fp() for cam in cams}
         points = OpenMVGJSONFileHandler.parse_points(

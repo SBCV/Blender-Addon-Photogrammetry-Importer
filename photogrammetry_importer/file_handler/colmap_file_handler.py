@@ -9,6 +9,7 @@ from photogrammetry_importer.ext.read_write_model import Point3D as ColmapPoint3
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
+from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
 
 
 # From photogrammetry_importer\ext\read_write_model.py
@@ -42,37 +43,43 @@ from photogrammetry_importer.point import Point
 def parse_camera_param_list(cam):
     name = cam.model
     params = cam.params 
-    f, fx, fy, cx, cy = None, None, None, None, None
+    f, fx, fy, cx, cy, r = None, None, None, None, None, None
     if name == "SIMPLE_PINHOLE":
         f, cx, cy = params
     elif name == "PINHOLE":
         fx, fy, cx, cy = params
     elif name == "SIMPLE_RADIAL":
-        f, cx, cy, _ = params
+        f, cx, cy, r = params
     elif name == "RADIAL":
-        f, cx, cy, _, _ = params
+        f, cx, cy, k1, k2 = params
+        r = [k1, k2]
     elif name == "OPENCV":
-        fx, fy, cx, cy, _, _, _, _ = params
+        fx, fy, cx, cy, k1, k2, p1, p2 = params
+        r = [k1, k2, p1, p2]
     elif name == "OPENCV_FISHEYE":
-        fx, fy, cx, cy, _, _, _, _ = params
+        fx, fy, cx, cy, k1, k2, k3, k4 = params
+        r = [k1, k2, k3, k4]
     elif name == "FULL_OPENCV":
-        fx, fy, cx, cy, _, _, _, _, _, _, _, _ = params
+        fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, k5, k6 = params
+        r = [k1, k2, p1, p2, k3, k4, k5, k6]
     elif name == "FOV":
-        fx, fy, cx, cy, _ = params
+        fx, fy, cx, cy, r = params
     elif name == "SIMPLE_RADIAL_FISHEYE":
-        f, cx, cy, _ = params
+        f, cx, cy, r = params
     elif name == "RADIAL_FISHEYE":
-        f, cx, cy, _, _ = params
+        f, cx, cy, k1, k2 = params
+        r = [k1, k2]
     elif name == "THIN_PRISM_FISHEYE":
-        fx, fy, cx, cy, _, _, _, _, _, _, _, _ = params
+        fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, sx1, sy1 = params
+        r = [k1, k2, p1, p2, k3, k4, sx1, sy1]
     if f is None:
         f = (fx + fy) * 0.5
-    return f, cx, cy
+    return f, cx, cy, r
 
 class ColmapFileHandler(object):
 
     @staticmethod
-    def convert_cameras(id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, op):
+    def convert_cameras(id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, suppress_distortion_warnings, op):
         # From photogrammetry_importer\ext\read_write_model.py
         #   CameraModel = collections.namedtuple(
         #       "CameraModel", ["model_id", "model_name", "num_params"])
@@ -102,7 +109,10 @@ class ColmapFileHandler(object):
             current_camera.width = camera_model.width
             current_camera.height = camera_model.height
 
-            focal_length, cx, cy = parse_camera_param_list(camera_model)
+            focal_length, cx, cy, r = parse_camera_param_list(camera_model)
+            if not suppress_distortion_warnings:
+                check_radial_distortion(r, current_camera._relative_fp, op)
+
             camera_calibration_matrix = np.array([
                 [focal_length, 0, cx],
                 [0, focal_length, cy],
@@ -161,7 +171,7 @@ class ColmapFileHandler(object):
         return valid
 
     @staticmethod
-    def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, op):
+    def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
         op.report({'INFO'}, 'Parse Colmap model folder: ' + model_idp)
 
@@ -176,7 +186,7 @@ class ColmapFileHandler(object):
         op.report({'INFO'}, 'id_to_col_cameras: ' + str(id_to_col_cameras))
 
         cameras = ColmapFileHandler.convert_cameras(
-            id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, op)
+            id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, suppress_distortion_warnings, op)
 
         points3D = ColmapFileHandler.convert_points(
             id_to_col_points3D)
@@ -195,7 +205,7 @@ class ColmapFileHandler(object):
         return model_idp, mesh_ifp
 
     @staticmethod
-    def parse_colmap_folder(idp, image_dp, image_fp_type, op):
+    def parse_colmap_folder(idp, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
         op.report({'INFO'}, 'idp: ' + str(idp))
 
@@ -206,7 +216,7 @@ class ColmapFileHandler(object):
             model_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
 
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(
-            model_idp, image_dp, image_fp_type, op)
+            model_idp, image_dp, image_fp_type, suppress_distortion_warnings, op)
 
         return cameras, points, mesh_ifp
 

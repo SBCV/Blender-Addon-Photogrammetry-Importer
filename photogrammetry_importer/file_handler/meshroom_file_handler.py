@@ -4,6 +4,7 @@ import os
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
+from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
 
 def get_element(data_list, id_string, query_id, op):
     result = None
@@ -19,7 +20,7 @@ class MeshroomFileHandler:
     # Note: *.SfM files are actually just *.JSON files.
 
     @staticmethod
-    def _parse_cameras_from_json_data(json_data, image_dp, image_fp_type, op):
+    def _parse_cameras_from_json_data(json_data, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
         cams = []
         image_index_to_camera_index = {}
@@ -79,6 +80,9 @@ class MeshroomFileHandler:
             else:
                 radial_distortion = 0.0
 
+            if not suppress_distortion_warnings:
+                check_radial_distortion(radial_distortion, camera._relative_fp, op)
+
             camera_calibration_matrix = np.array([
                 [focal_length, 0, cx],
                 [0, focal_length, cy],
@@ -123,7 +127,7 @@ class MeshroomFileHandler:
         return points
 
     @staticmethod
-    def parse_sfm_file(sfm_sfm_fp, image_dp, image_fp_type, op):
+    def parse_sfm_file(sfm_sfm_fp, image_dp, image_fp_type, suppress_distortion_warnings, op):
         """
         Parses cameras.sfm/sfm.sfm/sfm.json files created by the StructureFromMotion / ConvertSfMFormat node in Meshroom
         :param sfm_sfm_fp:
@@ -135,7 +139,7 @@ class MeshroomFileHandler:
         json_data = json.load(input_file)
 
         cams, image_index_to_camera_index = MeshroomFileHandler._parse_cameras_from_json_data(
-            json_data, image_dp, image_fp_type, op)
+            json_data, image_dp, image_fp_type, suppress_distortion_warnings, op)
         if 'structure' in json_data:
             points = MeshroomFileHandler._parse_points_from_json_data(
                 json_data, image_index_to_camera_index, op)
@@ -203,7 +207,7 @@ class MeshroomFileHandler:
 
 
     @staticmethod
-    def parse_meshroom_file(meshroom_ifp, image_dp, image_fp_type, op):
+    def parse_meshroom_file(meshroom_ifp, image_dp, image_fp_type, suppress_distortion_warnings, op):
         """
         :param meshroom_ifp:
         :return:
@@ -220,7 +224,7 @@ class MeshroomFileHandler:
             mesh_fp = None
 
         cams, points = MeshroomFileHandler.parse_sfm_file(
-            meshroom_ifp, image_dp, image_fp_type, op)
+            meshroom_ifp, image_dp, image_fp_type, suppress_distortion_warnings, op)
 
         op.report({'INFO'},'parse_meshroom_file: Done')
         return cams, points, mesh_fp
