@@ -5,6 +5,8 @@ import bpy
 from photogrammetry_importer.point import Point
 from photogrammetry_importer.utils.blender_camera_utils import get_selected_camera
 from photogrammetry_importer.utils.opengl_utils import render_opengl_image
+from photogrammetry_importer.opengl.visualization_utils import DrawManager
+from photogrammetry_importer.blender_logging import log_report
 
 from bpy.props import (StringProperty,
                        BoolProperty,
@@ -13,9 +15,14 @@ from bpy.props import (StringProperty,
 
 from bpy_extras.io_utils import (ExportHelper)
 
+class OpenGLPanelVizSettings(bpy.types.PropertyGroup):
+    viz_point_size : IntProperty(
+        name="Point Size",
+        description="OpenGL visualization point size.",
+        default=10)
 
-class OpenGLPanelGeneralSettings(bpy.types.PropertyGroup):
-    point_size : IntProperty(
+class OpenGLPanelWriteSettings(bpy.types.PropertyGroup):
+    write_point_size : IntProperty(
         name="Point Size",
         description="OpenGL point size.",
         default=10)
@@ -53,9 +60,13 @@ class OpenGLPanel(bpy.types.Panel):
         # https://blender.stackexchange.com/questions/28966/the-register-class-function-how-to-declare
         # https://blender.stackexchange.com/questions/17751/how-display-and-use-operator-properties-in-a-python-blender-ui-panel
 
-        bpy.utils.register_class(OpenGLPanelGeneralSettings)
-        bpy.types.Scene.opengl_panel_general_settings = PointerProperty(
-            type=OpenGLPanelGeneralSettings)
+        bpy.utils.register_class(OpenGLPanelVizSettings)
+        bpy.types.Scene.opengl_panel_viz_settings = PointerProperty(
+            type=OpenGLPanelVizSettings)
+
+        bpy.utils.register_class(OpenGLPanelWriteSettings)
+        bpy.types.Scene.opengl_panel_write_settings = PointerProperty(
+            type=OpenGLPanelWriteSettings)
 
         bpy.utils.register_class(OpenGLPanelExportImageSettings)
         bpy.types.Scene.opengl_panel_export_image_settings = PointerProperty(
@@ -65,14 +76,18 @@ class OpenGLPanel(bpy.types.Panel):
         bpy.types.Scene.opengl_panel_export_animation_settings = PointerProperty(
             type=OpenGLPanelExportAnimationSettings)
 
+        bpy.utils.register_class(UpdatePointCloudVisualizationOperator)
         bpy.utils.register_class(SaveOpenGLRenderImageOperator)
         bpy.utils.register_class(ExportOpenGLRenderImageOperator)
         bpy.utils.register_class(ExportOpenGLRenderAnimationOperator)
 
     @classmethod
     def unregister(cls):
-        bpy.utils.unregister_class(OpenGLPanelGeneralSettings)
-        del bpy.types.Scene.opengl_panel_general_settings
+        bpy.utils.unregister_class(OpenGLPanelVizSettings)
+        del bpy.types.Scene.opengl_panel_viz_settings
+
+        bpy.utils.unregister_class(OpenGLPanelWriteSettings)
+        del bpy.types.Scene.opengl_panel_write_settings
 
         bpy.utils.unregister_class(OpenGLPanelExportImageSettings)
         del bpy.types.Scene.opengl_panel_export_image_settings
@@ -80,41 +95,73 @@ class OpenGLPanel(bpy.types.Panel):
         bpy.utils.unregister_class(OpenGLPanelExportAnimationSettings)
         del bpy.types.Scene.opengl_panel_export_animation_settings
 
+        bpy.utils.unregister_class(UpdatePointCloudVisualizationOperator)
         bpy.utils.unregister_class(SaveOpenGLRenderImageOperator)
         bpy.utils.unregister_class(ExportOpenGLRenderImageOperator)
         bpy.utils.unregister_class(ExportOpenGLRenderAnimationOperator)
 
     def draw(self, context):
         layout = self.layout
-
-        layout.label(text="Select a camera to render/export an OpenGL rendering")
-        row = layout.row()
+        viz_box = layout.box()
+        viz_box.label(text="Visualization")
+        row = viz_box.row()
         row.prop(
-            context.scene.opengl_panel_general_settings, 
-            "point_size", 
-            text="OpenGL Point Size")
-        row = layout.row()
-        row.operator("export_opengl.save_opengl_render_image")
+            context.scene.opengl_panel_viz_settings, 
+            "viz_point_size", 
+            text="OpenGL Visualization Point Size")
+        row = viz_box.row()
+        row.operator("photogrammetry_importer.update_point_cloud_viz")
+
+        write_box = layout.box()
+        write_box.label(text="Select a camera to save/export an OpenGL rendering:")
+        row = write_box.row()
+        row.prop(
+            context.scene.opengl_panel_write_settings, 
+            "write_point_size", 
+            text="OpenGL Save/Exort Point Size")
+        save_box = write_box.box()
+        save_box.label(text="Save results:")
+        row = save_box.row()
+        row.operator("photogrammetry_importer.save_opengl_render_image")
         
-        export_box = layout.box()
+        export_box = write_box.box()
+        export_box.label(text="Export results:")
         row = export_box.row()
         row.prop(
             context.scene.opengl_panel_export_image_settings, 
             "file_format", 
             text="File Format")
         row = export_box.row()
-        row.operator("export_opengl.export_opengl_render_image")
+        row.operator("photogrammetry_importer.export_opengl_render_image")
         row = export_box.row()
         row.prop(
             context.scene.opengl_panel_export_animation_settings, 
             "use_camera_keyframes", 
             text="Use Camera Keyframes")
         row = export_box.row()
-        row.operator("export_opengl.export_opengl_render_animation")
+        row.operator("photogrammetry_importer.export_opengl_render_animation")
 
+class UpdatePointCloudVisualizationOperator(bpy.types.Operator):
+    bl_idname = "photogrammetry_importer.update_point_cloud_viz"
+    bl_label = "Update Visualization"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        draw_manager = DrawManager.get_singleton()
+        viz_point_size = context.scene.opengl_panel_viz_settings.viz_point_size
+        draw_manager.set_point_size(viz_point_size)
+        for area in bpy.context.screen.areas:
+            if area.type == 'VIEW_3D':
+                area.tag_redraw()
+                break
+
+        return {'FINISHED'}
 
 class SaveOpenGLRenderImageOperator(bpy.types.Operator):
-    bl_idname = "export_opengl.save_opengl_render_image"
+    bl_idname = "photogrammetry_importer.save_opengl_render_image"
     bl_label = "Save as Image"
 
     @classmethod
@@ -124,17 +171,17 @@ class SaveOpenGLRenderImageOperator(bpy.types.Operator):
 
     def execute(self, context):
         self.report({'INFO'}, 'Save opengl render as image: ...')
-        point_size = context.scene.opengl_panel_general_settings.point_size
+        write_point_size = context.scene.opengl_panel_write_settings.write_point_size
         cam = get_selected_camera()
         image_name = "OpenGL Render"
-        self.report({'INFO'}, 'image_name: ' + image_name)
-        render_opengl_image(image_name, cam, point_size)
-        self.report({'INFO'}, 'Save opengl render as image: Done')
+        log_report('INFO', 'image_name: ' + image_name, self)
+        render_opengl_image(image_name, cam, write_point_size)
+        log_report('INFO', 'Save opengl render as image: Done', self)
         return {'FINISHED'}
 
 
 class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
-    bl_idname = "export_opengl.export_opengl_render_image"
+    bl_idname = "photogrammetry_importer.export_opengl_render_image"
     bl_label = "Export as Image"
     
     filename_ext : StringProperty(default=".png")
@@ -145,11 +192,11 @@ class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
         return cam is not None
 
     def execute(self, context):
-        self.report({'INFO'}, 'Export opengl render as image: ...')
-        point_size = context.scene.opengl_panel_general_settings.point_size
+        log_report('INFO', 'Export opengl render as image: ...', self)
+        write_point_size = context.scene.opengl_panel_write_settings.write_point_size
         file_format = context.scene.opengl_panel_export_image_settings.file_format
 
-        self.report({'INFO'}, 'Output File Path: ' + str(self.filepath))
+        log_report('INFO', 'Output File Path: ' + str(self.filepath), self)
 
         # Used to cache the results 
         image_name = "Export Opengl"
@@ -158,14 +205,14 @@ class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
 
         cam = get_selected_camera()
 
-        render_opengl_image(image_name, cam, point_size)
+        render_opengl_image(image_name, cam, write_point_size)
         bpy.data.images[image_name].save_render(self.filepath)
-        self.report({'INFO'}, 'Save opengl render as image: Done')
+        log_report('INFO', 'Save opengl render as image: Done', self)
         return {'FINISHED'}
 
 
 class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
-    bl_idname = "export_opengl.export_opengl_render_animation"
+    bl_idname = "photogrammetry_importer.export_opengl_render_animation"
     bl_label = "Export as Animation"
     
     filename_ext = ""
@@ -193,15 +240,15 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
         return indices
 
     def execute(self, context):
-        self.report({'INFO'}, 'Export opengl render as image: ...')
-        point_size = context.scene.opengl_panel_general_settings.point_size
+        log_report('INFO', 'Export opengl render as animation: ...', self)
+        write_point_size = context.scene.opengl_panel_write_settings.write_point_size
 
         use_camera_keyframes = context.scene.opengl_panel_export_animation_settings.use_camera_keyframes
         file_format = context.scene.opengl_panel_export_image_settings.file_format
 
         # The export helper stores the path in self.filepath (even if its a directory)
         output_dp = self.filepath
-        self.report({'INFO'}, 'Output Directory Path: ' + str(output_dp))
+        log_report('INFO', 'Output Directory Path: ' + str(output_dp), self)
 
         if not os.path.isdir(output_dp):
             os.mkdir(output_dp)
@@ -217,10 +264,10 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
             current_frame_fn = str(idx).zfill(5) + ext
             current_frame_fp = os.path.join(output_dp, current_frame_fn)
 
-            self.report({'INFO'}, 'Output File Path: ' + str(current_frame_fp))
-            render_opengl_image(image_name, cam, point_size)
+            log_report('INFO', 'Output File Path: ' + str(current_frame_fp), self)
+            render_opengl_image(image_name, cam, write_point_size)
             bpy.data.images[image_name].save_render(current_frame_fp)
 
-        self.report({'INFO'}, 'Save opengl render as image: Done')
+        log_report('INFO', 'Save opengl render as animation: Done', self)
         return {'FINISHED'}
 

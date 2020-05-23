@@ -71,6 +71,10 @@ class DrawManager():
         del self.anchor_to_point_coords[object_anchor]
         del self.anchor_to_point_colors[object_anchor]
 
+    def set_point_size(self, point_size):
+        for draw_back_handler in self.draw_callback_handler_list:
+            draw_back_handler.point_size = point_size
+
 class DrawCallBackHandler():
 
     def __init__(self):
@@ -83,6 +87,7 @@ class DrawCallBackHandler():
         self.object_anchor_handle = None
         self.object_anchor_pose_previous = np.array([])
         self.batch_cached = None
+        self.point_size = 5
 
     def draw_points_callback(self, draw_manager, object_anchor, positions, colors):
 
@@ -113,7 +118,7 @@ class DrawCallBackHandler():
                             self.shader, "POINTS", {"pos": transf_pos_list, "color": colors})
 
                     self.shader.bind()
-
+                    bgl.glPointSize(self.point_size)
                     bgl.glEnable(bgl.GL_DEPTH_TEST)
                     bgl.glDepthMask(bgl.GL_TRUE)
 
