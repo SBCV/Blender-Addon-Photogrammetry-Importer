@@ -30,7 +30,8 @@ def compute_particle_color_texture(points):
             # opacity (0 = transparent, 1 = opaque)
             #local_pixels[row_offset + column_offset + 3] = 1.0    # already set by default   
         
-    image.pixels = local_pixels[:] 
+    image.pixels = local_pixels[:]
+    image.pack()
     return image
 
 def create_particle_color_nodes(node_tree, points, set_particle_color_flag, particle_overwrite_color=None):
