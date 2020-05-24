@@ -3,8 +3,7 @@ import bpy
 import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
-from photogrammetry_importer.point import Point
-
+from photogrammetry_importer.blender_logging import log_report
 
 def compute_transformed_coords(object_anchor_matrix_world, positions):
     pos_arr = np.asarray(positions)
@@ -41,8 +40,7 @@ class DrawManager():
            bpy.types.Object.current_draw_manager = draw_manger
         return draw_manger
 
-    def register_points_draw_callback(self, object_anchor, points):
-        coords, colors = Point.split_points(points)
+    def register_points_draw_callback(self, object_anchor, coords, colors):
         draw_callback_handler = DrawCallBackHandler()
         draw_callback_handler.register_points_draw_callback(
             self, object_anchor, coords, colors)
@@ -125,7 +123,7 @@ class DrawCallBackHandler():
                     self.batch_cached.draw(self.shader)
 
         else:
-            print("Removing draw handler")
+            log_report('INFO', 'Removing draw handler of deleted point cloud handle')
             if self.draw_handler_handle is not None:
                 bpy.types.SpaceView3D.draw_handler_remove(
                     self.draw_handler_handle, 'WINDOW')

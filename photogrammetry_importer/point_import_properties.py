@@ -15,6 +15,10 @@ class PointImportProperties():
        name="Draw Points in the 3D View with OpenGL.",
         description="Draw Points in the 3D View. Allows to visualize point clouds with many elements. These are not visible in eevee/cycles renderings.",
         default=True)
+    add_points_to_point_cloud_handle: BoolProperty(
+        name="Add point data to the point cloud handle.",
+        description="This allows to draw the point cloud (again) with OpenGL after saving and reloading the blend file.",
+        default=True)
     add_points_as_particle_system: BoolProperty(
         name="Add Points as Particle System",
         description="Use a particle system to represent vertex positions with objects. Can be rendered with eevee/cycles.",
@@ -53,8 +57,11 @@ class PointImportProperties():
         point_box = layout.box()
         point_box.prop(self, "import_points")
         if self.import_points:
+            opengl_box = point_box.box()
+            opengl_box.prop(self, "draw_points_with_gpu")
+            if self.draw_points_with_gpu:
+                opengl_box.prop(self, "add_points_to_point_cloud_handle")
             particle_box = point_box.box()
-            particle_box.prop(self, "draw_points_with_gpu")
             particle_box.prop(self, "add_points_as_particle_system")
             if self.add_points_as_particle_system:
                 particle_box.prop(self, "mesh_type")
@@ -69,7 +76,7 @@ class PointImportProperties():
         if self.import_points:
 
             if self.draw_points_with_gpu:
-                draw_points(self, points)
+                draw_points(self, points, self.add_points_to_point_cloud_handle)
 
             point_cloud_obj_name = add_points_as_mesh(
                 self, 

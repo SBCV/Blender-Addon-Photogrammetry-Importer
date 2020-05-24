@@ -2,35 +2,52 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
+from photogrammetry_importer.point import Point
 from photogrammetry_importer.utils.blender_utils import add_obj
 from photogrammetry_importer.utils.stop_watch import StopWatch
 
-def compute_particle_color_texture(points):
-    # To view the texture we set the height of the texture to vis_image_height 
-    vis_image_height = 1
-    image = bpy.data.images.new(
-        'ParticleColor', 
-        len(points), 
-        vis_image_height)
 
+def copy_values_to_image(value_tripplets, image_name):
+    image = bpy.data.images[image_name]
     # working on a copy of the pixels results in a MASSIVE performance speed
     local_pixels = list(image.pixels[:])
-    
-    num_points = len(points)
-    
-    for j in range(vis_image_height):
-        for point_index, point in enumerate(points):
-            column_offset = point_index * 4     # (R,G,B,A)
-            row_offset = j * 4 * num_points
-            color = point.color 
-            # Order is R,G,B, opacity
-            local_pixels[row_offset + column_offset] = color[0] / 255.0
-            local_pixels[row_offset + column_offset + 1] = color[1] / 255.0
-            local_pixels[row_offset + column_offset + 2] = color[2] / 255.0
-            # opacity (0 = transparent, 1 = opaque)
-            #local_pixels[row_offset + column_offset + 3] = 1.0    # already set by default   
-        
+    for value_index, tripplet in enumerate(value_tripplets):
+        column_offset = value_index * 4     # (R,G,B,A)
+        # Order is R,G,B, opacity
+        local_pixels[column_offset] = tripplet[0]
+        local_pixels[column_offset + 1] = tripplet[1]
+        local_pixels[column_offset + 2] = tripplet[2]
+        # opacity (0 = transparent, 1 = opaque)
+        #local_pixels[column_offset + 3] = 1.0    # already set by default   
     image.pixels = local_pixels[:]
+
+
+def compute_particle_coord_texture(coords, name='ParticleCoord'):
+
+    image = bpy.data.images.new(
+        name=name, 
+        alpha=False,
+        # is_data=True,
+        float_buffer=True,
+        width=len(coords), 
+        height=1)
+
+    copy_values_to_image(colors, image.name)
+    image = bpy.data.images[image.name]
+    # https://docs.blender.org/api/current/bpy.types.Image.html#bpy.types.Image.pack
+    image.pack()
+    return image
+
+def compute_particle_color_texture(colors, name='ParticleColor'):
+    # To view the texture we set the height of the texture to vis_image_height 
+    image = bpy.data.images.new(
+        name=name, 
+        width=len(colors), 
+        height=1)
+
+    copy_values_to_image(colors, image.name)
+    image = bpy.data.images[image.name]
+    # https://docs.blender.org/api/current/bpy.types.Image.html#bpy.types.Image.pack
     image.pack()
     return image
 
@@ -52,7 +69,8 @@ def create_particle_color_nodes(node_tree, points, set_particle_color_flag, part
         else:
             particle_color_node = node_tree.nodes.new("ShaderNodeTexImage")
 
-        particle_color_node.image = compute_particle_color_texture(points)
+        coords, colors = Point.split_points(points)
+        particle_color_node.image = compute_particle_color_texture(colors)
 
         particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
         divide_node = node_tree.nodes.new('ShaderNodeMath')

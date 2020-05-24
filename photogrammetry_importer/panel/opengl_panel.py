@@ -15,11 +15,13 @@ from bpy.props import (StringProperty,
 
 from bpy_extras.io_utils import (ExportHelper)
 
+
 class OpenGLPanelVizSettings(bpy.types.PropertyGroup):
     viz_point_size : IntProperty(
         name="Point Size",
         description="OpenGL visualization point size.",
         default=10)
+
 
 class OpenGLPanelWriteSettings(bpy.types.PropertyGroup):
     write_point_size : IntProperty(
@@ -50,7 +52,7 @@ class OpenGLPanel(bpy.types.Panel):
     bl_category = "PhotogrammetryImporter"
 
     @classmethod
-    def poll(cls,context):
+    def poll(cls, context):
         return True
 
     @classmethod
@@ -141,6 +143,7 @@ class OpenGLPanel(bpy.types.Panel):
         row = export_box.row()
         row.operator("photogrammetry_importer.export_opengl_render_animation")
 
+
 class UpdatePointCloudVisualizationOperator(bpy.types.Operator):
     bl_idname = "photogrammetry_importer.update_point_cloud_viz"
     bl_label = "Update Visualization"
@@ -157,8 +160,8 @@ class UpdatePointCloudVisualizationOperator(bpy.types.Operator):
             if area.type == 'VIEW_3D':
                 area.tag_redraw()
                 break
-
         return {'FINISHED'}
+
 
 class SaveOpenGLRenderImageOperator(bpy.types.Operator):
     bl_idname = "photogrammetry_importer.save_opengl_render_image"

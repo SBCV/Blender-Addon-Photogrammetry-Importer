@@ -32,7 +32,6 @@ bl_info = {
 
 import bpy
 
-
 # load and reload submodules
 ##################################
 
@@ -54,6 +53,8 @@ from photogrammetry_importer.photogrammetry_export_op import ExportNVM
 from photogrammetry_importer.photogrammetry_export_op import ExportColmap
 
 from photogrammetry_importer.panel.opengl_panel import OpenGLPanel
+from photogrammetry_importer.opengl.visualization_utils import redraw_points
+bpy.app.handlers.load_post.append(redraw_points)
 
 # register
 ##################################
