@@ -22,7 +22,7 @@ bl_info = {
     "name": "Photogrammetry Import Export Addon",
     "description": "Allows to import and export photogrammetry results (cameras and points).",
     "author": "Sebastian Bullinger",
-    "version": (1, 0, 0),
+    "version": (2, 0, 0),
     "blender": (2, 80, 0),
     "location": "View3D",
     "warning": "",
