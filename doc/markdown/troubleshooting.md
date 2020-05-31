@@ -12,3 +12,9 @@ Under Windows delete the following folder:\
 `%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\<Version>\scripts\addons\photogrammetry_importer`\
 In the case of Blender 2.82:\
 `%USERPROFILE%\AppData\Roaming\Blender Foundation\Blender\2.82\scripts\addons\photogrammetry_importer`
+
+#### Linux
+Under Linux delete:\
+`~/.config/blender/<Version>/scripts/addons/photogrammetry_importer`\
+In the case of Blender 2.82:\
+`~/.config/blender/2.82/scripts/addons/photogrammetry_importer`
