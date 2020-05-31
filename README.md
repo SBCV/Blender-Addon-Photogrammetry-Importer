@@ -23,6 +23,7 @@ Tested for Blender 2.81. There is an older version of the addon available for Bl
 ## Getting Started
 - [Tutorial Video](https://www.youtube.com/watch?v=BwwaT2scoP0) 
 - [Installation Instructions](doc/markdown/installation.md)
+- [Troubleshooting](doc/markdown/troubleshooting.md)
 - [Examples](doc/markdown/example.md)
 - [Import Data](doc/markdown/import.md)
 - [Export Data](doc/markdown/export.md)
