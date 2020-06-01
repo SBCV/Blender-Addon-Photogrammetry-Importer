@@ -239,7 +239,7 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
             indices = self.get_animation_indices(cam)
         else:
             scene = bpy.context.scene
-            indices = range(scene.frame_start, sceene.frame_end)
+            indices = range(scene.frame_start, scene.frame_end)
         return indices
 
     def execute(self, context):
