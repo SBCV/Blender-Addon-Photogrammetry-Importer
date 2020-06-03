@@ -10,11 +10,25 @@ from photogrammetry_importer.blender_logging import log_report
 class OpenMVGJSONFileHandler:
 
     @staticmethod
+    def get_default_polymorphic_name(intrinsics):
+        default_polymorpihc_name = None
+        for _, intrinsic in intrinsics.items():
+            if intrinsic['key'] == 0:
+                default_polymorpihc_name = intrinsic['value']['polymorphic_name']
+                break
+        assert default_polymorpihc_name is not None
+        return default_polymorpihc_name
+
+
+    @staticmethod
     def parse_cameras(json_data, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
         views = {item['key']:item for item in json_data['views']}
         intrinsics = {item['key']:item for item in json_data['intrinsics']}
         extrinsics = {item['key']:item for item in json_data['extrinsics']}
+
+        # Regard 3D stores the polymorhic attribute in the first intrinsic
+        default_polymorphic_name = OpenMVGJSONFileHandler.get_default_polymorphic_name(intrinsics)
 
         # IMPORTANT:
         # Views contain the description about the dataset and attribute to Pose and Intrinsic data.
@@ -48,8 +62,17 @@ class OpenMVGJSONFileHandler:
                 id_intrinsic = view_data['id_intrinsic']
 
                 # handle intrinsic params
-                intrinsic_data = intrinsics[int(id_intrinsic)]['value']['ptr_wrapper']['data']
-                polymorphic_name = intrinsics[int(id_intrinsic)]['value']['polymorphic_name']
+                intrinsic_values = intrinsics[int(id_intrinsic)]['value']
+                intrinsic_data = intrinsic_values['ptr_wrapper']['data']
+                
+
+                if 'polymorphic_name' in intrinsic_values:
+                    polymorphic_name = intrinsic_values['polymorphic_name']
+                else:
+                    polymorphic_name = default_polymorphic_name
+                    log_report(
+                        'WARNING', 'Key polymorphic_name in intrinsic with id ' + str(id_intrinsic) + 
+                        ' is missing, substituting with polymorphic_name of first intrinsic.', op) 
 
                 if polymorphic_name == 'spherical':
                     camera.set_panoramic_type(Camera.panoramic_type_equirectangular)
