@@ -6,6 +6,10 @@ from gpu_extras.batch import batch_for_shader
 from photogrammetry_importer.blender_logging import log_report
 
 def compute_transformed_coords(object_anchor_matrix_world, positions):
+
+    if len(positions) == 0:
+        return []
+
     pos_arr = np.asarray(positions)
     ones_arr = np.ones((pos_arr.shape[0],1))
     pos_hom_arr = np.hstack((pos_arr, ones_arr))
