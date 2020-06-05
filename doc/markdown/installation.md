@@ -1,5 +1,5 @@
 ## Installation
-Delete any previous version of the addon - see [Troubleshooting](doc/markdown/troubleshooting.md) for more information.
+Delete any previous version of the addon - see [Troubleshooting](troubleshooting.md) for more information.
 
 Clone the addon for Blender 2.80 (or newer):
 ```
