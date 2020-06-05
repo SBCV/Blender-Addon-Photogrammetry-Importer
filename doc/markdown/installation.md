@@ -1,4 +1,6 @@
 ## Installation
+Delete any previous version of the addon - see [Troubleshooting](doc/markdown/troubleshooting.md) for more information.
+
 Clone the addon for Blender 2.80 (or newer):
 ```
 git clone https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer.git
