@@ -24,6 +24,9 @@ However, one can add a ConvertSfMFormat node in Meshroom (see image below) to wr
 
 In addition to `*.SfM` / `*.json` files the addon allows to import `*.mg` files, which allows to also import corresponding meshes. The addon prioritizes the output of recently added nodes (e.g. `ConvertSfMFormat3` has a higher priority than `ConvertSfMFormat`). For importing meshes the addon uses the following prioritization: first the output of `Texturing`, then the output of `Meshfiltering` and finally the output of `Meshing`. In order to import the original images corresponding to the `*.mg` file, one can set the import option `Image File Path Type` of the Blender-Addon to `Absolute Path`. To import the undistorted `*.exr` images set `Image File Path Type` to `File Name` and set `Image Directory` to the folder with the `*.exr` files.
 
+### Regard3D
+By default Regard3D stores the Structure from Motion results in `path/to/project/pictureset_0/matching_0/triangulation_0/sfm_data.bin`. Use [OpenMVG](https://github.com/openMVG/openMVG) to convert the `*.bin` to a `*.json` file with `openMVG_main_ConvertSfM_DataFormat -i "path/to/sfm_data.bin" -o "path/to/cameras.json"`. For Windows you can find the pre-built binaries [here](https://github.com/openMVG/openMVG/releases/).  
+
 ### Meshes
 In order to view a reconstructed mesh with the corresponding sparse reconstruction (cameras and point cloud) import the files separately. When importing *.obj files make sure to adjust the corresponding import transform options. Set the `Forward` option to `Y Forward` and the `Up` option to `Z Up`.   
 
