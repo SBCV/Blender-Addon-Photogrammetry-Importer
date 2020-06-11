@@ -2,21 +2,24 @@
 This repository contains a Blender addon to import reconstruction results of several libraries.
 
 Supported libraries / data formats:
-- [x] Polygon Files ([http://paulbourke.net/dataformats/ply/](http://paulbourke.net/dataformats/ply/))
-	* PLY
-- [x] VisualSFM reconstructions ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
-	* NVM
+
 - [x] Colmap reconstructions ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) 
 	* Colmap model folders (binary and txt format), Colmap workspaces, NVM, PLY 
-- [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-	* JSON, NVM, PLY
 - [x] Meshroom reconstructions ([https://alicevision.github.io/](https://alicevision.github.io/))
 	* MG, JSON, SfM, PLY
-- [x] Regard3D reconstructions ([https://www.regard3d.org/](https://www.regard3d.org/))
-	* (OpenMVG) JSON
 - [x] Open3D reconstructions ([http://www.open3d.org/](http://www.open3d.org/))
 	* JSON, LOG, PLY
-
+- [x] OpenSfM reconstructions ([https://github.com/mapillary/OpenSfM](https://github.com/mapillary/OpenSfM))
+	* JSON
+- [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
+	* JSON, NVM, PLY
+- [x] Polygon Files ([http://paulbourke.net/dataformats/ply/](http://paulbourke.net/dataformats/ply/))
+	* PLY
+- [x] Regard3D reconstructions ([https://www.regard3d.org/](https://www.regard3d.org/))
+	* (OpenMVG) JSON
+- [x] VisualSFM reconstructions ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
+	* NVM
+	
 
 Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
