@@ -38,12 +38,12 @@ If you haven't installed pip for blender already, download https://bootstrap.pyp
 
 For Linux run:
 ```
-<Blender_Root>/<Version>/python/bin/python3.7m get-pip.py
+<Blender_Root>/<Version>/python/bin/python3.7m <Blender_Root>/<Version>/python/bin/get-pip.py
 <Blender_Root>/<Version>/python/bin/pip install pillow
 ```
 For Windows run:
 ```
-<Blender_Root>/<Version>/python/bin/python.exe get-pip.py
+<Blender_Root>/<Version>/python/bin/python.exe <Blender_Root>/<Version>/python/bin/get-pip.py
 <Blender_Root>/<Version>/python/Scripts/pip.exe install pillow
 ```
 
