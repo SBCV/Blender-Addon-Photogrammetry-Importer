@@ -1,6 +1,7 @@
 import os
 import math
 import bpy
+import numpy as np
 from mathutils import Vector
 from collections import namedtuple
 
@@ -381,7 +382,11 @@ def check_radial_distortion(radial_distortion, camera_name, op):
     # https://docs.blender.org/manual/en/latest/compositing/types/distort/lens_distortion.html
     # to properly support radial distortion consisting of a single parameter
 
-    if radial_distortion is None or radial_distortion == 0.0:
+    if radial_distortion is None:
+        return
+    if radial_distortion == 0.0:
+        return
+    if np.array_equal(np.asarray(radial_distortion), np.zeros_like(radial_distortion)):
         return
 
     output = 'Blender does not support radial distortion of cameras in the 3D View.'

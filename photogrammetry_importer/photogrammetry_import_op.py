@@ -10,6 +10,7 @@ from photogrammetry_importer.utils.blender_utils import add_collection
 from photogrammetry_importer.file_handler.image_file_handler import ImageFileHandler
 from photogrammetry_importer.file_handler.meshroom_file_handler import MeshroomFileHandler
 from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler
+from photogrammetry_importer.file_handler.opensfm_json_file_handler import OpenSfMJSONFileHandler
 from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
 from photogrammetry_importer.file_handler.open3D_file_handler import Open3DFileHandler
@@ -192,6 +193,53 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
         layout = self.layout
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
+
+
+class ImportOpenSfM(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):
+
+    """Import an OpenSfM JSON file"""
+    bl_idname = "import_scene.opensfm_json"
+    bl_label = "Import OpenSfM JSON"
+    bl_options = {'PRESET'}
+
+    filepath: StringProperty(
+        name="OpenSfM JSON File Path",
+        description="File path used for importing the OpenSfM JSON file")
+    directory: StringProperty()
+    filter_glob: StringProperty(default="*.json", options={'HIDDEN'})
+
+    reconstruction_number: IntProperty(
+        name="Reconstruction Number",
+        description = "If the input file contains multiple reconstructions, use this property to select the desired reconstruction.", 
+        default=0)
+
+    def execute(self, context):
+
+        path = os.path.join(self.directory, self.filepath)
+        self.report({'INFO'}, 'path: ' + str(path))
+ 
+        self.image_dp = get_default_image_path(
+            path, self.image_dp)
+        self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
+        
+        cameras, points = OpenSfMJSONFileHandler.parse_opensfm_file(
+            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, self.reconstruction_number, self)
+        
+        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        
+        reconstruction_collection = add_collection('Reconstruction Collection')
+        self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+        self.import_photogrammetry_points(points, reconstruction_collection)
+
+        return {'FINISHED'}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "reconstruction_number")
+        self.draw_camera_options(layout)
+        self.draw_point_options(layout)
+
 
 class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportProperties, bpy.types.Operator, ImportHelper):
 

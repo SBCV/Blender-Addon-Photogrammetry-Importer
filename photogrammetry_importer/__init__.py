@@ -44,6 +44,7 @@ modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in local
 # therefore we need the "photogrammetry_importer" specifier for this addon
 from photogrammetry_importer.photogrammetry_import_op import ImportMeshroom
 from photogrammetry_importer.photogrammetry_import_op import ImportOpenMVG
+from photogrammetry_importer.photogrammetry_import_op import ImportOpenSfM
 from photogrammetry_importer.photogrammetry_import_op import ImportColmap
 from photogrammetry_importer.photogrammetry_import_op import ImportNVM
 from photogrammetry_importer.photogrammetry_import_op import ImportOpen3D
@@ -62,6 +63,7 @@ bpy.app.handlers.load_post.append(redraw_points)
 def menu_func_import(self, context):
     self.layout.operator(ImportMeshroom.bl_idname, text="Meshroom Import (.sfm/.json/.mg)")
     self.layout.operator(ImportOpenMVG.bl_idname, text="OpenMVG / Regard3D Import (.json)")
+    self.layout.operator(ImportOpenSfM.bl_idname, text="OpenSfM Import (.json)")
     self.layout.operator(ImportColmap.bl_idname, text="Colmap Import (model/workspace)")
     self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
     self.layout.operator(ImportOpen3D.bl_idname, text="Open3D Import (.log/.json)")
@@ -91,6 +93,7 @@ def menu_func_export(self, context):
 def register():
     bpy.utils.register_class(ImportMeshroom)
     bpy.utils.register_class(ImportOpenMVG)
+    bpy.utils.register_class(ImportOpenSfM)
     bpy.utils.register_class(ImportColmap)
     bpy.utils.register_class(ImportNVM)
     bpy.utils.register_class(ImportOpen3D)
@@ -113,6 +116,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(ImportMeshroom)
     bpy.utils.unregister_class(ImportOpenMVG)
+    bpy.utils.unregister_class(ImportOpenSfM)
     bpy.utils.unregister_class(ImportColmap)
     bpy.utils.unregister_class(ImportNVM)
     bpy.utils.unregister_class(ImportOpen3D)
