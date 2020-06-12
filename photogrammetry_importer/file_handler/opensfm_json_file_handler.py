@@ -2,6 +2,7 @@ import json
 import numpy as np
 import os
 import math
+import sys
 
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
@@ -48,21 +49,28 @@ class OpenSfMJSONFileHandler:
     def rodrigues_to_matrix(rodrigues_vec):
         # https://docs.opencv.org/4.2.0/d9/d0c/group__calib3d.html#ga61585db663d9da06b68e70cfbf6a1eac
         #   Check the formulas under Rodrigues()
+        # https://github.com/opencv/opencv/blob/master/modules/calib3d/src/calibration.cpp
+        #   Check the definition of cvRodrigues2()
+        # http://www.cplusplus.com/reference/cfloat/
+        #   See the defintion of DBL_EPSILON
 
         theta = np.linalg.norm(rodrigues_vec)
-        r = rodrigues_vec / theta
-        I = np.eye(3)
-        r_rT = np.array([
-            [r[0]*r[0], r[0]*r[1], r[0]*r[2]],
-            [r[1]*r[0], r[1]*r[1], r[1]*r[2]],
-            [r[2]*r[0], r[2]*r[1], r[2]*r[2]]
-        ])
-        r_cross = np.array([
-            [0, -r[2], r[1]],
-            [r[2], 0, -r[0]],
-            [-r[1], r[0], 0]
-        ])
-        rot_mat = math.cos(theta) * I + (1 - math.cos(theta)) * r_rT + math.sin(theta) * r_cross
+        if theta < sys.float_info.epsilon:              # For most systems: theta < 2.220446049250313e-16
+            rot_mat = np.eye(3, dtype=float)
+        else:
+            r = rodrigues_vec / theta
+            I = np.eye(3, dtype=float)
+            r_rT = np.array([
+                [r[0]*r[0], r[0]*r[1], r[0]*r[2]],
+                [r[1]*r[0], r[1]*r[1], r[1]*r[2]],
+                [r[2]*r[0], r[2]*r[1], r[2]*r[2]]
+            ])
+            r_cross = np.array([
+                [0, -r[2], r[1]],
+                [r[2], 0, -r[0]],
+                [-r[1], r[0], 0]
+            ])
+            rot_mat = math.cos(theta) * I + (1 - math.cos(theta)) * r_rT + math.sin(theta) * r_cross
         return rot_mat
 
     @staticmethod
