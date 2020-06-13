@@ -200,8 +200,8 @@ class MeshroomFileHandler:
         if mesh_fp is None:
             mesh_fp = MeshroomFileHandler.get_latest_node_data_fp(
                 cache_dp, json_graph, 'Meshing', 'mesh.obj')
-
-        op.report({'INFO'},'mesh_fp: ' + mesh_fp)
+        if mesh_fp is not None:
+            op.report({'INFO'},'mesh_fp: ' + mesh_fp)
 
         return sfm_fp, mesh_fp
 
