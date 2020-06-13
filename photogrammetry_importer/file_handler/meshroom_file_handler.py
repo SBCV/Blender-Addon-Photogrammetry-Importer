@@ -5,6 +5,7 @@ import os
 from photogrammetry_importer.camera import Camera
 from photogrammetry_importer.point import Point
 from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
+from photogrammetry_importer.blender_logging import log_report
 
 def get_element(data_list, id_string, query_id, op):
     result = None
@@ -223,8 +224,13 @@ class MeshroomFileHandler:
             assert ext == '.json' or ext == '.sfm'
             mesh_fp = None
 
-        cams, points = MeshroomFileHandler.parse_sfm_file(
-            meshroom_ifp, image_dp, image_fp_type, suppress_distortion_warnings, op)
+        if meshroom_ifp is not None:
+            cams, points = MeshroomFileHandler.parse_sfm_file(
+                meshroom_ifp, image_dp, image_fp_type, suppress_distortion_warnings, op)
+        else:
+            log_report('WARNING', 'Meshroom project does not contain cameras or points', op)
+            cams = []
+            points = []
 
         op.report({'INFO'},'parse_meshroom_file: Done')
         return cams, points, mesh_fp
