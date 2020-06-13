@@ -4,6 +4,7 @@ Changelog with most relevant features. Recently added features are listed at the
 
 ### 2020
 
+* Added an OpenSfM importer
 * OpenGL data is now persistent (stored in blend file) and is available after reopening
 * Panel allows to change the OpenGL point size
 * Added a panel with options to export renderings of the point cloud using OpenGL
