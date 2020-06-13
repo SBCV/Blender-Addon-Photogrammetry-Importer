@@ -1,5 +1,5 @@
 ## Installation
-Delete any previous version of the addon - see [Troubleshooting](troubleshooting.md) for more information.
+Delete any previous version of the addon. See [Troubleshooting](troubleshooting.md) for more information. Otherwise errors may appear during activation or Blender may not reflect the latest changes of the addon. 
 
 Clone the addon for Blender 2.80 (or newer):
 ```
