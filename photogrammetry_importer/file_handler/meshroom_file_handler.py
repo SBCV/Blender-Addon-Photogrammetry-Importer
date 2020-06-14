@@ -149,26 +149,12 @@ class MeshroomFileHandler:
         op.report({'INFO'},'parse_sfm_sfm_file: Done')
         return cams, points
 
-
     @staticmethod
-    def get_latest_node(json_graph, node_key):
-        i = 0
-        while node_key + "_" + str(i + 1) in json_graph:
-            i = i + 1
-        if i == 0:
-            return None
-        else:
-            return json_graph[node_key + "_" + str(i)]
-
-    @staticmethod
-    def get_latest_node_data_fp(cache_dp, json_graph, node_key, fn_or_fn_list):
-
+    def get_data_fp_of_node(cache_dp, data_node, fn_or_fn_list):
         if isinstance(fn_or_fn_list, str):
             fn_list = [fn_or_fn_list]
         else:
             fn_list = fn_or_fn_list
-
-        data_node = MeshroomFileHandler.get_latest_node(json_graph, node_key)
         data_fp = None
         if data_node is not None:
             node_type = data_node['nodeType']
@@ -180,35 +166,95 @@ class MeshroomFileHandler:
                     break
         return data_fp
 
+    @staticmethod
+    def get_latest_node(json_graph, node_type):
+        i = 0
+        while node_type + "_" + str(i + 1) in json_graph:
+            i = i + 1
+        if i == 0:
+            return None
+        else:
+            return json_graph[node_type + "_" + str(i)]
 
     @staticmethod
-    def parse_meshrom_mg_file(mg_fp, op):
+    def get_node(json_graph, node_type, node_number, op):
+        if node_number == -1:
+            return MeshroomFileHandler.get_latest_node(json_graph, node_type)
+        else:
+            node_key = node_type + "_" + str(node_number)
+            if node_key in json_graph:
+                return json_graph[node_key]
+            else:
+               log_report(
+                   'ERROR', 'Invalid combination of node type (i.e. ' + node_type + ') ' + 
+                   'and node number (i.e. ' + str(node_number) + ') provided', op)
+               assert False
+
+    @staticmethod
+    def get_node_data_fp(cache_dp, json_graph, node_type, node_number, fn_or_fn_list, op):
+        data_node = MeshroomFileHandler.get_node(json_graph, node_type, node_number, op)
+        data_fp = MeshroomFileHandler.get_data_fp_of_node(cache_dp, data_node, fn_or_fn_list)
+        return data_fp
+
+    @staticmethod
+    def parse_meshrom_mg_file(mg_fp, sfm_node_type, sfm_node_number, mesh_node_type, mesh_node_number, op):
         cache_dp = os.path.join(os.path.dirname(mg_fp), 'MeshroomCache')
         json_data = json.load(open(mg_fp, 'r'))
         json_graph = json_data['graph']
 
-        sfm_fp = MeshroomFileHandler.get_latest_node_data_fp(
-            cache_dp, json_graph, 'ConvertSfMFormat', ['sfm.sfm', 'sfm.json'])
-        if sfm_fp is None:
-            sfm_fp = MeshroomFileHandler.get_latest_node_data_fp(
-                cache_dp, json_graph, 'StructureFromMotion', 'cameras.sfm')
+        if sfm_node_type == 'ConvertSfMFormatNode':
+            sfm_fp = MeshroomFileHandler.get_node_data_fp(
+                cache_dp, json_graph, 'ConvertSfMFormat', sfm_node_number, ['sfm.sfm', 'sfm.json'], op)
+        elif sfm_node_type == 'StructureFromMotionNode':
+            sfm_fp = MeshroomFileHandler.get_node_data_fp(
+                cache_dp, json_graph, 'StructureFromMotion', sfm_node_number, 'cameras.sfm', op)
+        elif sfm_node_type == 'AUTOMATIC':
+            sfm_fp = MeshroomFileHandler.get_node_data_fp(
+                cache_dp, json_graph, 'ConvertSfMFormat', sfm_node_number, ['sfm.sfm', 'sfm.json'], op)
+            if sfm_fp is None:
+                sfm_fp = MeshroomFileHandler.get_node_data_fp(
+                    cache_dp, json_graph, 'StructureFromMotion', sfm_node_number, 'cameras.sfm', op)
+        else:
+            log_report('ERROR', 'Select SfM node is not supported', op)
+            assert False
 
-        mesh_fp = MeshroomFileHandler.get_latest_node_data_fp(
-            cache_dp, json_graph, 'Texturing', 'texturedMesh.obj')
-        if mesh_fp is None:
-            mesh_fp = MeshroomFileHandler.get_latest_node_data_fp(
-                cache_dp, json_graph, 'MeshFiltering', 'mesh.obj')
-        if mesh_fp is None:
-            mesh_fp = MeshroomFileHandler.get_latest_node_data_fp(
-                cache_dp, json_graph, 'Meshing', 'mesh.obj')
+        if mesh_node_type == 'Texturing':
+            mesh_fp = MeshroomFileHandler.get_node_data_fp(
+                cache_dp, json_graph, 'Texturing', mesh_node_number, 'texturedMesh.obj', op)
+        elif mesh_node_type == 'MeshFiltering':
+            mesh_fp = MeshroomFileHandler.get_node_data_fp(
+                cache_dp, json_graph, 'MeshFiltering', mesh_node_number, 'mesh.obj', op)
+        elif mesh_node_type == 'Meshing':
+            mesh_fp = MeshroomFileHandler.get_node_data_fp(
+                cache_dp, json_graph, 'Meshing', mesh_node_number, 'mesh.obj', op)
+        elif mesh_node_type == 'AUTOMATIC':
+            mesh_fp = MeshroomFileHandler.get_node_data_fp(
+                cache_dp, json_graph, 'Texturing', mesh_node_number, 'texturedMesh.obj', op)
+            if mesh_fp is None:
+                mesh_fp = MeshroomFileHandler.get_node_data_fp(
+                    cache_dp, json_graph, 'MeshFiltering', mesh_node_number, 'mesh.obj', op)
+            if mesh_fp is None:
+                mesh_fp = MeshroomFileHandler.get_node_data_fp(
+                    cache_dp, json_graph, 'Meshing', mesh_node_number, 'mesh.obj', op)
+        else:
+            log_report('ERROR', 'Select Mesh node is not supported', op)
+            assert False
+
+        if sfm_fp is not None:
+            log_report('INFO', 'Found the following sfm file: ' + sfm_fp, op)
+        else:
+            log_report('INFO', 'Request target SfM result does not exist in this meshroom project', op)
+
         if mesh_fp is not None:
-            op.report({'INFO'},'mesh_fp: ' + mesh_fp)
+            log_report('INFO', 'Found the following mesh file: ' + mesh_fp, op)
+        else:
+            log_report('INFO', 'Request target mesh does not exist in this meshroom project', op)
 
         return sfm_fp, mesh_fp
 
-
     @staticmethod
-    def parse_meshroom_file(meshroom_ifp, image_dp, image_fp_type, suppress_distortion_warnings, op):
+    def parse_meshroom_file(meshroom_ifp, image_dp, image_fp_type, suppress_distortion_warnings, 
+                            sfm_node_type, sfm_node_number, mesh_node_type, mesh_node_number, op):
         """
         :param meshroom_ifp:
         :return:
@@ -219,7 +265,7 @@ class MeshroomFileHandler:
         ext = os.path.splitext(meshroom_ifp)[1].lower()
         if ext == '.mg':
             meshroom_ifp, mesh_fp = MeshroomFileHandler.parse_meshrom_mg_file(
-                meshroom_ifp, op)
+                meshroom_ifp, sfm_node_type, sfm_node_number, mesh_node_type, mesh_node_number, op)
         else:
             assert ext == '.json' or ext == '.sfm'
             mesh_fp = None

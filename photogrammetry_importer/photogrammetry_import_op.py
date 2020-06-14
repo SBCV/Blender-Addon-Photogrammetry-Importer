@@ -254,6 +254,40 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
     directory: StringProperty()
     filter_glob: StringProperty(default="*.sfm;*.json;*.mg", options={'HIDDEN'})
 
+    # Structure From Motion Node
+    sfm_node_items = [
+        ("AUTOMATIC", "AUTOMATIC", "", 1),
+        ("ConvertSfMFormatNode", "ConvertSfMFormatNode", "", 2),
+        ("StructureFromMotionNode", "StructureFromMotionNode", "", 3)
+        ]
+    sfm_node_type: EnumProperty(
+        name="Structure From Motion Node Type",
+        description = "Use this property to select the node with the structure from motion results to import.", 
+        items=sfm_node_items)
+    sfm_node_number: IntProperty(
+        name="ConvertSfMFormat Node Number",
+        description = "Use this property to select the desired node." +
+            "By default the node with the highest number is imported.",
+        default=-1)
+
+    # Mesh Node
+    mesh_node_items = [
+        ("AUTOMATIC", "AUTOMATIC", "", 1),
+        ("Texturing", "Texturing", "", 2),
+        ("MeshFiltering", "MeshFiltering", "", 3),
+        ("Meshing", "Meshing", "", 4)
+        ]
+    mesh_node_type: EnumProperty(
+        name="Mesh Node Type",
+        description = "Use this property to select the node with the mesh results to import.", 
+        items=mesh_node_items)
+
+    mesh_node_number: IntProperty(
+        name="Mesh Node Number",
+        description = "Use this property to select the desired node." + 
+            "By default the node with the highest number is imported.",
+        default=-1)
+
     def execute(self, context):
 
         path = os.path.join(self.directory, self.filepath)
@@ -264,7 +298,8 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
         self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
         
         cameras, points, mesh_fp = MeshroomFileHandler.parse_meshroom_file(
-            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, self)
+            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, 
+            self.sfm_node_type, self.sfm_node_number, self.mesh_node_type, self.mesh_node_number, self)
         
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
@@ -279,6 +314,11 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
 
     def draw(self, context):
         layout = self.layout
+        node_box = layout.box()
+        node_box.prop(self, "sfm_node_type")
+        node_box.prop(self, "sfm_node_number")
+        node_box.prop(self, "mesh_node_type")
+        node_box.prop(self, "mesh_node_number")
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
         self.draw_mesh_options(layout)
