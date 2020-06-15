@@ -4,6 +4,7 @@ Changelog with most relevant features. Recently added features are listed at the
 
 ### 2020
 
+* Added addon preferences to enable/disable importers and exporters
 * Added an OpenSfM importer
 * OpenGL data is now persistent (stored in blend file) and is available after reopening
 * Panel allows to change the OpenGL point size
