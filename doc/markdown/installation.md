@@ -23,6 +23,8 @@ Install the addon by
 - Scroll down to **ACTIVATE the addon**, i.e. check the bounding box left of `Import-Export: Photogrammetry Import Export Addon` (see image below)
 <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/activated.jpg" width="500">
 
+If you want to only add a subset of the provided import/export functions, adjust the checkboxes in the addon preferences and click on  the `Update (Enable/Disable) Importers and Exporters` button as shown below:
+![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/addon_preferences_annotations.jpg)
 
 ## Optional Dependency for VisualSfM and OpenMVG/Regard3D files
 This addon uses Pillow (https://python-pillow.org/) to compute missing information for VisualSFM (NVM) and OpenMVG (JSON) files.
@@ -48,15 +50,3 @@ For Windows run:
 ```
 
 IMPORTANT: Use the full path to the python and the pip executable. Otherwise the system python installation or the system pip executable may be used.
-
-## Select import functions 
-If you want to add only a subset of the provided import functions to Blender (in order to maintain your Blender Import interface clean), just comment out the corresponding lines in "photogrammetry_importer/\_\_init\_\_.py".  
-For example:
-```
-def menu_func_import(self, context):
-    self.layout.operator(ImportMeshroom.bl_idname, text="Meshroom Import (.sfm/.json)")
-    # self.layout.operator(ImportOpenMVG.bl_idname, text="OpenMVG Import (.json)")
-    self.layout.operator(ImportColmap.bl_idname, text="Colmap Import (folder)")
-    # self.layout.operator(ImportNVM.bl_idname, text="VSFM NVM Import (.nvm)")
-    self.layout.operator(ImportPLY.bl_idname, text="Point Cloud PLY Import (.ply)")
-```
