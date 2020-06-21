@@ -7,9 +7,11 @@ Problems to Activate the Addon
 ==============================
 
 If you experience problems while installing and activating a newer version of the addon 
-(i.e. an older version of the addon was previously installed), delete Blender's user folder of the  addon.
-[This page](https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html) of the Blender manual
-provides information about the location of the corresponding folder. Make sure that you close Blender before deleting the folder.
+(i.e. an older version of the addon was previously installed), delete Blender's user folder of the addon.
+`This page <https://docs.blender.org/manual/en/latest/advanced/blender_directory_layout.html>`_ of the Blender manual
+provides information about the location of the corresponding folder. 
+
+**Make sure that you CLOSE Blender BEFORE deleting the folder.**
 
 Windows
 -------

@@ -1,13 +1,36 @@
 *************************
 Installation Instructions
 *************************
-Delete any previous version of the addon. See the :doc:`troubleshooting page <./troubleshooting>` for more information. Otherwise errors may appear during activation or Blender may not reflect the latest changes of the addon. 
 
-Clone the addon for Blender 2.80 (or newer): ::
+Delete any Previous Version of the Addon
+========================================
+
+- Remove any previous version of the addon from Blender.
+    * Inside Blender go to :code:`Edit/Preferences/Add-ons`, search for :code:`Import-Export: Photogrammetry Import Export Addon` and click on :code:`Remove`
+    * See the :doc:`troubleshooting page <./troubleshooting>` for more information.
+- **THEN, CLOSE BLENDER**
+- Reopen Blender and follow the installation instructions below
+
+Without removal of previos versions errors may appear during activation or Blender may not reflect the latest changes of the addon. 
+
+
+Download the Addon for Blender 2.80 (or newer)
+==============================================
+
+Option 1: Download a Release Version of the Addon
+-------------------------------------------------
+Download the corresponding :code:`photogrammetry_importer.zip` from the `release page <https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/releases>`_.
+
+Option 2: Download the Latest Version of the Addon
+--------------------------------------------------
+
+For example, clone the addon with ::
 
 	git clone https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer.git
 
-Compress the folder :code:`photogrammetry_importer` in :code:`Blender-Addon-Photogrammetry-Importer` to a zip archive. 
+(Alternatively, go to :code:`https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer`, click on :code:`clone or download`, and download the archive by clicking on :code:`Download Zip`. Extract the :code:`Blender-Addon-Photogrammetry-Importer-master.zip` file, which creates a folder :code:`Blender-Addon-Photogrammetry-Importer`.) 
+
+Finally, compress the folder :code:`photogrammetry_importer` in :code:`Blender-Addon-Photogrammetry-Importer` to a zip archive :code:`photogrammetry_importer.zip`. 
 The final structure must look as follows:
 
 ::
@@ -18,6 +41,9 @@ The final structure must look as follows:
 	        file_handler
 	        blender_utils.py
 	        ...
+
+Install the Addon
+=================
 
 Install the addon by 
 	- Opening the preferences of Blender (:code:`Edit / Preferences ...`)  
