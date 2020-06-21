@@ -24,18 +24,19 @@ Supported libraries / data formats:
 Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
 ## Getting Started
+- [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
 - [Tutorial Video](https://www.youtube.com/watch?v=BwwaT2scoP0) 
-- [Installation Instructions](doc/markdown/installation.md)
-- [Troubleshooting](doc/markdown/troubleshooting.md)
-- [Examples](doc/markdown/example.md)
-- [Import Data](doc/markdown/import.md)
-- [Export Data](doc/markdown/export.md)
-- [Adjust Results (Scale Cameras and Points)](doc/markdown/adjustment.md)
-- [Ensure Camera and Point Alignment](doc/markdown/alignment.md)
-- [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md)
-- [Addon Usage with Python](doc/markdown/python.md)
-- [Contribution](doc/markdown/contribution.md)
-- [Recent features / Changelog](doc/markdown/changelog.md)
+- [Installation Instructions](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html)
+- [Troubleshooting](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/troubleshooting.html)
+- [Examples](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/examples.html)
+- [Import Data](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/import.html)
+- [Export Data](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/export.html)
+- [Adjust Results (Scale Cameras and Points)](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/adjustment.html)
+- [Ensure Camera and Point Alignment](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/alignment.html)
+- [Point Cloud Visualization and Rendering](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/point_cloud.html)
+- [Addon Usage with Python](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/python.html)
+- [Contribution](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/contribution.html)
+- [Recent features / Changelog](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/changelog.html)
 
 ## Example
 This repository contains an example NVM file. The imported result looks as follows.
