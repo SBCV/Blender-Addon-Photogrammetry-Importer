@@ -20,15 +20,15 @@ Created by Sebastian Bullinger
 
 bl_info = {
     "name": "Photogrammetry Import Export Addon",
-    "description": "Allows to import and export photogrammetry results (cameras and points).",
+    "description": "Allows to import and export photogrammetry results (cameras, points and meshes).",
     "author": "Sebastian Bullinger",
     "version": (2, 0, 0),
     "blender": (2, 80, 0),
-    "location": "View3D",
+    "location": "File / Import and File/Export",
     "warning": "",
-    "wiki_url": "",
+    "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html",
+    "tracker_url": "https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/issues",
     "category": "Import-Export" }
-
 
 import bpy
 
