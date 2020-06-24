@@ -41,3 +41,10 @@ def redraw_points(dummy):
                 draw_manager = DrawManager.get_singleton()
                 draw_manager.register_points_draw_callback(
                     obj, coords, colors)
+                viz_point_size = bpy.context.scene.opengl_panel_viz_settings.viz_point_size
+                draw_manager.set_point_size(viz_point_size)
+
+        for area in bpy.context.screen.areas:
+            if area.type == 'VIEW_3D':
+                area.tag_redraw()
+                break
