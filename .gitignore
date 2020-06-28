@@ -1,5 +1,4 @@
-nvm_import_export.zip
-/nvm_import_export/__pycache__/*.pyc
+*.pyc
 /photogrammetry_importer/__pycache__/*
 /photogrammetry_importer/file_handler/__pycache__/*
 /photogrammetry_importer/ext/__pycache__/*

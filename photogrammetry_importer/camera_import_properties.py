@@ -138,16 +138,16 @@ class CameraImportProperties():
         description = "Initial Camera Extent (Visualization)",
         default=1)
 
-    def draw_camera_options(self, layout, draw_size_and_pp=False, draw_focal_length=False):
+    def draw_camera_options(self, layout, draw_size_and_pp=False, draw_focal_length=False, draw_everything=False):
         camera_box = layout.box()
 
         camera_box.prop(self, "image_fp_type")
-        if self.image_fp_type == "NAME" or self.image_fp_type == "RELATIVE":
+        if self.image_fp_type == "NAME" or self.image_fp_type == "RELATIVE" or draw_everything:
             camera_box.prop(self, "image_dp")
 
-        if draw_size_and_pp:
+        if draw_size_and_pp or draw_everything:
             image_box = camera_box.box()
-            if draw_focal_length:
+            if draw_focal_length or draw_everything:
                 image_box.prop(self, "default_focal_length")
             image_box.prop(self, "default_width")
             image_box.prop(self, "default_height")
@@ -156,19 +156,19 @@ class CameraImportProperties():
 
         import_camera_box = camera_box.box()
         import_camera_box.prop(self, "import_cameras")
-        if self.import_cameras:
+        if self.import_cameras or draw_everything:
             import_camera_box.prop(self, "camera_extent")
             import_camera_box.prop(self, "add_background_images")
 
             image_plane_box = import_camera_box.box()
             image_plane_box.prop(self, "add_image_planes")
-            if self.add_image_planes:
+            if self.add_image_planes or draw_everything:
                 image_plane_box.prop(self, "add_image_plane_emission")
                 image_plane_box.prop(self, "image_plane_transparency")
 
         box = camera_box.box()
         box.prop(self, "add_camera_motion_as_animation")
-        if self.add_camera_motion_as_animation:
+        if self.add_camera_motion_as_animation or draw_everything:
             box.prop(self, "number_interpolation_frames")
             box.prop(self, "interpolation_type")
             box.prop(self, "consider_missing_cameras_during_animation")

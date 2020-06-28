@@ -57,22 +57,22 @@ class PointImportProperties():
         description="Use a mesh object to represent the point cloud with the vertex positions.",
         default=False)
 
-    def draw_point_options(self, layout):
+    def draw_point_options(self, layout, draw_everything=False):
         point_box = layout.box()
         point_box.prop(self, "import_points")
-        if self.import_points:
+        if self.import_points or draw_everything:
             opengl_box = point_box.box()
             opengl_box.prop(self, "draw_points_with_gpu")
-            if self.draw_points_with_gpu:
+            if self.draw_points_with_gpu or draw_everything:
                 opengl_box.prop(self, "add_points_to_point_cloud_handle")
             particle_box = point_box.box()
             particle_box.prop(self, "add_points_as_particle_system")
-            if self.add_points_as_particle_system:
+            if self.add_points_as_particle_system or draw_everything:
                 particle_box.prop(self, "mesh_type")
                 particle_box.prop(self, "add_particle_color_emission")
                 particle_box.prop(self, "point_extent")
                 particle_box.prop(self, "set_particle_color_flag")
-                if self.set_particle_color_flag:
+                if self.set_particle_color_flag or draw_everything:
                     particle_box.prop(self, "particle_overwrite_color")
             mesh_box = point_box.box()
             mesh_box.prop(self, "add_points_as_mesh_oject")

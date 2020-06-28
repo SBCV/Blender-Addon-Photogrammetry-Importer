@@ -5,7 +5,10 @@ import math
 
 # from photogrammetry_importer.point import Point
 
+from photogrammetry_importer.blender_logging import log_report
 from photogrammetry_importer.utils.blender_utils import add_collection
+
+from photogrammetry_importer.initialization import Initializer
 
 from photogrammetry_importer.file_handler.image_file_handler import ImageFileHandler
 from photogrammetry_importer.file_handler.meshroom_file_handler import MeshroomFileHandler
@@ -46,6 +49,8 @@ from bpy_extras.io_utils import (ImportHelper,
                                  ExportHelper,
                                  axis_conversion)
 
+def get_addon_name():
+    return __name__.split('.')[0]
 
 def get_default_image_path(reconstruction_fp, image_dp):
     if image_dp is None:
@@ -97,6 +102,10 @@ class ImportColmap(CameraImportProperties, PointImportProperties, MeshImportProp
         return {'FINISHED'}
 
     def invoke(self, context, event):
+
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
         # See: 
         # https://blender.stackexchange.com/questions/14738/use-filemanager-to-select-directory-instead-of-file/14778
         # https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
@@ -149,6 +158,13 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
 
         return {'FINISHED'}
 
+    def invoke(self, context, event):
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
     def draw(self, context):
         layout = self.layout
         self.draw_camera_options(layout, draw_size_and_pp=True)
@@ -188,6 +204,13 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
         self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
     def draw(self, context):
         layout = self.layout
@@ -233,6 +256,13 @@ class ImportOpenSfM(CameraImportProperties, PointImportProperties, bpy.types.Ope
         self.import_photogrammetry_points(points, reconstruction_collection)
 
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
     def draw(self, context):
         layout = self.layout
@@ -311,6 +341,13 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
 
 
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
     def draw(self, context):
         layout = self.layout
@@ -397,6 +434,13 @@ class ImportOpen3D(CameraImportProperties, PointImportProperties, bpy.types.Oper
 
         return {'FINISHED'}
 
+    def invoke(self, context, event):
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
     def draw(self, context):
         layout = self.layout
         self.draw_camera_options(layout, draw_size_and_pp=True, draw_focal_length=True)
@@ -428,6 +472,13 @@ class ImportPLY(PointImportProperties, TransformationImportProperties, bpy.types
         self.import_photogrammetry_points(points, reconstruction_collection, transformations_sorted)
 
         return {'FINISHED'}
+
+    def invoke(self, context, event):
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
 
     def draw(self, context):
         layout = self.layout
