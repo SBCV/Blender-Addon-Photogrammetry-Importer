@@ -28,6 +28,7 @@ Tested for Blender 2.81. There is an older version of the addon available for Bl
 - [Tutorial Video](https://www.youtube.com/watch?v=BwwaT2scoP0) 
 - [Installation Instructions](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html)
 - [Troubleshooting](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/troubleshooting.html)
+- [Customize Import/Export Options](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/customize.html)
 - [Examples](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/examples.html)
 - [Import Data](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/import.html)
 - [Export Data](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/export.html)
