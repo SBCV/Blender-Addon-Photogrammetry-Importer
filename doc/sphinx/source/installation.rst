@@ -56,11 +56,7 @@ Install the addon by
    :scale: 75 %
    :align: center
 
-If you want to only add a subset of the provided import/export functions, adjust the checkboxes in the addon preferences and click on  the :code:`Update (Enable/Disable) Importers and Exporters` button as shown below:
-
-.. image:: ../../images/addon_preferences_annotations.jpg
-   :scale: 75 %
-   :align: center
+Follow the instructions on the :doc:`customize <./customize>` page, to adjust the default options of the addon. 
 
 Optional Dependency for VisualSfM and OpenMVG/Regard3D Files
 ============================================================

@@ -51,6 +51,7 @@ Getting Started
    self
    installation
    troubleshooting
+   customize
    examples
    import
    export
