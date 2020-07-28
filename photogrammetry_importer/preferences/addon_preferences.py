@@ -1,6 +1,6 @@
 import os
 import bpy
-from bpy.props import BoolProperty
+from bpy.props import BoolProperty, EnumProperty
 
 from photogrammetry_importer.blender_logging import log_report
 from photogrammetry_importer.camera_import_properties import CameraImportProperties
@@ -61,8 +61,22 @@ class PhotogrammetryImporterPreferences(bpy.types.AddonPreferences,
         name="VisualSfM Exporter",
         default=True)
 
+    @classmethod
+    def register(cls):
+        bpy.utils.register_class(ResetPreferences)
+        bpy.utils.register_class(UpdateImportersAndExporters)
+
+    @classmethod
+    def unregister(cls):
+        bpy.utils.unregister_class(ResetPreferences)
+        bpy.utils.unregister_class(UpdateImportersAndExporters)
+
     def draw(self, context):
         layout = self.layout
+
+        reset_box = layout.box()
+        reset_box.operator("photogrammetry_importer.reset_preferences")
+
         importer_exporter_box = layout.box()
         importer_exporter_box.label(
             text='Active Importers / Exporters:')
@@ -91,6 +105,41 @@ class PhotogrammetryImporterPreferences(bpy.types.AddonPreferences,
         self.draw_point_options(import_options_box, draw_everything=True)
         self.draw_mesh_options(import_options_box)
 
+    def copy_values_from_annotations(self, source):
+        for annotation_key in source.__annotations__:
+            source_annotation = source.__annotations__[annotation_key]
+            if source_annotation[0] == EnumProperty:
+                source_default_value = source_annotation[1]['items'][0][0]
+            else:
+                source_default_value = source_annotation[1]['default']
+            setattr(self, annotation_key, source_default_value)
+
+    def reset(self):
+        camera_properties_original = CameraImportProperties()
+        point_properties_original = PointImportProperties()
+        mesh_properties_original = MeshImportProperties()
+
+        self.copy_values_from_annotations(camera_properties_original)
+        self.copy_values_from_annotations(point_properties_original)
+        self.copy_values_from_annotations(mesh_properties_original)
+        self.copy_values_from_annotations(self)
+
+
+class ResetPreferences(bpy.types.Operator):
+    bl_idname = "photogrammetry_importer.reset_preferences"
+    bl_label = "Reset Preferences to Default Values"
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        log_report('INFO', 'Reset preferences: ...', self)
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        import_export_prefs.reset()
+        log_report('INFO', 'Reset preferences: Done', self)
+        return {'FINISHED'}
 
 class UpdateImportersAndExporters(bpy.types.Operator):
     bl_idname = "photogrammetry_importer.update_importers_and_exporters"

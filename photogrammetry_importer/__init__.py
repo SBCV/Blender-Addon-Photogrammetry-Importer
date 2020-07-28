@@ -40,12 +40,11 @@ from .utils import developer_utils
 importlib.reload(developer_utils)
 modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
-# The root dir is blenders addon folder, 
-# therefore we need the "photogrammetry_importer" specifier for this addon
+# The root dir is Blenders addon folder.
+# Therefore, we need the "photogrammetry_importer" specifier for this addon
 from photogrammetry_importer.blender_logging import log_report
 
 from photogrammetry_importer.preferences.addon_preferences import PhotogrammetryImporterPreferences
-from photogrammetry_importer.preferences.addon_preferences import UpdateImportersAndExporters
 
 from photogrammetry_importer.registration import register_importers
 from photogrammetry_importer.registration import unregister_importers
@@ -75,7 +74,6 @@ bpy.app.handlers.load_post.append(redraw_points)
 # 
 
 def register():
-    bpy.utils.register_class(UpdateImportersAndExporters)
     bpy.utils.register_class(PhotogrammetryImporterPreferences)
 
     import_export_prefs = bpy.context.preferences.addons[__name__].preferences
@@ -90,7 +88,6 @@ def register():
     print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
 
 def unregister():
-    bpy.utils.unregister_class(UpdateImportersAndExporters)
     bpy.utils.unregister_class(PhotogrammetryImporterPreferences)
 
     unregister_importers()

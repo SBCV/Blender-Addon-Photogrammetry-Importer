@@ -10,14 +10,16 @@ class Initializer(object):
         bpy.types.StringProperty,
         bpy.types.EnumProperty]
 
+    @staticmethod
     def is_custom_property(prop):
         return type(prop) in Initializer.custom_property_types
 
+    @staticmethod
     def initialize_options(source, target):
 
         # Side note:
         #   "vars(my_obj)" does not work in Blender
-        #   "dir(my_obj)" shows the attributesm, but not the corresponding type
+        #   "dir(my_obj)" shows the attributes, but not the corresponding type
         #   "my_obj.rna_type.properties.items()" lists attribute names with corresponding types
 
         for name, prop in source.rna_type.properties.items():
