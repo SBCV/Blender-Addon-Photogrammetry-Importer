@@ -1,4 +1,5 @@
 import numpy as np
+import atexit
 import bpy
 import bgl
 import gpu
@@ -66,7 +67,6 @@ class DrawManager():
             colors = self.anchor_to_point_colors[object_anchor]
             color_list = color_list + colors
 
-        
         return transf_coord_list, color_list
 
     def delete_anchor(self, object_anchor):
@@ -76,6 +76,7 @@ class DrawManager():
     def set_point_size(self, point_size):
         for draw_back_handler in self.draw_callback_handler_list:
             draw_back_handler.point_size = point_size
+
 
 class DrawCallBackHandler():
 
@@ -90,6 +91,14 @@ class DrawCallBackHandler():
         self.object_anchor_pose_previous = np.array([])
         self.batch_cached = None
         self.point_size = 5
+
+        # If Blender is closed and self.batch_cached is not properly deleted, 
+        # this causes something like the following:
+        # "Error: Not freed memory blocks: 2, total unfreed memory 0.001358 MB"
+        atexit.register(self.clean_batch_cached)
+
+    def clean_batch_cached(self):
+        self.batch_cached = None
 
     def draw_points_callback(self, draw_manager, object_anchor, positions, colors):
 
@@ -132,8 +141,8 @@ class DrawCallBackHandler():
                 bpy.types.SpaceView3D.draw_handler_remove(
                     self.draw_handler_handle, 'WINDOW')
                 self.draw_handler_handle = None
+                self.batch_cached = None
                 draw_manager.delete_anchor(object_anchor)
-
 
     def register_points_draw_callback(self, draw_manager, object_anchor, positions, colors):
 
