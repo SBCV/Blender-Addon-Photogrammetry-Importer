@@ -31,6 +31,10 @@ class PhotogrammetryImporterPreferences(bpy.types.AddonPreferences,
     meshroom_importer_bool: BoolProperty(
         name="Meshroom Importer",
         default=True)
+    
+    mve_importer_bool: BoolProperty(
+        name="MVE Importer",
+        default=True)
 
     open3d_importer_bool: BoolProperty(
         name="Open3D Importer",
@@ -85,6 +89,7 @@ class PhotogrammetryImporterPreferences(bpy.types.AddonPreferences,
         importer_box = column.box()
         importer_box.prop(self, "colmap_importer_bool")
         importer_box.prop(self, "meshroom_importer_bool")
+        importer_box.prop(self, "mve_importer_bool")
         importer_box.prop(self, "open3d_importer_bool")
         importer_box.prop(self, "opensfm_importer_bool")
         importer_box.prop(self, "openmvg_importer_bool")
@@ -127,7 +132,7 @@ class PhotogrammetryImporterPreferences(bpy.types.AddonPreferences,
 
 class ResetPreferences(bpy.types.Operator):
     bl_idname = "photogrammetry_importer.reset_preferences"
-    bl_label = "Reset Preferences to Default Values"
+    bl_label = "Reset Preferences to Factory Settings"
 
     @classmethod
     def poll(cls, context):
@@ -138,6 +143,13 @@ class ResetPreferences(bpy.types.Operator):
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
         import_export_prefs.reset()
+
+        unregister_importers()
+        register_importers(import_export_prefs)
+
+        unregister_exporters()
+        register_exporters(import_export_prefs)
+
         log_report('INFO', 'Reset preferences: Done', self)
         return {'FINISHED'}
 

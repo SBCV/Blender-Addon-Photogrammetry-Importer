@@ -1,5 +1,9 @@
 import os
 
+def natural_key(some_string):
+    """See http://www.codinghorror.com/blog/archives/001018.html"""
+    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', some_string)]
+
 def get_file_paths_in_dir(idp,
                           ext=None,
                           target_str_or_list=None,
@@ -78,3 +82,34 @@ def get_image_file_paths_in_dir(idp,
         without_ext=without_ext,
         sort_result=sort_result,
         recursive=recursive)
+
+
+def get_subdirs(idp,
+                base_name_only=False,
+                sort_result=True,
+                natural_sorting=False,
+                recursive=False):
+
+    if recursive:
+        sub_dps = []
+        if base_name_only:
+            for root, dirs, files in os.walk(idp):
+                sub_dps += [name for name in dirs]
+        else:
+            for root, dirs, files in os.walk(idp):
+                sub_dps += [os.path.join(root, sub_dn) for sub_dn in dirs]
+    else:
+        sub_dns = [name for name in os.listdir(idp)
+                   if os.path.isdir(os.path.join(idp, name))]
+        if base_name_only:
+            sub_dps = sub_dns
+        else:
+            sub_dps = [os.path.join(idp, sub_dn) for sub_dn in sub_dns]
+
+    if sort_result:
+        if natural_sorting:
+            sub_dps = sorted(sub_dps, key=natural_key)
+        else:
+            sub_dps = sorted(sub_dps)
+
+    return sub_dps

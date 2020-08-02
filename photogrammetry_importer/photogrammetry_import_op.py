@@ -11,11 +11,12 @@ from photogrammetry_importer.utils.blender_utils import add_collection
 from photogrammetry_importer.initialization import Initializer
 
 from photogrammetry_importer.file_handler.image_file_handler import ImageFileHandler
+from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.file_handler.meshroom_file_handler import MeshroomFileHandler
+from photogrammetry_importer.file_handler.mve_file_handler import MVEFileHandler
+from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
 from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler
 from photogrammetry_importer.file_handler.opensfm_json_file_handler import OpenSfMJSONFileHandler
-from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
-from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
 from photogrammetry_importer.file_handler.open3D_file_handler import Open3DFileHandler
 from photogrammetry_importer.file_handler.ply_file_handler import PLYFileHandler
 from photogrammetry_importer.file_handler.transformation_file_handler import TransformationFileHandler
@@ -96,8 +97,6 @@ class ImportColmap(CameraImportProperties, PointImportProperties, MeshImportProp
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
         self.import_photogrammetry_mesh(mesh_ifp, reconstruction_collection)
-
-        self.report({'INFO'}, 'Parse Colmap model folder: Done')
 
         return {'FINISHED'}
 
@@ -339,7 +338,6 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
         self.import_photogrammetry_points(points, reconstruction_collection)
         self.import_photogrammetry_mesh(mesh_fp, reconstruction_collection)
 
-
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -359,6 +357,51 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
         self.draw_mesh_options(layout)
+
+
+class ImportMVE(CameraImportProperties, PointImportProperties, bpy.types.Operator):
+    
+    """Import a Multi-View Environment reconstruction folder."""
+    bl_idname = "import_scene.mve_folder"
+    bl_label = "Import MVE Folder"
+    bl_options = {'PRESET'}
+
+    directory : StringProperty()
+
+    def execute(self, context):
+
+        path = self.directory
+        # Remove trailing slash
+        path = os.path.dirname(path)
+        self.report({'INFO'}, 'path: ' + str(path))
+        
+        cameras, points = MVEFileHandler.parse_mve_workspace(
+            path, self.suppress_distortion_warnings, self)
+
+        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+
+        reconstruction_collection = add_collection('Reconstruction Collection')
+        self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+        self.import_photogrammetry_points(points, reconstruction_collection)
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+
+        addon_name = get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        Initializer.initialize_options(import_export_prefs, self)
+        # See: 
+        # https://blender.stackexchange.com/questions/14738/use-filemanager-to-select-directory-instead-of-file/14778
+        # https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+    def draw(self, context):
+        layout = self.layout
+        self.draw_camera_options(layout, draw_image_fp=False)
+        self.draw_point_options(layout)
 
 
 class ImportOpen3D(CameraImportProperties, PointImportProperties, bpy.types.Operator, ImportHelper):

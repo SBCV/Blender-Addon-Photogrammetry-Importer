@@ -138,12 +138,13 @@ class CameraImportProperties():
         description = "Initial Camera Extent (Visualization)",
         default=1)
 
-    def draw_camera_options(self, layout, draw_size_and_pp=False, draw_focal_length=False, draw_everything=False):
+    def draw_camera_options(self, layout, draw_image_fp=True, draw_size_and_pp=False, draw_focal_length=False, draw_everything=False):
         camera_box = layout.box()
 
-        camera_box.prop(self, "image_fp_type")
-        if self.image_fp_type == "NAME" or self.image_fp_type == "RELATIVE" or draw_everything:
-            camera_box.prop(self, "image_dp")
+        if draw_image_fp or draw_everything:
+            camera_box.prop(self, "image_fp_type")
+            if self.image_fp_type == "NAME" or self.image_fp_type == "RELATIVE" or draw_everything:
+                camera_box.prop(self, "image_dp")
 
         if draw_size_and_pp or draw_everything:
             image_box = camera_box.box()

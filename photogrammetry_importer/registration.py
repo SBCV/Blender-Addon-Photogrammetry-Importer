@@ -1,10 +1,11 @@
 import bpy
 
+from photogrammetry_importer.photogrammetry_import_op import ImportColmap
 from photogrammetry_importer.photogrammetry_import_op import ImportMeshroom
+from photogrammetry_importer.photogrammetry_import_op import ImportMVE
+from photogrammetry_importer.photogrammetry_import_op import ImportNVM
 from photogrammetry_importer.photogrammetry_import_op import ImportOpenMVG
 from photogrammetry_importer.photogrammetry_import_op import ImportOpenSfM
-from photogrammetry_importer.photogrammetry_import_op import ImportColmap
-from photogrammetry_importer.photogrammetry_import_op import ImportNVM
 from photogrammetry_importer.photogrammetry_import_op import ImportOpen3D
 from photogrammetry_importer.photogrammetry_import_op import ImportPLY
 
@@ -18,6 +19,9 @@ def colmap_import_operator_function(self, context):
 
 def meshroom_import_operator_function(self, context):
     self.layout.operator(ImportMeshroom.bl_idname, text="Meshroom Import (.sfm/.json/.mg)")
+
+def mve_import_operator_function(self, context):
+    self.layout.operator(ImportMVE.bl_idname, text="MVE Import (workspace)")
 
 def open3d_import_operator_function(self, context):
     self.layout.operator(ImportOpen3D.bl_idname, text="Open3D Import (.log/.json)")
@@ -80,6 +84,7 @@ def unregister_exporter(exporter, append_function):
 def register_importers(import_prefs):
     register_importer(import_prefs.colmap_importer_bool, ImportColmap, colmap_import_operator_function)
     register_importer(import_prefs.meshroom_importer_bool, ImportMeshroom, meshroom_import_operator_function)
+    register_importer(import_prefs.mve_importer_bool, ImportMVE, mve_import_operator_function)
     register_importer(import_prefs.open3d_importer_bool, ImportOpen3D, open3d_import_operator_function)
     register_importer(import_prefs.opensfm_importer_bool, ImportOpenSfM, opensfm_import_operator_function)
     register_importer(import_prefs.openmvg_importer_bool, ImportOpenMVG, openmvg_import_operator_function)
@@ -90,6 +95,7 @@ def register_importers(import_prefs):
 def unregister_importers():
     unregister_importer(ImportColmap, colmap_import_operator_function)
     unregister_importer(ImportMeshroom, meshroom_import_operator_function)
+    unregister_importer(ImportMVE, mve_import_operator_function)
     unregister_importer(ImportOpen3D, open3d_import_operator_function)
     unregister_importer(ImportOpenSfM, opensfm_import_operator_function)
     unregister_importer(ImportOpenMVG, openmvg_import_operator_function)

@@ -217,14 +217,15 @@ def add_cameras(op,
             continue 
 
         if camera.has_undistorted_absolute_fp():
-            path_to_image = camera.get_undistored_absolute_fp()
+            image_path = camera.get_undistored_absolute_fp()
         else:
-            path_to_image = camera.get_absolute_fp()
+            image_path = camera.get_absolute_fp()
 
-        if not os.path.isfile(path_to_image):
+        if not os.path.isfile(image_path):
+            op.report({'WARNING'}, 'Could not find image at ' + str(image_path))
             continue
 
-        blender_image = bpy.data.images.load(path_to_image)
+        blender_image = bpy.data.images.load(image_path)
 
         if add_background_images:
             # op.report({'INFO'}, 'Adding background image for: ' + camera_name)
@@ -383,8 +384,6 @@ def check_radial_distortion(radial_distortion, camera_name, op):
     # to properly support radial distortion consisting of a single parameter
 
     if radial_distortion is None:
-        return
-    if radial_distortion == 0.0:
         return
     if np.array_equal(np.asarray(radial_distortion), np.zeros_like(radial_distortion)):
         return
