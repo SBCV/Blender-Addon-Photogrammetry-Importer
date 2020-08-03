@@ -2,10 +2,10 @@ import json
 import numpy as np
 import os
 
-from photogrammetry_importer.camera import Camera
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
-from photogrammetry_importer.blender_logging import log_report
+from photogrammetry_importer.types.camera import Camera
+from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.utility.blender_camera_utility import check_radial_distortion
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 def get_element(data_list, id_string, query_id, op):
     result = None

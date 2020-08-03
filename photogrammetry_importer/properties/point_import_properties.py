@@ -1,10 +1,10 @@
 import bpy
 
 from bpy.props import (BoolProperty, EnumProperty, FloatProperty, FloatVectorProperty)
-from photogrammetry_importer.utils.blender_animation_utils import add_transformation_animation
-from photogrammetry_importer.opengl.visualization_utils import draw_points
-from photogrammetry_importer.utils.blender_point_utils import add_points_as_mesh
-from photogrammetry_importer.utils.blender_point_utils import add_points_as_particle_system
+from photogrammetry_importer.utility.blender_animation_utility import add_transformation_animation
+from photogrammetry_importer.utility.blender_opengl_utility import draw_points
+from photogrammetry_importer.utility.blender_point_utility import add_points_as_mesh
+from photogrammetry_importer.utility.blender_point_utility import add_points_as_particle_system
 
 
 class PointImportProperties():

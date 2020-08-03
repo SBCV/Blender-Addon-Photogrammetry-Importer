@@ -7,9 +7,9 @@ try:
 except ImportError:
     PILImage = None
 
-from photogrammetry_importer.camera import Camera
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.utils.os_utils import get_image_file_paths_in_dir
+from photogrammetry_importer.types.camera import Camera
+from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.utility.os_utility import get_image_file_paths_in_dir
 
 class Open3DFileHandler:
 

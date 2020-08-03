@@ -3,9 +3,9 @@ import os
 from collections import defaultdict
 import numpy as np
 
-from photogrammetry_importer.camera import Camera
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion 
+from photogrammetry_importer.types.camera import Camera
+from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.utility.blender_camera_utility import check_radial_distortion 
 
 class NVMFileHandler(object):
 

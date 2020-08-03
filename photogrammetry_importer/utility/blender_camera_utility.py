@@ -5,16 +5,16 @@ import numpy as np
 from mathutils import Vector
 from collections import namedtuple
 
-from photogrammetry_importer.camera import Camera
+from photogrammetry_importer.types.camera import Camera
 
-from photogrammetry_importer.utils.os_utils import get_image_file_paths_in_dir
-from photogrammetry_importer.utils.blender_utils import compute_camera_matrix_world
-from photogrammetry_importer.utils.blender_utils import add_collection
-from photogrammetry_importer.utils.blender_utils import add_obj
-from photogrammetry_importer.utils.blender_animation_utils import add_transformation_animation
-from photogrammetry_importer.utils.blender_animation_utils import add_camera_intrinsics_animation
-from photogrammetry_importer.utils.stop_watch import StopWatch
-from photogrammetry_importer.blender_logging import log_report
+from photogrammetry_importer.utility.os_utility import get_image_file_paths_in_dir
+from photogrammetry_importer.utility.blender_utility import compute_camera_matrix_world
+from photogrammetry_importer.utility.blender_utility import add_collection
+from photogrammetry_importer.utility.blender_utility import add_obj
+from photogrammetry_importer.utility.blender_animation_utility import add_transformation_animation
+from photogrammetry_importer.utility.blender_animation_utility import add_camera_intrinsics_animation
+from photogrammetry_importer.utility.stop_watch import StopWatch
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class DummyCamera(object):

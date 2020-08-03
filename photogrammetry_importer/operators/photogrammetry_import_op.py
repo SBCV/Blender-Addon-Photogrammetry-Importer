@@ -5,28 +5,26 @@ import math
 
 # from photogrammetry_importer.point import Point
 
-from photogrammetry_importer.blender_logging import log_report
-from photogrammetry_importer.utils.blender_utils import add_collection
+from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.utility.blender_utility import add_collection
 
-from photogrammetry_importer.initialization import Initializer
+from photogrammetry_importer.file_handlers.image_file_handler import ImageFileHandler
+from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
+from photogrammetry_importer.file_handlers.meshroom_file_handler import MeshroomFileHandler
+from photogrammetry_importer.file_handlers.mve_file_handler import MVEFileHandler
+from photogrammetry_importer.file_handlers.nvm_file_handler import NVMFileHandler
+from photogrammetry_importer.file_handlers.openmvg_json_file_handler import OpenMVGJSONFileHandler
+from photogrammetry_importer.file_handlers.opensfm_json_file_handler import OpenSfMJSONFileHandler
+from photogrammetry_importer.file_handlers.open3D_file_handler import Open3DFileHandler
+from photogrammetry_importer.file_handlers.ply_file_handler import PLYFileHandler
+from photogrammetry_importer.file_handlers.transformation_file_handler import TransformationFileHandler
 
-from photogrammetry_importer.file_handler.image_file_handler import ImageFileHandler
-from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
-from photogrammetry_importer.file_handler.meshroom_file_handler import MeshroomFileHandler
-from photogrammetry_importer.file_handler.mve_file_handler import MVEFileHandler
-from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
-from photogrammetry_importer.file_handler.openmvg_json_file_handler import OpenMVGJSONFileHandler
-from photogrammetry_importer.file_handler.opensfm_json_file_handler import OpenSfMJSONFileHandler
-from photogrammetry_importer.file_handler.open3D_file_handler import Open3DFileHandler
-from photogrammetry_importer.file_handler.ply_file_handler import PLYFileHandler
-from photogrammetry_importer.file_handler.transformation_file_handler import TransformationFileHandler
+from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
+from photogrammetry_importer.properties.point_import_properties import PointImportProperties
+from photogrammetry_importer.properties.mesh_import_properties import MeshImportProperties
+from photogrammetry_importer.properties.transformation_import_properties import TransformationImportProperties
 
-from photogrammetry_importer.camera_import_properties import CameraImportProperties
-from photogrammetry_importer.point_import_properties import PointImportProperties
-from photogrammetry_importer.mesh_import_properties import MeshImportProperties
-from photogrammetry_importer.transformation_import_properties import TransformationImportProperties
-
-from photogrammetry_importer.camera import Camera
+from photogrammetry_importer.types.camera import Camera
 
 # Notes:
 #   http://sinestesia.co/blog/tutorials/using-blenders-filebrowser-with-python/
@@ -49,6 +47,30 @@ from bpy.props import (CollectionProperty,
 from bpy_extras.io_utils import (ImportHelper,
                                  ExportHelper,
                                  axis_conversion)
+
+custom_property_types = [
+    bpy.types.BoolProperty,
+    bpy.types.IntProperty,
+    bpy.types.FloatProperty,
+    bpy.types.StringProperty,
+    bpy.types.EnumProperty]
+
+def is_custom_property(prop):
+    return type(prop) in custom_property_types
+
+def initialize_options(source, target):
+    # Side note:
+    #   "vars(my_obj)" does not work in Blender
+    #   "dir(my_obj)" shows the attributes, but not the corresponding type
+    #   "my_obj.rna_type.properties.items()" lists attribute names with corresponding types
+    for name, prop in source.rna_type.properties.items():
+        if name == 'bl_idname':
+            continue
+        if not is_custom_property(prop):
+            continue
+        if not hasattr(target, name):
+            continue
+        setattr(target, name, getattr(source, name))
 
 def get_addon_name():
     return __name__.split('.')[0]
@@ -104,7 +126,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, MeshImportProp
 
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         # See: 
         # https://blender.stackexchange.com/questions/14738/use-filemanager-to-select-directory-instead-of-file/14778
         # https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
@@ -160,7 +182,7 @@ class ImportNVM(CameraImportProperties, PointImportProperties, bpy.types.Operato
     def invoke(self, context, event):
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -207,7 +229,7 @@ class ImportOpenMVG(CameraImportProperties, PointImportProperties, bpy.types.Ope
     def invoke(self, context, event):
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -259,7 +281,7 @@ class ImportOpenSfM(CameraImportProperties, PointImportProperties, bpy.types.Ope
     def invoke(self, context, event):
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -343,7 +365,7 @@ class ImportMeshroom(CameraImportProperties, PointImportProperties, MeshImportPr
     def invoke(self, context, event):
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -391,7 +413,7 @@ class ImportMVE(CameraImportProperties, PointImportProperties, bpy.types.Operato
 
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         # See: 
         # https://blender.stackexchange.com/questions/14738/use-filemanager-to-select-directory-instead-of-file/14778
         # https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
@@ -480,7 +502,7 @@ class ImportOpen3D(CameraImportProperties, PointImportProperties, bpy.types.Oper
     def invoke(self, context, event):
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
@@ -519,7 +541,7 @@ class ImportPLY(PointImportProperties, TransformationImportProperties, bpy.types
     def invoke(self, context, event):
         addon_name = get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
-        Initializer.initialize_options(import_export_prefs, self)
+        initialize_options(import_export_prefs, self)
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 

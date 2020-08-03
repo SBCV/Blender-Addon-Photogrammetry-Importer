@@ -2,9 +2,9 @@ import bpy
 import numpy as np
 from mathutils import Vector
 
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.utils.blender_utils import add_obj
-from photogrammetry_importer.utils.stop_watch import StopWatch
+from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.utility.blender_utility import add_obj
+from photogrammetry_importer.utility.stop_watch import StopWatch
 
 
 def copy_values_to_image(value_tripplets, image_name):

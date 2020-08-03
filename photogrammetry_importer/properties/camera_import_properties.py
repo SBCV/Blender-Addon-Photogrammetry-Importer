@@ -6,12 +6,12 @@ from bpy.props import (StringProperty,
                        FloatProperty,
                        IntProperty)
 
-from photogrammetry_importer.utils.blender_utils import adjust_render_settings_if_possible
-from photogrammetry_importer.utils.blender_camera_utils import principal_points_initialized
-from photogrammetry_importer.utils.blender_camera_utils import set_principal_point_for_cameras
-from photogrammetry_importer.utils.blender_camera_utils import add_cameras
-from photogrammetry_importer.utils.blender_camera_utils import add_camera_animation
-from photogrammetry_importer.camera import Camera
+from photogrammetry_importer.utility.blender_utility import adjust_render_settings_if_possible
+from photogrammetry_importer.utility.blender_camera_utility import principal_points_initialized
+from photogrammetry_importer.utility.blender_camera_utility import set_principal_point_for_cameras
+from photogrammetry_importer.utility.blender_camera_utility import add_cameras
+from photogrammetry_importer.utility.blender_camera_utility import add_camera_animation
+from photogrammetry_importer.types.camera import Camera
 
 class CameraImportProperties():
     """ This class encapsulates Blender UI properties that are required to visualize the reconstructed cameras correctly. """

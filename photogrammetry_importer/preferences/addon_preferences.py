@@ -2,15 +2,15 @@ import os
 import bpy
 from bpy.props import BoolProperty, EnumProperty
 
-from photogrammetry_importer.blender_logging import log_report
-from photogrammetry_importer.camera_import_properties import CameraImportProperties
-from photogrammetry_importer.point_import_properties import PointImportProperties
-from photogrammetry_importer.mesh_import_properties import MeshImportProperties
+from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
+from photogrammetry_importer.properties.point_import_properties import PointImportProperties
+from photogrammetry_importer.properties.mesh_import_properties import MeshImportProperties
 
-from photogrammetry_importer.registration import register_importers
-from photogrammetry_importer.registration import unregister_importers
-from photogrammetry_importer.registration import register_exporters
-from photogrammetry_importer.registration import unregister_exporters
+from photogrammetry_importer.registration.registration import register_importers
+from photogrammetry_importer.registration.registration import unregister_importers
+from photogrammetry_importer.registration.registration import register_exporters
+from photogrammetry_importer.registration.registration import unregister_exporters
 
 def get_addon_name():
     return __name__.split('.')[0]

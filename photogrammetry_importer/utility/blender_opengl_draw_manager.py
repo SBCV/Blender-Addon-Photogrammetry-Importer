@@ -4,7 +4,7 @@ import bpy
 import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
-from photogrammetry_importer.blender_logging import log_report
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 def compute_transformed_coords(object_anchor_matrix_world, positions):
 

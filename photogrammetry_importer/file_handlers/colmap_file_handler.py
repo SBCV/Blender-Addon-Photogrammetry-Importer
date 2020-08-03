@@ -7,9 +7,9 @@ from photogrammetry_importer.ext.read_write_model import Camera as ColmapCamera
 from photogrammetry_importer.ext.read_write_model import Image as ColmapImage
 from photogrammetry_importer.ext.read_write_model import Point3D as ColmapPoint3D
 
-from photogrammetry_importer.camera import Camera
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
+from photogrammetry_importer.types.camera import Camera
+from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.utility.blender_camera_utility import check_radial_distortion
 
 
 # From photogrammetry_importer\ext\read_write_model.py

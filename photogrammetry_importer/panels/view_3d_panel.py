@@ -2,11 +2,11 @@ import os
 import numpy as np
 import bpy
 
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.utils.blender_camera_utils import get_selected_camera
-from photogrammetry_importer.utils.opengl_utils import render_opengl_image
-from photogrammetry_importer.opengl.visualization_utils import DrawManager
-from photogrammetry_importer.blender_logging import log_report
+from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.utility.blender_camera_utility import get_selected_camera
+from photogrammetry_importer.utility.blender_opengl_utility import render_opengl_image
+from photogrammetry_importer.utility.blender_opengl_draw_manager import DrawManager
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 from bpy.props import (StringProperty,
                        BoolProperty,

@@ -1,11 +1,11 @@
 import bpy
 import os
 import numpy as np
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.camera import Camera
+from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.types.camera import Camera
 
-from photogrammetry_importer.file_handler.nvm_file_handler import NVMFileHandler
-from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
+from photogrammetry_importer.file_handlers.nvm_file_handler import NVMFileHandler
+from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
 
 from bpy.props import (CollectionProperty,
                        StringProperty,

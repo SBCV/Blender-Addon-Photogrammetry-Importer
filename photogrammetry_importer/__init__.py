@@ -36,23 +36,23 @@ import bpy
 ##################################
 
 import importlib
-from .utils import developer_utils
-importlib.reload(developer_utils)
-modules = developer_utils.setup_addon_modules(__path__, __name__, "bpy" in locals())
+from .utility import developer_utility
+importlib.reload(developer_utility)
+modules = developer_utility.setup_addon_modules(__path__, __name__, "bpy" in locals())
 
 # The root dir is Blenders addon folder.
 # Therefore, we need the "photogrammetry_importer" specifier for this addon
-from photogrammetry_importer.blender_logging import log_report
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 from photogrammetry_importer.preferences.addon_preferences import PhotogrammetryImporterPreferences
 
-from photogrammetry_importer.registration import register_importers
-from photogrammetry_importer.registration import unregister_importers
-from photogrammetry_importer.registration import register_exporters
-from photogrammetry_importer.registration import unregister_exporters
+from photogrammetry_importer.registration.registration import register_importers
+from photogrammetry_importer.registration.registration import unregister_importers
+from photogrammetry_importer.registration.registration import register_exporters
+from photogrammetry_importer.registration.registration import unregister_exporters
 
-from photogrammetry_importer.panel.opengl_panel import OpenGLPanel
-from photogrammetry_importer.opengl.visualization_utils import redraw_points
+from photogrammetry_importer.panels.view_3d_panel import OpenGLPanel
+from photogrammetry_importer.utility.blender_opengl_utility import redraw_points
 bpy.app.handlers.load_post.append(redraw_points)
 
 # =========================================================================

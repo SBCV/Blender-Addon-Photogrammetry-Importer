@@ -3,12 +3,12 @@ import numpy as np
 import configparser
 import math
 
-from photogrammetry_importer.file_handler.image_file_handler import ImageFileHandler
-from photogrammetry_importer.utils.os_utils import get_subdirs 
-from photogrammetry_importer.camera import Camera
-from photogrammetry_importer.point import Point
-from photogrammetry_importer.utils.blender_camera_utils import check_radial_distortion
-from photogrammetry_importer.blender_logging import log_report
+from photogrammetry_importer.file_handlers.image_file_handler import ImageFileHandler
+from photogrammetry_importer.utility.os_utility import get_subdirs 
+from photogrammetry_importer.utility.blender_camera_utility import check_radial_distortion
+from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.types.camera import Camera
+from photogrammetry_importer.types.point import Point
 
 class MVEFileHandler(object):
 

@@ -19,7 +19,7 @@ Created by Sebastian Bullinger
 
 import numpy as np
 from photogrammetry_importer.ext.plyfile import PlyData, PlyElement
-from photogrammetry_importer.point import Point
+from photogrammetry_importer.types.point import Point
 
 
 # REMARK: In PLY file format FLOAT is SINGLE precision (32 bit) and DOUBLE is DOUBLE PRECISION (64 bit)
