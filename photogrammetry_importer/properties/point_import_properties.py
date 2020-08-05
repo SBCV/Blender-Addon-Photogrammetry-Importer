@@ -49,6 +49,8 @@ class PointImportProperties():
     particle_overwrite_color: FloatVectorProperty(
         name="Particle Color",
         description="Single fixed particle color.", 
+        subtype='COLOR',
+        size=3,
         default=(0.0, 1.0, 0.0),
         min=0.0,
         max=1.0)
