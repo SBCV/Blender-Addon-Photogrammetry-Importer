@@ -10,7 +10,7 @@ from photogrammetry_importer.ext.read_write_model import Point3D as ColmapPoint3
 from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.utility.blender_camera_utility import check_radial_distortion
-
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 # From photogrammetry_importer\ext\read_write_model.py
 # CAMERA_MODELS = {
@@ -79,7 +79,7 @@ def parse_camera_param_list(cam):
 class ColmapFileHandler(object):
 
     @staticmethod
-    def convert_cameras(id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, suppress_distortion_warnings, op):
+    def convert_cameras(id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op):
         # From photogrammetry_importer\ext\read_write_model.py
         #   CameraModel = collections.namedtuple(
         #       "CameraModel", ["model_id", "model_name", "num_params"])
@@ -102,9 +102,9 @@ class ColmapFileHandler(object):
             
             camera_model = id_to_col_cameras[col_image.camera_id]
     
-            # op.report({'INFO'}, 'image_id: ' + str(col_image.id))
-            # op.report({'INFO'}, 'camera_id: ' + str(col_image.camera_id))
-            # op.report({'INFO'}, 'camera_model: ' + str(camera_model))
+            # log_report('INFO', 'image_id: ' + str(col_image.id))
+            # log_report('INFO', 'camera_id: ' + str(col_image.camera_id))
+            # log_report('INFO', 'camera_model: ' + str(camera_model))
 
             current_camera.width = camera_model.width
             current_camera.height = camera_model.height
@@ -121,6 +121,14 @@ class ColmapFileHandler(object):
                 camera_calibration_matrix, 
                 radial_distortion=0)
 
+            geometric_ifp = os.path.join(depth_map_idp, col_image.name + '.geometric.bin')
+            photometric_ifp = os.path.join(depth_map_idp, col_image.name + '.photometric.bin')
+            if os.path.isfile(geometric_ifp):
+                current_camera.depth_map_fp = geometric_ifp
+            elif os.path.isfile(photometric_ifp):
+                current_camera.depth_map_fp = photometric_ifp
+            else:
+                current_camera.depth_map_fp = None
             cameras.append(current_camera)
      
         return cameras
@@ -171,7 +179,7 @@ class ColmapFileHandler(object):
         return valid
 
     @staticmethod
-    def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, suppress_distortion_warnings, op):
+    def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op):
 
         op.report({'INFO'}, 'Parse Colmap model folder: ' + model_idp)
 
@@ -186,7 +194,13 @@ class ColmapFileHandler(object):
         op.report({'INFO'}, 'id_to_col_cameras: ' + str(id_to_col_cameras))
 
         cameras = ColmapFileHandler.convert_cameras(
-            id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, suppress_distortion_warnings, op)
+            id_to_col_cameras,
+            id_to_col_images,
+            image_dp,
+            image_fp_type,
+            depth_map_idp,
+            suppress_distortion_warnings,
+            op)
 
         points3D = ColmapFileHandler.convert_points(
             id_to_col_points3D)
@@ -199,10 +213,17 @@ class ColmapFileHandler(object):
         assert ColmapFileHandler.is_valid_workspace_folder(workspace_idp)
 
         model_idp = os.path.join(workspace_idp, 'sparse')
-        mesh_ifp = os.path.join(workspace_idp, 'meshed-poisson.ply')
-        if not os.path.isfile(mesh_ifp):
-            mesh_ifp = os.path.join(workspace_idp, 'meshed-delaunay.ply') 
-        return model_idp, mesh_ifp
+        poisson_mesh_ifp = os.path.join(workspace_idp, 'meshed-poisson.ply')
+        delaunay_mesh_ifp = os.path.join(workspace_idp, 'meshed-delaunay.ply')
+        if os.path.isfile(poisson_mesh_ifp):
+            mesh_ifp = poisson_mesh_ifp
+        elif os.path.isfile(delaunay_mesh_ifp):
+            mesh_ifp = delaunay_mesh_ifp
+        else:
+            mesh_ifp = None
+        depth_map_idp = os.path.join(workspace_idp, 'stereo', 'depth_maps')
+
+        return model_idp, depth_map_idp, mesh_ifp
 
     @staticmethod
     def parse_colmap_folder(idp, image_dp, image_fp_type, suppress_distortion_warnings, op):
@@ -213,10 +234,10 @@ class ColmapFileHandler(object):
             model_idp = idp
             mesh_ifp = None
         elif ColmapFileHandler.is_valid_workspace_folder(idp):
-            model_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
+            model_idp, depth_map_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
 
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(
-            model_idp, image_dp, image_fp_type, suppress_distortion_warnings, op)
+            model_idp, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op)
 
         return cameras, points, mesh_ifp
 

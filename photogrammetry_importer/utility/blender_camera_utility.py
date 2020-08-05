@@ -13,8 +13,10 @@ from photogrammetry_importer.utility.blender_utility import add_collection
 from photogrammetry_importer.utility.blender_utility import add_obj
 from photogrammetry_importer.utility.blender_animation_utility import add_transformation_animation
 from photogrammetry_importer.utility.blender_animation_utility import add_camera_intrinsics_animation
+from photogrammetry_importer.utility.blender_opengl_utility import draw_coords
 from photogrammetry_importer.utility.stop_watch import StopWatch
 from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.ext.read_dense import read_array
 
 
 class DummyCamera(object):
@@ -48,8 +50,8 @@ def compute_shift(camera, relativ_to_largest_extend):
     shift_x = float((width / 2.0 - p_x) / float(width_denominator))
     shift_y = -float((height / 2.0 - p_y) / float(height_denominator))
 
-    # op.report({'INFO'}, 'shift_x: ' + str(shift_x))
-    # op.report({'INFO'}, 'shift_y: ' + str(shift_y))
+    # log_report('INFO', 'shift_x: ' + str(shift_x))
+    # log_report('INFO', 'shift_y: ' + str(shift_y))
 
     return shift_x, shift_y
 
@@ -71,12 +73,12 @@ def add_single_camera(op, camera_name, camera):
     bcamera.shift_x, bcamera.shift_y = compute_shift(
         camera, relativ_to_largest_extend=True)
 
-    # op.report({'INFO'}, 'focal_length: ' + str(focal_length))
-    # op.report({'INFO'}, 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
-    # op.report({'INFO'}, 'width: ' + str(camera.width))
-    # op.report({'INFO'}, 'height: ' + str(camera.height))
-    # op.report({'INFO'}, 'p_x: ' + str(p_x))
-    # op.report({'INFO'}, 'p_y: ' + str(p_y))
+    # log_report('INFO', 'focal_length: ' + str(focal_length))
+    # log_report('INFO', 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
+    # log_report('INFO', 'width: ' + str(camera.width))
+    # log_report('INFO', 'height: ' + str(camera.height))
+    # log_report('INFO', 'p_x: ' + str(p_x))
+    # log_report('INFO', 'p_y: ' + str(p_y))
 
     return bcamera
 
@@ -111,7 +113,7 @@ def add_camera_animation(op,
                         remove_rotation_discontinuities,
                         image_dp,
                         image_fp_type):
-    op.report({'INFO'}, 'Adding Camera Animation: ...')
+    log_report('INFO', 'Adding Camera Animation: ...')
 
     if len(cameras) == 0:
         return
@@ -164,12 +166,16 @@ def add_cameras(op,
                 image_dp=None,
                 add_background_images=False,
                 add_image_planes=False,
+                add_depth_maps_as_point_cloud=True,
                 convert_camera_coordinate_system=True,
                 camera_collection_name='Cameras',
                 image_plane_collection_name='Image Planes',
+                depth_map_collection_name='Depth Maps',
                 camera_scale=1.0,
                 image_plane_transparency=0.5,
-                add_image_plane_emission=True):
+                add_image_plane_emission=True,
+                depth_map_color=(1.0, 0.0, 0.0),
+                depth_map_display_sparsity=10):
 
     """
     ======== The images are currently only shown in BLENDER RENDER ========
@@ -183,14 +189,14 @@ def add_cameras(op,
     :param image_plane_collection_name:
     :return:
     """
-    op.report({'INFO'}, 'Adding Cameras: ...')
+    log_report('INFO', 'Adding Cameras: ...')
     stop_watch = StopWatch()
     camera_collection = add_collection(
         camera_collection_name, 
         parent_collection)
 
     if add_image_planes:
-        op.report({'INFO'}, 'Adding image planes: True')
+        log_report('INFO', 'Adding image planes: True')
         image_planes_collection = add_collection(
             image_plane_collection_name, 
             parent_collection)
@@ -198,7 +204,18 @@ def add_cameras(op,
             "Camera Image Plane Pair Collection",
             parent_collection)
     else:
-        op.report({'INFO'}, 'Adding image planes: False')
+        log_report('INFO', 'Adding image planes: False')
+
+    if add_depth_maps_as_point_cloud:
+        log_report('INFO', 'Adding depth maps as point cloud: True')
+        depth_map_collection = add_collection(
+            depth_map_collection_name, 
+            parent_collection)
+        camera_depth_map_pair_collection = add_collection(
+            "Camera Depth Map Pair Collection",
+            parent_collection)
+    else:
+        log_report('INFO', 'Adding depth maps: False')
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
@@ -222,22 +239,18 @@ def add_cameras(op,
             image_path = camera.get_absolute_fp()
 
         if not os.path.isfile(image_path):
-            op.report({'WARNING'}, 'Could not find image at ' + str(image_path))
+            log_report('WARNING', 'Could not find image at ' + str(image_path))
             continue
 
         blender_image = bpy.data.images.load(image_path)
 
         if add_background_images:
-            # op.report({'INFO'}, 'Adding background image for: ' + camera_name)
-
             camera_data = bpy.data.objects[camera_name].data
             camera_data.show_background_images = True
             background_image = camera_data.background_images.new()
             background_image.image = blender_image
 
         if add_image_planes and not camera.is_panoramic():
-            # op.report({'INFO'}, 'Adding image plane for: ' + camera_name)
-
             # Group image plane and camera:
             camera_image_plane_pair_collection_current = add_collection(
                 "Camera Image Plane Pair Collection %s" % blender_image_name_stem,
@@ -245,7 +258,6 @@ def add_cameras(op,
             
             image_plane_name = blender_image_name_stem + '_image_plane'
 
-            # do not add image planes by default, this is slow !
             image_plane_obj = add_camera_image_plane(
                 matrix_world, 
                 blender_image, 
@@ -259,8 +271,36 @@ def add_cameras(op,
             camera_image_plane_pair_collection_current.objects.link(camera_object)
             camera_image_plane_pair_collection_current.objects.link(image_plane_obj)
 
-    op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
-    op.report({'INFO'}, 'Adding Cameras: Done')
+        if add_depth_maps_as_point_cloud:
+
+            depth_map_fp = camera.depth_map_fp
+
+            # Group image plane and camera:
+            camera_depth_map_pair_collection_current = add_collection(
+                "Camera Depth Map Pair Collection %s" % os.path.basename(depth_map_fp),
+                camera_depth_map_pair_collection)
+
+            depth_map = read_array(depth_map_fp)
+            height, width = depth_map.shape
+
+            depth_map_world_coords = camera.convert_depth_map_to_world_coords(
+                depth_map,
+                depth_map_display_sparsity=depth_map_display_sparsity)
+
+            depth_map_anchor_handle = draw_coords(
+                op,
+                depth_map_world_coords, 
+                # TODO Setting this to true causes an error message 
+                add_points_to_point_cloud_handle=False, 
+                reconstruction_collection=depth_map_collection,
+                object_anchor_handle_name= camera.get_blender_obj_gui_str() + "_depth_point_cloud",
+                color=depth_map_color)
+
+            camera_depth_map_pair_collection_current.objects.link(camera_object)
+            camera_depth_map_pair_collection_current.objects.link(depth_map_anchor_handle)
+
+    log_report('INFO', 'Duration: ' + str(stop_watch.get_elapsed_time()))
+    log_report('INFO', 'Adding Cameras: Done')
 
 def add_camera_image_plane(matrix_world, 
                            blender_image, 
@@ -273,8 +313,8 @@ def add_camera_image_plane(matrix_world,
     """
     Create mesh for image plane
     """
-    # op.report({'INFO'}, 'add_camera_image_plane: ...')
-    # op.report({'INFO'}, 'name: ' + str(name))
+    # log_report('INFO', 'add_camera_image_plane: ...')
+    # log_report('INFO', 'name: ' + str(name))
 
     width = camera.width 
     height = camera.height 
@@ -342,15 +382,15 @@ def add_camera_image_plane(matrix_world,
     mesh_obj.matrix_world = matrix_world
     mesh.update()
     mesh.validate()
-    # op.report({'INFO'}, 'add_camera_image_plane: Done')
+    # log_report('INFO', 'add_camera_image_plane: Done')
     return mesh_obj
 
 def set_principal_point_for_cameras(cameras, default_pp_x, default_pp_y, op):
     
     if not math.isnan(default_pp_x) and not math.isnan(default_pp_y):
-        op.report({'WARNING'}, 'Setting principal points to default values!')
+        log_report('WARNING', 'Setting principal points to default values!')
     else:
-        op.report({'WARNING'}, 'Setting principal points to image centers!')
+        log_report('WARNING', 'Setting principal points to image centers!')
         assert cameras[0].width is not None and cameras[0].height is not None
         default_pp_x = cameras[0].width / 2.0
         default_pp_y = cameras[0].height / 2.0

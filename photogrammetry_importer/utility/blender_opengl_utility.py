@@ -14,13 +14,15 @@ from photogrammetry_importer.utility.blender_point_utility import compute_partic
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-def draw_points(op, points, add_points_to_point_cloud_handle, reconstruction_collection=None):
+def draw_coords_with_color( op, 
+                            coords,
+                            colors, 
+                            add_points_to_point_cloud_handle, 
+                            reconstruction_collection=None,
+                            object_anchor_handle_name="OpenGL Point Cloud"):
 
-    log_report('INFO', 'Add particle draw handlers', op)
-
-    coords, colors = Point.split_points(points)
     object_anchor_handle = add_empty(
-        "OpenGL Point Cloud", reconstruction_collection)
+        object_anchor_handle_name, reconstruction_collection)
     if add_points_to_point_cloud_handle:
         object_anchor_handle['particle_coords'] = coords
         object_anchor_handle['particle_colors'] = colors
@@ -29,7 +31,45 @@ def draw_points(op, points, add_points_to_point_cloud_handle, reconstruction_col
     draw_manager = DrawManager.get_singleton()
     draw_manager.register_points_draw_callback(
         object_anchor_handle, coords, colors)
+    return object_anchor_handle
 
+
+def draw_points(op, 
+                points, 
+                add_points_to_point_cloud_handle, 
+                reconstruction_collection=None,
+                object_anchor_handle_name="OpenGL Point Cloud"):
+
+    log_report('INFO', 'Add particle draw handlers', op)
+
+    coords, colors = Point.split_points(points)
+    object_anchor_handle = draw_coords_with_color(
+        op, 
+        coords, 
+        colors, 
+        add_points_to_point_cloud_handle, 
+        reconstruction_collection, 
+        object_anchor_handle_name)
+    return object_anchor_handle
+
+def draw_coords(op, 
+                coords, 
+                add_points_to_point_cloud_handle, 
+                reconstruction_collection=None,
+                object_anchor_handle_name="OpenGL Coord Point Cloud",
+                color=(0, 0, 255, 1.0)):
+    if len(color) == 3:
+        color = (color[0], color[1], color[2], 1) 
+    assert len(color) == 4
+    colors = [color for coord in coords]
+    object_anchor_handle = draw_coords_with_color(
+        op, 
+        coords, 
+        colors, 
+        add_points_to_point_cloud_handle, 
+        reconstruction_collection, 
+        object_anchor_handle_name)
+    return object_anchor_handle
 
 @persistent
 def redraw_points(dummy):

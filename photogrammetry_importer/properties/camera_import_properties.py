@@ -4,7 +4,8 @@ from bpy.props import (StringProperty,
                        BoolProperty,
                        EnumProperty,
                        FloatProperty,
-                       IntProperty)
+                       IntProperty,
+                       FloatVectorProperty)
 
 from photogrammetry_importer.utility.blender_utility import adjust_render_settings_if_possible
 from photogrammetry_importer.utility.blender_camera_utility import principal_points_initialized
@@ -15,6 +16,22 @@ from photogrammetry_importer.types.camera import Camera
 
 class CameraImportProperties():
     """ This class encapsulates Blender UI properties that are required to visualize the reconstructed cameras correctly. """
+    image_fp_items = [
+        (Camera.IMAGE_FP_TYPE_NAME, "File Name", "", 1),
+        (Camera.IMAGE_FP_TYPE_RELATIVE, "Relative Path", "", 2),
+        (Camera.IMAGE_FP_TYPE_ABSOLUTE, "Absolute Path", "", 3)
+        ]
+    image_fp_type: EnumProperty(
+        name="Image File Path Type",
+        description = "Choose how image file paths are treated, i.e. absolute path, relative path or file name.",
+        items=image_fp_items)
+    image_dp: StringProperty(
+        name="Image Directory",
+        description =   "Assuming the reconstruction result is located in <some/path/rec.ext> or <some/path/colmap_model>. " +
+                        "The addons uses <some/path/images> (if available) or <some/path> as default image path." ,
+        default=""
+        # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
+        )
     import_cameras: BoolProperty(
         name="Import Cameras",
         description = "Import Cameras", 
@@ -49,22 +66,6 @@ class CameraImportProperties():
         name="Add an Image Plane for each Camera",
         description = "Add an Image Plane for each Camera - only for non-panoramic cameras.", 
         default=True)
-    image_fp_items = [
-        (Camera.IMAGE_FP_TYPE_NAME, "File Name", "", 1),
-        (Camera.IMAGE_FP_TYPE_RELATIVE, "Relative Path", "", 2),
-        (Camera.IMAGE_FP_TYPE_ABSOLUTE, "Absolute Path", "", 3)
-        ]
-    image_fp_type: EnumProperty(
-        name="Image File Path Type",
-        description = "Choose how image file paths are treated, i.e. absolute path, relative path or file name.", 
-        items=image_fp_items)
-    image_dp: StringProperty(
-        name="Image Directory",
-        description =   "Assuming the reconstruction result is located in <some/path/rec.ext> or <some/path/colmap_model>. " + 
-                        "The addons uses <some/path/images> (if available) or <some/path> as default image path." , 
-        default=""
-        # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
-        )
     add_image_plane_emission: BoolProperty(
         name="Add Image Plane Color Emission",
         description = "Add image plane color emission to increase the visibility of the image planes.", 
@@ -75,6 +76,24 @@ class CameraImportProperties():
         default=0.5,
         min=0,
         max=1)
+    add_depth_maps_as_point_cloud: BoolProperty(
+        name="Add Depth Maps",
+        description = "Add the depth map (if available) as point cloud for each Camera",
+        default=False)
+    depth_map_color: FloatVectorProperty(
+        name="Depth Map Color",
+        description="Depth map color.",
+        subtype='COLOR',
+        size=3,     # RGBA colors are not compatible with the GPU Module
+        default=(0.0, 1.0, 0.0),
+        min=0.0,
+        max=1.0
+        )
+    depth_map_display_sparsity: IntProperty(
+        name="Depth Map Display Sparsity",
+        description =   "Adjust the sparsity of the depth maps. A value of 10 means, " +
+                        "that every 10th depth map value is converted to a 3D point.",
+        default=10)
     add_camera_motion_as_animation: BoolProperty(
         name="Add Camera Motion as Animation",
         description =   "Add an animation reflecting the camera motion. " + 
@@ -138,7 +157,13 @@ class CameraImportProperties():
         description = "Initial Camera Extent (Visualization)",
         default=1)
 
-    def draw_camera_options(self, layout, draw_image_fp=True, draw_size_and_pp=False, draw_focal_length=False, draw_everything=False):
+    def draw_camera_options(self,
+                            layout,
+                            draw_image_fp=True,
+                            draw_depth_map_import=False,
+                            draw_size_and_pp=False,
+                            draw_focal_length=False,
+                            draw_everything=False):
         camera_box = layout.box()
 
         if draw_image_fp or draw_everything:
@@ -166,6 +191,13 @@ class CameraImportProperties():
             if self.add_image_planes or draw_everything:
                 image_plane_box.prop(self, "add_image_plane_emission")
                 image_plane_box.prop(self, "image_plane_transparency")
+
+            if draw_depth_map_import or draw_everything:
+                depth_map_box = import_camera_box.box()
+                depth_map_box.prop(self, "add_depth_maps_as_point_cloud")
+                if self.add_depth_maps_as_point_cloud or draw_everything:
+                    depth_map_box.prop(self, "depth_map_color")
+                    depth_map_box.prop(self, "depth_map_display_sparsity")
 
         box = camera_box.box()
         box.prop(self, "add_camera_motion_as_animation")
@@ -218,10 +250,13 @@ class CameraImportProperties():
                         parent_collection,
                         image_dp=self.image_dp, 
                         add_background_images=self.add_background_images,
-                        add_image_planes=self.add_image_planes, 
+                        add_image_planes=self.add_image_planes,
+                        add_depth_maps_as_point_cloud=self.add_depth_maps_as_point_cloud,
                         camera_scale=self.camera_extent,
                         image_plane_transparency=self.image_plane_transparency,
-                        add_image_plane_emission=self.add_image_plane_emission)
+                        add_image_plane_emission=self.add_image_plane_emission,
+                        depth_map_color=self.depth_map_color,
+                        depth_map_display_sparsity=self.depth_map_display_sparsity)
 
                 if self.add_camera_motion_as_animation:
                     add_camera_animation(

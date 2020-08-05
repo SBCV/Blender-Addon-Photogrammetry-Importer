@@ -135,7 +135,7 @@ class ImportColmap(CameraImportProperties, PointImportProperties, MeshImportProp
 
     def draw(self, context):
         layout = self.layout
-        self.draw_camera_options(layout)
+        self.draw_camera_options(layout, draw_depth_map_import=True)
         self.draw_point_options(layout)
         self.draw_mesh_options(layout)
 

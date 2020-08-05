@@ -3,6 +3,7 @@ __author__ = 'sebastian'
 import numpy as np
 import math
 import os
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class Camera:
     """ 
@@ -36,6 +37,8 @@ class Camera:
         self.width = None
         self.height = None
         self.panoramic_type = None
+
+        self.depth_map_fp = None
 
         self.id = None  # an unique identifier (natural number)
 
@@ -299,6 +302,79 @@ class Camera:
                 q[0] = (m[0][1] - m[1][0]) / s
         return q
 
+    def get_4x4_cam_to_world_mat(self):
+        """
+        This matrix can be used to convert points given in camera coordinates
+        into points given in world coordinates.
+        M = [R^T    c]
+            [0      1]
+        :return:
+        """
+        homogeneous_mat = np.identity(4, dtype=float)
+        homogeneous_mat[0:3, 0:3] = self.get_rotation_mat().transpose()
+        homogeneous_mat[0:3, 3] = self.get_camera_center()
+        return homogeneous_mat
 
+    def convert_depth_map_to_world_coords(self,
+                                        depth_map,
+                                        depth_map_display_sparsity=100):
+        """
+        Do not confuse z_buffer with depth_buffer!
+        z_buffer contains values in [0,1]
+        depth_buffer contains the actual distance values
 
+        :param depth_buffer_matrix:
+        :param n_th_result_point:
+        :return:
+        """
+        assert 0 < depth_map_display_sparsity
+
+        height, width = depth_map.shape
+        assert self.height == height
+        assert self.width == width
+
+        fx = self.get_calibration_mat()[0][0]
+        fy = self.get_calibration_mat()[1][1]
+        cx, cy = self.get_principal_point()
+
+        indices = np.indices((height, width))
+        y_index_list = indices[0].flatten()
+        x_index_list = indices[1].flatten()
+
+        # Use the local coordinate system of the camera to analyze its viewing directions
+        # The Blender camera coordinate system looks along the negative z axis (blue),
+        # the up axis points along the y axis (green).
+
+        y_index_list = y_index_list[::-1]   # Reverse indices
+        x_index_list = x_index_list[::-1]   # Reverse indices
+        fx = -fx
+        fy = -fy
+        d_val_list = depth_map.flatten()
+
+        assert len(x_index_list) == len(y_index_list) == len(d_val_list)
+
+        # See Multiple View Geometry on p.155 (Hartley and Zisserman)
+        x_coords = d_val_list * (x_index_list - cx) / fx
+        y_coords = d_val_list * (y_index_list - cy) / fy
+        z_coords = d_val_list
+
+        # Determine non-background data
+        non_background_flags = z_coords > 0
+        x_coords_filtered = x_coords[non_background_flags]
+        y_coords_filtered = y_coords[non_background_flags]
+        z_coords_filtered = z_coords[non_background_flags]
+
+        if depth_map_display_sparsity != 100:
+            x_coords_filtered = x_coords_filtered[::depth_map_display_sparsity]
+            y_coords_filtered = y_coords_filtered[::depth_map_display_sparsity]
+            z_coords_filtered = z_coords_filtered[::depth_map_display_sparsity]
+
+        hom_entries = np.ones_like(z_coords_filtered)
+        cam_coords_hom = np.dstack(
+            (x_coords_filtered, y_coords_filtered, z_coords_filtered, hom_entries))[0]
+
+        world_coords_hom = self.get_4x4_cam_to_world_mat().dot(cam_coords_hom.T).T
+        world_coords = np.delete(world_coords_hom, 3, 1)
+
+        return world_coords
 
