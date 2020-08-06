@@ -126,7 +126,8 @@ class OpenMVGJSONFileHandler:
 
         compute_color = True
         try:
-            from PIL import Image
+            from PIL import Image, ImageFile
+            ImageFile.LOAD_TRUNCATED_IMAGES = True
         except ImportError:
             log_report('WARNING', 'Can not compute point cloud color information, since Pillow is not installed.', op)
             compute_color = False
