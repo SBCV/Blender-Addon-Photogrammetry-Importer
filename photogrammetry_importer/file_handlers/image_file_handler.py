@@ -1,4 +1,5 @@
 import os
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 try:
     from PIL import Image as PILImage
 except ImportError:
@@ -16,18 +17,18 @@ class ImageFileHandler(object):
         elif default_width > 0 and default_height > 0:
             width = default_width
             height = default_height
-            op.report({'WARNING'}, 'Set width and height to provided default values! (' + str(default_width) + ', ' + str(default_height) + ')')
+            log_report('WARNING', 'Set width and height to provided default values! (' + str(default_width) + ', ' + str(default_height) + ')', op)
             success = True
         else:
             if PILImage is None:
-                op.report({'ERROR'}, 'PIL/PILLOW is not installed. Can not read image from disc to get image size.')
+                log_report('ERROR', 'PIL/PILLOW is not installed. Can not read image from disc to get image size.', op)
             else:
-                op.report({'ERROR'}, 'Corresponding image not found at: ' + image_path)
-            op.report({'ERROR'}, 'Invalid default values provided for width (' + str(default_width) + ') and height (' + str(default_height) + ')')
+                log_report('ERROR', 'Corresponding image not found at: ' + image_path, op)
+            log_report('ERROR', 'Invalid default values provided for width (' + str(default_width) + ') and height (' + str(default_height) + ')', op)
             if PILImage is None:
-                op.report({'ERROR'}, 'Adjust the default width/height values to import the NVM / LOG / MVE file.')
+                log_report('ERROR', 'Adjust the default width/height values to import the NVM / LOG / MVE file.', op)
             else:
-                op.report({'ERROR'}, 'Adjust the image path or the default width/height values to import the NVM / LOG file.')
+                log_report('ERROR', 'Adjust the image path or the default width/height values to import the NVM / LOG file.', op)
             width = None
             height = None
             success = False
@@ -35,7 +36,7 @@ class ImageFileHandler(object):
 
     @staticmethod
     def parse_camera_image_files(cameras, default_width, default_height, op):
-        op.report({'INFO'}, 'parse_camera_image_files: ')
+        log_report('INFO', 'parse_camera_image_files: ', op)
         success = True 
         for camera in cameras:
             image_path = camera.get_absolute_fp()
@@ -45,5 +46,5 @@ class ImageFileHandler(object):
             camera.height = height
             if not success:
                 break
-        op.report({'INFO'}, 'parse_camera_image_files: Done')
+        log_report('INFO', 'parse_camera_image_files: Done', op)
         return cameras, success

@@ -121,14 +121,13 @@ class ColmapFileHandler(object):
                 camera_calibration_matrix, 
                 radial_distortion=0)
 
-            geometric_ifp = os.path.join(depth_map_idp, col_image.name + '.geometric.bin')
-            photometric_ifp = os.path.join(depth_map_idp, col_image.name + '.photometric.bin')
-            if os.path.isfile(geometric_ifp):
-                current_camera.depth_map_fp = geometric_ifp
-            elif os.path.isfile(photometric_ifp):
-                current_camera.depth_map_fp = photometric_ifp
-            else:
-                current_camera.depth_map_fp = None
+            if depth_map_idp is not None:
+                geometric_ifp = os.path.join(depth_map_idp, col_image.name + '.geometric.bin')
+                photometric_ifp = os.path.join(depth_map_idp, col_image.name + '.photometric.bin')
+                if os.path.isfile(geometric_ifp):
+                    current_camera.depth_map_fp = geometric_ifp
+                elif os.path.isfile(photometric_ifp):
+                    current_camera.depth_map_fp = photometric_ifp
             cameras.append(current_camera)
      
         return cameras
@@ -233,6 +232,7 @@ class ColmapFileHandler(object):
         if ColmapFileHandler.is_valid_model_folder(idp):
             model_idp = idp
             mesh_ifp = None
+            depth_map_idp = None
         elif ColmapFileHandler.is_valid_workspace_folder(idp):
             model_idp, depth_map_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
 

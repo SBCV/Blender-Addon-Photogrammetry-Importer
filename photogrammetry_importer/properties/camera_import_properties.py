@@ -161,7 +161,8 @@ class CameraImportProperties():
                             layout,
                             draw_image_fp=True,
                             draw_depth_map_import=False,
-                            draw_size_and_pp=False,
+                            draw_image_size=False,
+                            draw_principal_point=False,
                             draw_focal_length=False,
                             draw_everything=False):
         camera_box = layout.box()
@@ -171,14 +172,16 @@ class CameraImportProperties():
             if self.image_fp_type == "NAME" or self.image_fp_type == "RELATIVE" or draw_everything:
                 camera_box.prop(self, "image_dp")
 
-        if draw_size_and_pp or draw_everything:
+        if draw_focal_length or draw_image_size or draw_principal_point or draw_everything:
             image_box = camera_box.box()
             if draw_focal_length or draw_everything:
                 image_box.prop(self, "default_focal_length")
-            image_box.prop(self, "default_width")
-            image_box.prop(self, "default_height")
-            image_box.prop(self, "default_pp_x")
-            image_box.prop(self, "default_pp_y")
+            if draw_image_size or draw_everything:
+                image_box.prop(self, "default_width")
+                image_box.prop(self, "default_height")
+            if draw_principal_point or draw_everything:
+                image_box.prop(self, "default_pp_x")
+                image_box.prop(self, "default_pp_y")
 
         import_camera_box = camera_box.box()
         import_camera_box.prop(self, "import_cameras")

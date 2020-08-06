@@ -122,7 +122,7 @@ class MVEFileHandler(object):
         return camera
 
     @staticmethod
-    def parse_views(views_idp, op):
+    def parse_views(views_idp, default_width, default_height, op):
 
         cameras = []
         subdirs = get_subdirs(views_idp)
@@ -132,7 +132,7 @@ class MVEFileHandler(object):
             camera_name = folder_name.split('_')[1].split('.')[0]
             undistorted_img_ifp = os.path.join(subdir, "undistorted.png")
             success, width, height = ImageFileHandler.parse_camera_image_file(
-                undistorted_img_ifp, default_width=-1, default_height=-1, op=op)
+                undistorted_img_ifp, default_width=default_width, default_height=default_height, op=op)
             assert success
 
             meta_ifp = os.path.join(subdir, "meta.ini")
@@ -146,14 +146,14 @@ class MVEFileHandler(object):
 
 
     @staticmethod
-    def parse_mve_workspace(workspace_idp, suppress_distortion_warnings, op):
+    def parse_mve_workspace(workspace_idp, default_width, default_height, suppress_distortion_warnings, op):
 
         log_report('INFO', 'Parse MVE workspace: ...', op)
         log_report('INFO', workspace_idp, op)
         views_idp = os.path.join(workspace_idp, "views")
         synth_ifp = os.path.join(workspace_idp, "synth_0.out")
         cameras = MVEFileHandler.parse_views(
-            views_idp, op)
+            views_idp, default_width, default_height, op)
         points3D = MVEFileHandler.parse_synth_out(
             synth_ifp)
         log_report('INFO', 'Parse MVE workspace: Done', op)
