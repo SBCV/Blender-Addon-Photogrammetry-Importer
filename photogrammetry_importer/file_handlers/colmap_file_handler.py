@@ -180,7 +180,7 @@ class ColmapFileHandler(object):
     @staticmethod
     def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op):
 
-        op.report({'INFO'}, 'Parse Colmap model folder: ' + model_idp)
+        log_report('INFO', 'Parse Colmap model folder: ' + model_idp, op)
 
         assert ColmapFileHandler.is_valid_model_folder(model_idp)
         ext = ColmapFileHandler.get_model_folder_ext(model_idp)
@@ -190,7 +190,7 @@ class ColmapFileHandler(object):
         id_to_col_cameras, id_to_col_images, id_to_col_points3D = read_model(
             model_idp, ext=ext)
 
-        op.report({'INFO'}, 'id_to_col_cameras: ' + str(id_to_col_cameras))
+        log_report('INFO', 'id_to_col_cameras: ' + str(id_to_col_cameras), op)
 
         cameras = ColmapFileHandler.convert_cameras(
             id_to_col_cameras,
@@ -235,6 +235,9 @@ class ColmapFileHandler(object):
             depth_map_idp = None
         elif ColmapFileHandler.is_valid_workspace_folder(idp):
             model_idp, depth_map_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
+        else:
+            log_report('ERROR', 'Invalid colmap model / workspace', op)
+            assert False
 
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(
             model_idp, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op)
