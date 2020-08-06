@@ -11,6 +11,7 @@ from photogrammetry_importer.properties.point_import_properties import PointImpo
 from photogrammetry_importer.file_handlers.image_file_handler import ImageFileHandler
 from photogrammetry_importer.file_handlers.open3D_file_handler import Open3DFileHandler
 from photogrammetry_importer.utility.blender_utility import add_collection
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 from photogrammetry_importer.types.camera import Camera
 
@@ -39,16 +40,16 @@ class ImportOpen3DOperator( ImportOperator,
                 break
 
         if not intrinsic_missing:
-            self.report({'INFO'}, 'Using intrinsics from file (.json).')
+            log_report('INFO', 'Using intrinsics from file (.json).', self)
             return cameras, True
         else:
-            self.report({'INFO'}, 'Using intrinsics from user options, since not present in the reconstruction file (.log).')
+            log_report('INFO', 'Using intrinsics from user options, since not present in the reconstruction file (.log).', self)
             if math.isnan(self.default_focal_length):
-                self.report({'ERROR'}, 'User must provide the focal length using the import options.')
+                log_report('ERROR', 'User must provide the focal length using the import options.', self)
                 return [], False 
 
             if math.isnan(self.default_pp_x) or math.isnan(self.default_pp_y):
-                self.report({'WARNING'}, 'Setting the principal point to the image center.')
+                log_report('WARNING', 'Setting the principal point to the image center.', op)
 
             for cam in cameras:
                 if math.isnan(self.default_pp_x) or math.isnan(self.default_pp_y):
@@ -67,25 +68,39 @@ class ImportOpen3DOperator( ImportOperator,
                 cam.set_calibration_mat(intrinsics)
             return cameras, True
 
+    def image_size_initialized(self, cameras):
+        missing_data = False
+        for camera in cameras:
+            if camera.width is None or camera.height is None:
+                missing_data = True
+                break
+        is_initialized = not missing_data 
+        return is_initialized
+
     def enhance_camera_with_images(self, cameras):
-        # Overwrites CameraImportProperties.enhance_camera_with_images()
-        cameras, success = ImageFileHandler.parse_camera_image_files(
-            cameras, self.default_width, self.default_height, self)
+
+        if not self.image_size_initialized(cameras):
+            # Overwrites CameraImportProperties.enhance_camera_with_images()
+            cameras, success = ImageFileHandler.parse_camera_image_files(
+                cameras, self.default_width, self.default_height, self)
+        else:
+            success = True
         return cameras, success
 
     def execute(self, context):
 
         path = os.path.join(self.directory, self.filepath)
-        self.report({'INFO'}, 'path: ' + str(path))
+        log_report('INFO', 'path: ' + str(path), self)
 
         self.image_dp = self.get_default_image_path(
             path, self.image_dp)
-        self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
+        log_report('INFO', 'image_dp: ' + str(self.image_dp), self)
         
         cameras = Open3DFileHandler.parse_open3d_file(
             path, self.image_dp, self.image_fp_type, self)
         
-        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
+        log_report('INFO', 'aaaaa ' + str(cameras[0].width), self)
+        log_report('INFO', 'Number cameras: ' + str(len(cameras)), self)
         
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)

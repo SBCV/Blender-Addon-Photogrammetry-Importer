@@ -11,6 +11,8 @@ from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.utility.os_utility import get_image_file_paths_in_dir
 
+from photogrammetry_importer.utility.blender_logging_utility import log_report
+
 class Open3DFileHandler:
 
     @staticmethod
@@ -23,9 +25,9 @@ class Open3DFileHandler:
         - *.txt (Only extrinsics, TUM format (https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats))
         :return: cameras
         """
-        op.report({'INFO'}, 'parse_open3d_file: ...')
-        op.report({'INFO'}, 'open3d_ifp: ' + open3d_ifp)
-        op.report({'INFO'}, 'image_dp: ' + image_dp)
+        log_report('INFO', 'parse_open3d_file: ...', op)
+        log_report('INFO', 'open3d_ifp: ' + open3d_ifp, op)
+        log_report('INFO', 'image_dp: ' + image_dp, op)
 
         image_relative_fp_list = get_image_file_paths_in_dir(
             image_dp,
@@ -44,7 +46,7 @@ class Open3DFileHandler:
         else:
             assert False
 
-        op.report({'INFO'}, 'parse_open3d_file: Done')
+        log_report('INFO', 'parse_open3d_file: Done', op)
         return cams
 
     @staticmethod
