@@ -58,12 +58,12 @@ Install the addon by
 
 Follow the instructions on the :doc:`customize <./customize>` page, to adjust the default options of the addon. 
 
-Optional Dependency for VisualSfM and OpenMVG/Regard3D Files
-============================================================
-This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to compute missing information for VisualSFM (NVM) and OpenMVG (JSON) files.
+Optional Dependency for VisualSfM, Multi-View Environment and OpenMVG/Regard3D
+==============================================================================
+This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to compute missing information for VisualSFM NVM files, Multi-View Environment folders and OpenMVG JSON files.
 
-- For VisualSFM (NVM) the addon uses pillow to read the (missing) image sizes from disc.
-- For OpenMVG/Regard3D (JSON) the addon uses pillow to compute the (missing) colors for the 3D points in the point cloud.
+- For VisualSFM (NVM files) and Multi-View Environment the addon uses pillow to read the (missing) image sizes from disc.
+- For OpenMVG/Regard3D (JSON files) the addon uses pillow to compute the (missing) colors for the 3D points in the point cloud.
 
 Using Pillow instead of Blender's image API significantly improves processing time. 
 

@@ -25,6 +25,8 @@ Supported libraries / data formats:
 	* Colmap model folders (binary and txt format), Colmap workspaces, NVM, PLY 
 - Meshroom reconstructions (https://alicevision.github.io/)
 	* MG, JSON, SfM, PLY
+- Multi-View Environment reconstructions (https://github.com/simonfuhrmann/mve)
+	* MVE workspaces
 - Open3D reconstructions (http://www.open3d.org/)
 	* JSON, LOG, PLY
 - OpenSfM reconstructions (https://github.com/mapillary/OpenSfM)

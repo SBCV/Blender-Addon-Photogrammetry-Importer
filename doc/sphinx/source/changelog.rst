@@ -7,6 +7,8 @@ Changelog with most relevant features. Recently added features are listed at the
 2020
 ====
 
+* Added an option to import depth maps of Colmap as point clouds
+* Added support for Multi-View Environment workspaces
 * Added addon preferences to enable/disable importers and exporters
 * Added an OpenSfM importer
 * OpenGL data is now persistent (stored in blend file) and is available after reopening
