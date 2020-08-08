@@ -2,6 +2,7 @@ import os
 import numpy as np
 import configparser
 import math
+import struct
 
 from photogrammetry_importer.file_handlers.image_file_handler import ImageFileHandler
 from photogrammetry_importer.utility.os_utility import get_subdirs 
@@ -122,7 +123,7 @@ class MVEFileHandler(object):
         return camera
 
     @staticmethod
-    def parse_views(views_idp, default_width, default_height, op):
+    def parse_views(views_idp, default_width, default_height, add_depth_maps_as_point_cloud, op):
 
         cameras = []
         subdirs = get_subdirs(views_idp)
@@ -138,24 +139,67 @@ class MVEFileHandler(object):
             meta_ifp = os.path.join(subdir, "meta.ini")
             camera = MVEFileHandler.parse_meta(meta_ifp, width, height, camera_name, op)
 
-            # TODO
-            depth_ifp = os.path.join(subdir, "depth-L0.mvei")
+            if add_depth_maps_as_point_cloud:
+                depth_ifp = os.path.join(subdir, "depth-L0.mvei")
+                if os.path.isfile(depth_ifp):
+                    camera.depth_map_fp = depth_ifp
+                    camera.depth_map_callback = MVEFileHandler.read_depth_map
+                else:
+                    log_report('WARNING', 'Depth map at scale 0 is missing (' + depth_ifp + ').', op)
 
             cameras.append(camera)
         return cameras
 
 
     @staticmethod
-    def parse_mve_workspace(workspace_idp, default_width, default_height, suppress_distortion_warnings, op):
+    def parse_mve_workspace(workspace_idp,
+                            default_width,
+                            default_height,
+                            add_depth_maps_as_point_cloud,
+                            suppress_distortion_warnings,
+                            op):
 
         log_report('INFO', 'Parse MVE workspace: ...', op)
         log_report('INFO', workspace_idp, op)
         views_idp = os.path.join(workspace_idp, "views")
         synth_ifp = os.path.join(workspace_idp, "synth_0.out")
         cameras = MVEFileHandler.parse_views(
-            views_idp, default_width, default_height, op)
+            views_idp, default_width, default_height, add_depth_maps_as_point_cloud, op)
         points3D = MVEFileHandler.parse_synth_out(
             synth_ifp)
         log_report('INFO', 'Parse MVE workspace: Done', op)
         return cameras, points3D
 
+
+    @staticmethod
+    def read_next_bytes(fid, num_bytes, format_char_sequence, endian_character="<"):
+        """Read and unpack the next bytes from a binary file.
+        :param fid:
+        :param num_bytes: Sum of combination of {2, 4, 8}, e.g. 2, 6, 16, 30, etc.
+        :param format_char_sequence: List of {c, e, f, d, h, H, i, I, l, L, q, Q}.
+        :param endian_character: Any of {@, =, <, >, !}
+        :return: Tuple of read and unpacked values.
+        """
+        data = fid.read(num_bytes)
+        return struct.unpack(endian_character + format_char_sequence, data)
+
+
+    @staticmethod
+    def read_depth_map(depth_map_ifp):
+
+        # See:
+        # https://github.com/simonfuhrmann/mve/wiki/MVE-File-Format#the-mvei-image-format
+        # https://github.com/simonfuhrmann/mve/blob/master/libs/mve/image_io.cc
+
+        with open(depth_map_ifp, "rb") as fid:
+            mvei_file_signature = MVEFileHandler.read_next_bytes(fid, 11, "ccccccccccc")
+            width = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
+            height = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
+            channels = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
+            assert channels == 1
+            raw_type = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
+            assert raw_type == 9    # IMAGE_TYPE_FLOAT
+            num_elements = width * height * channels
+            data = np.asarray(
+                MVEFileHandler.read_next_bytes(fid, num_elements * 4, "f" * num_elements))
+            return data.reshape((height, width))

@@ -39,6 +39,7 @@ class Camera:
         self.panoramic_type = None
 
         self.depth_map_fp = None
+        self.depth_map_callback = None
 
         self.id = None  # an unique identifier (natural number)
 
@@ -301,6 +302,12 @@ class Camera:
                 q[3] = 0.25 * s
                 q[0] = (m[0][1] - m[1][0]) / s
         return q
+
+    def get_depth_map(self):
+        if os.path.isfile(self.depth_map_fp):
+            return self.depth_map_callback(self.depth_map_fp)
+        else:
+            return None
 
     def get_4x4_cam_to_world_mat(self):
         """

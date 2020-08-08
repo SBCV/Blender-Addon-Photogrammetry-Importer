@@ -29,7 +29,12 @@ class ImportMVEOperator(ImportOperator,
         self.report({'INFO'}, 'path: ' + str(path))
         
         cameras, points = MVEFileHandler.parse_mve_workspace(
-            path, self.default_width, self.default_height, self.suppress_distortion_warnings, self)
+            path,
+            self.default_width,
+            self.default_height,
+            self.add_depth_maps_as_point_cloud,
+            self.suppress_distortion_warnings,
+            self)
 
         self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
         self.report({'INFO'}, 'Number points: ' + str(len(points)))
@@ -53,5 +58,5 @@ class ImportMVEOperator(ImportOperator,
 
     def draw(self, context):
         layout = self.layout
-        self.draw_camera_options(layout, draw_image_fp=False, draw_image_size=True)
+        self.draw_camera_options(layout, draw_image_fp=False, draw_image_size=True, draw_depth_map_import=True)
         self.draw_point_options(layout)

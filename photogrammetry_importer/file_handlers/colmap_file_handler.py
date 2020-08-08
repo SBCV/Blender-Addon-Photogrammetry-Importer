@@ -1,5 +1,8 @@
 import os
 import numpy as np
+
+from photogrammetry_importer.ext.read_dense import read_array
+
 from photogrammetry_importer.ext.read_write_model import read_model
 from photogrammetry_importer.ext.read_write_model import write_model
 
@@ -128,6 +131,7 @@ class ColmapFileHandler(object):
                     current_camera.depth_map_fp = geometric_ifp
                 elif os.path.isfile(photometric_ifp):
                     current_camera.depth_map_fp = photometric_ifp
+                current_camera.depth_map_callback = read_array
             cameras.append(current_camera)
      
         return cameras

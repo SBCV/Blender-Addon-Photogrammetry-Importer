@@ -16,8 +16,6 @@ from photogrammetry_importer.utility.blender_animation_utility import add_camera
 from photogrammetry_importer.utility.blender_opengl_utility import draw_coords
 from photogrammetry_importer.utility.stop_watch import StopWatch
 from photogrammetry_importer.utility.blender_logging_utility import log_report
-from photogrammetry_importer.ext.read_dense import read_array
-
 
 class DummyCamera(object):
     def __init__(self):
@@ -273,31 +271,32 @@ def add_cameras(op,
 
         if add_depth_maps_as_point_cloud:
 
-            depth_map_fp = camera.depth_map_fp
+            if camera.depth_map_fp is not None:
+                depth_map_fp = camera.depth_map_fp
 
-            # Group image plane and camera:
-            camera_depth_map_pair_collection_current = add_collection(
-                "Camera Depth Map Pair Collection %s" % os.path.basename(depth_map_fp),
-                camera_depth_map_pair_collection)
+                # Group image plane and camera:
+                camera_depth_map_pair_collection_current = add_collection(
+                    "Camera Depth Map Pair Collection %s" % os.path.basename(depth_map_fp),
+                    camera_depth_map_pair_collection)
 
-            depth_map = read_array(depth_map_fp)
-            height, width = depth_map.shape
+                depth_map = camera.get_depth_map()
+                height, width = depth_map.shape
 
-            depth_map_world_coords = camera.convert_depth_map_to_world_coords(
-                depth_map,
-                depth_map_display_sparsity=depth_map_display_sparsity)
+                depth_map_world_coords = camera.convert_depth_map_to_world_coords(
+                    depth_map,
+                    depth_map_display_sparsity=depth_map_display_sparsity)
 
-            depth_map_anchor_handle = draw_coords(
-                op,
-                depth_map_world_coords, 
-                # TODO Setting this to true causes an error message 
-                add_points_to_point_cloud_handle=False, 
-                reconstruction_collection=depth_map_collection,
-                object_anchor_handle_name= camera.get_blender_obj_gui_str() + "_depth_point_cloud",
-                color=depth_map_color)
+                depth_map_anchor_handle = draw_coords(
+                    op,
+                    depth_map_world_coords,
+                    # TODO Setting this to true causes an error message
+                    add_points_to_point_cloud_handle=False,
+                    reconstruction_collection=depth_map_collection,
+                    object_anchor_handle_name= camera.get_blender_obj_gui_str() + "_depth_point_cloud",
+                    color=depth_map_color)
 
-            camera_depth_map_pair_collection_current.objects.link(camera_object)
-            camera_depth_map_pair_collection_current.objects.link(depth_map_anchor_handle)
+                camera_depth_map_pair_collection_current.objects.link(camera_object)
+                camera_depth_map_pair_collection_current.objects.link(depth_map_anchor_handle)
 
     log_report('INFO', 'Duration: ' + str(stop_watch.get_elapsed_time()))
     log_report('INFO', 'Adding Cameras: Done')
