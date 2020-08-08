@@ -1,6 +1,7 @@
 import os
 import math
 import bpy
+import colorsys
 import numpy as np
 from mathutils import Vector
 from collections import namedtuple
@@ -158,6 +159,18 @@ def add_camera_animation(op,
         number_interpolation_frames=number_interpolation_frames
     )
 
+def color_from_value(val, min_val, max_val):
+    # source: http://stackoverflow.com/questions/10901085/range-values-to-pseudocolor
+
+    # convert val in range minval..maxval to the range 0..120 degrees which
+    # correspond to the colors red..green in the HSV colorspace
+
+    h = (float(val - min_val) / (max_val - min_val)) * 120
+    # convert hsv color (h, 1, 1) to its rgb equivalent
+    # note: the hsv_to_rgb() function expects h to be in the range 0..1 not 0..360
+    r, g, b = colorsys.hsv_to_rgb(h / 360, 1., 1.)
+    return r, g, b, 1
+
 def add_cameras(op, 
                 cameras,
                 parent_collection,
@@ -172,7 +185,8 @@ def add_cameras(op,
                 camera_scale=1.0,
                 image_plane_transparency=0.5,
                 add_image_plane_emission=True,
-                depth_map_color=(1.0, 0.0, 0.0),
+                use_default_depth_map_color=False,
+                depth_map_default_color=(1.0, 0.0, 0.0),
                 depth_map_display_sparsity=10):
 
     """
@@ -286,6 +300,11 @@ def add_cameras(op,
                     depth_map,
                     depth_map_display_sparsity=depth_map_display_sparsity)
 
+                if use_default_depth_map_color:
+                    color = depth_map_default_color
+                else:
+                    color = color_from_value(val=index, min_val=0, max_val=len(cameras))
+
                 depth_map_anchor_handle = draw_coords(
                     op,
                     depth_map_world_coords,
@@ -293,7 +312,7 @@ def add_cameras(op,
                     add_points_to_point_cloud_handle=False,
                     reconstruction_collection=depth_map_collection,
                     object_anchor_handle_name= camera.get_blender_obj_gui_str() + "_depth_point_cloud",
-                    color=depth_map_color)
+                    color=color)
 
                 camera_depth_map_pair_collection_current.objects.link(camera_object)
                 camera_depth_map_pair_collection_current.objects.link(depth_map_anchor_handle)
