@@ -7,7 +7,7 @@ from photogrammetry_importer.operators.nvm_import_op import ImportNVMOperator
 from photogrammetry_importer.operators.openmvg_import_op import ImportOpenMVGOperator
 from photogrammetry_importer.operators.opensfm_import_op import ImportOpenSfMOperator
 from photogrammetry_importer.operators.open3d_import_op import ImportOpen3DOperator
-from photogrammetry_importer.operators.ply_import_op import ImportPLYOperator
+from photogrammetry_importer.operators.point_data_import_op import ImportPointDataOperator
 
 from photogrammetry_importer.operators.nvm_export_op import ExportNVMOperator
 from photogrammetry_importer.operators.colmap_export_op import ExportColmapOperator
@@ -32,8 +32,8 @@ def opensfm_import_operator_function(self, context):
 def openmvg_import_operator_function(self, context):
     self.layout.operator(ImportOpenMVGOperator.bl_idname, text="OpenMVG / Regard3D Import (.json)")
 
-def ply_import_operator_function(self, context):
-    self.layout.operator(ImportPLYOperator.bl_idname, text="Point Cloud PLY Import (.ply)")
+def point_data_import_operator_function(self, context):
+    self.layout.operator(ImportPointDataOperator.bl_idname, text="Point Data Import (.ply/.asc/.pts/.csv)")
 
 def visualsfm_import_operator_function(self, context):
     self.layout.operator(ImportNVMOperator.bl_idname, text="VisualSfM Import (.nvm)")
@@ -88,7 +88,7 @@ def register_importers(import_prefs):
     register_importer(import_prefs.open3d_importer_bool, ImportOpen3DOperator, open3d_import_operator_function)
     register_importer(import_prefs.opensfm_importer_bool, ImportOpenSfMOperator, opensfm_import_operator_function)
     register_importer(import_prefs.openmvg_importer_bool, ImportOpenMVGOperator, openmvg_import_operator_function)
-    register_importer(import_prefs.ply_importer_bool, ImportPLYOperator, ply_import_operator_function)
+    register_importer(import_prefs.ply_importer_bool, ImportPointDataOperator, point_data_import_operator_function)
     register_importer(import_prefs.visualsfm_importer_bool, ImportNVMOperator, visualsfm_import_operator_function)
 
 def unregister_importers():
@@ -98,7 +98,7 @@ def unregister_importers():
     unregister_importer(ImportOpen3DOperator, open3d_import_operator_function)
     unregister_importer(ImportOpenSfMOperator, opensfm_import_operator_function)
     unregister_importer(ImportOpenMVGOperator, openmvg_import_operator_function)
-    unregister_importer(ImportPLYOperator, ply_import_operator_function)
+    unregister_importer(ImportPointDataOperator, point_data_import_operator_function)
     unregister_importer(ImportNVMOperator, visualsfm_import_operator_function)
 
 def register_exporters(export_prefs):

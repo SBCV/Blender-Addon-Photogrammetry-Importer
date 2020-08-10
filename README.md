@@ -15,13 +15,17 @@ Supported libraries / data formats:
 	* JSON
 - [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
 	* JSON, NVM, PLY
-- [x] Polygon files ([http://paulbourke.net/dataformats/ply/](http://paulbourke.net/dataformats/ply/))
-	* PLY
 - [x] Regard3D reconstructions ([https://www.regard3d.org/](https://www.regard3d.org/))
 	* (OpenMVG) JSON
 - [x] VisualSFM reconstructions ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
 	* NVM
-	
+
+In addition, the addon supports some common point cloud data formats:
+
+- [x] Polygon files ([http://paulbourke.net/dataformats/ply/](http://paulbourke.net/dataformats/ply/))
+	* PLY
+- [x] Simple ASCII point files ([https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O))
+	* ASC, PTS, CSV
 
 Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
