@@ -16,6 +16,9 @@ class Camera:
     IMAGE_FP_TYPE_RELATIVE = "RELATIVE"
     IMAGE_FP_TYPE_ABSOLUTE = "ABSOLUTE"
 
+    DEPTH_MAP_WRT_UNIT_VECTORS = "DEPTH_MAP_WRT_UNIT_VECTORS"
+    DEPTH_MAP_WRT_CANONICAL_VECTORS = "DEPTH_MAP_WRT_CANONICAL_VECTORS"
+
     def __init__(self):
         self._center = np.array([0, 0, 0], dtype=float)              # C = -R^T t
         self._translation_vec = np.array([0, 0, 0], dtype=float)     # t = -R C
@@ -40,6 +43,7 @@ class Camera:
 
         self.depth_map_fp = None
         self.depth_map_callback = None
+        self.depth_map_semantic = None
 
         self.id = None  # an unique identifier (natural number)
 
@@ -303,6 +307,11 @@ class Camera:
                 q[0] = (m[0][1] - m[1][0]) / s
         return q
 
+    def set_depth_map(self, depth_map_ifp, depth_map_callback, depth_map_semantic):
+        self.depth_map_fp = depth_map_ifp
+        self.depth_map_callback = depth_map_callback
+        self.depth_map_semantic = depth_map_semantic
+
     def get_depth_map(self):
         if os.path.isfile(self.depth_map_fp):
             return self.depth_map_callback(self.depth_map_fp)
@@ -322,9 +331,8 @@ class Camera:
         homogeneous_mat[0:3, 3] = self.get_camera_center()
         return homogeneous_mat
 
-    def convert_depth_map_to_world_coords(self,
-                                        depth_map,
-                                        depth_map_display_sparsity=100):
+    def convert_depth_map_to_world_coords(  self,
+                                            depth_map_display_sparsity=100):
         """
         Do not confuse z_buffer with depth_buffer!
         z_buffer contains values in [0,1]
@@ -336,6 +344,7 @@ class Camera:
         """
         assert 0 < depth_map_display_sparsity
 
+        depth_map = self.get_depth_map()
         height, width = depth_map.shape
         assert self.height == height
         assert self.width == width
@@ -352,33 +361,75 @@ class Camera:
         # The Blender camera coordinate system looks along the negative z axis (blue),
         # the up axis points along the y axis (green).
 
-        y_index_list = y_index_list[::-1]   # Reverse indices
-        x_index_list = x_index_list[::-1]   # Reverse indices
+        y_index_list = y_index_list[::-1]   # Reverse order of indices
+        x_index_list = x_index_list[::-1]   # Reverse order of indices
         fx = -fx
         fy = -fy
-        d_val_list = depth_map.flatten()
+        depth_values = depth_map.flatten()
 
-        assert len(x_index_list) == len(y_index_list) == len(d_val_list)
+        assert len(x_index_list) == len(y_index_list) == len(depth_values)
 
-        # See Multiple View Geometry on p.155 (Hartley and Zisserman)
-        x_coords = d_val_list * (x_index_list - cx) / fx
-        y_coords = d_val_list * (y_index_list - cy) / fy
-        z_coords = d_val_list
+        # https://github.com/colmap/colmap/blob/dev/src/base/reconstruction.cc
+        #   // COLMAP assumes that the upper left pixel center is (0.5, 0.5)
+        # https://github.com/simonfuhrmann/mve/blob/master/libs/mve/depthmap.cc
+        #  math::Vec3f v = invproj * math::Vec3f(
+        #       (float)x + 0.5f, (float)y + 0.5f, 1.0f);
+        x_index_coord_list = x_index_list + 0.5
+        y_index_coord_list = y_index_list + 0.5
+
+        # The cannoncial vectors are defined according to p.155 of 
+        # "Multiple View Geometry" by Hartley and Zisserman using a canonical 
+        # focal length of 1 , i.e. vec = [(x - cx) / fx, (y - cy) / fy, 1] 
+        x_coords_canonical = (x_index_coord_list - cx) / fx
+        y_coords_canonical = (y_index_coord_list - cy) / fy
+        z_coords_canonical = np.ones(len(depth_values), dtype=float)
 
         # Determine non-background data
-        non_background_flags = z_coords > 0
-        x_coords_filtered = x_coords[non_background_flags]
-        y_coords_filtered = y_coords[non_background_flags]
-        z_coords_filtered = z_coords[non_background_flags]
+        non_background_flags = depth_values > 0
+        x_coords_canonical_filtered = x_coords_canonical[non_background_flags]
+        y_coords_canonical_filtered = y_coords_canonical[non_background_flags]
+        z_coords_canonical_filtered = z_coords_canonical[non_background_flags]
+        depth_values_filtered = depth_values[non_background_flags]
 
         if depth_map_display_sparsity != 100:
-            x_coords_filtered = x_coords_filtered[::depth_map_display_sparsity]
-            y_coords_filtered = y_coords_filtered[::depth_map_display_sparsity]
-            z_coords_filtered = z_coords_filtered[::depth_map_display_sparsity]
+            x_coords_canonical_filtered = x_coords_canonical_filtered[::depth_map_display_sparsity]
+            y_coords_canonical_filtered = y_coords_canonical_filtered[::depth_map_display_sparsity]
+            z_coords_canonical_filtered = z_coords_canonical_filtered[::depth_map_display_sparsity]
+            depth_values_filtered = depth_values_filtered[::depth_map_display_sparsity]
+
+        if self.depth_map_semantic == Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS:
+            # In this case, the depth values are defined w.r.t. the canonical
+            # vectors. This kind of depth data is used by Colmap.
+            x_coords_filtered = x_coords_canonical_filtered * depth_values_filtered
+            y_coords_filtered = y_coords_canonical_filtered * depth_values_filtered
+            z_coords_filtered = z_coords_canonical_filtered * depth_values_filtered
+
+        elif self.depth_map_semantic == Camera.DEPTH_MAP_WRT_UNIT_VECTORS:
+            # In this case the depth values are defined w.r.t. the normalized 
+            # canonical vectors. This kind of depth data is used by MVE.
+            cannonical_norms_filtered = np.linalg.norm(
+                np.array(
+                    [x_coords_canonical_filtered, 
+                    y_coords_canonical_filtered, 
+                    z_coords_canonical_filtered], 
+                    dtype=float),
+                axis=0)
+            # Instead of normalizing the x,y and z component, we divide the 
+            # depth values by the corresponding norm.
+            normalized_depth_values_filtered = depth_values_filtered / cannonical_norms_filtered
+            x_coords_filtered = x_coords_canonical_filtered * normalized_depth_values_filtered
+            y_coords_filtered = y_coords_canonical_filtered * normalized_depth_values_filtered
+            z_coords_filtered = z_coords_canonical_filtered * normalized_depth_values_filtered
+
+        else:
+            assert False
 
         hom_entries = np.ones_like(z_coords_filtered)
         cam_coords_hom = np.dstack(
-            (x_coords_filtered, y_coords_filtered, z_coords_filtered, hom_entries))[0]
+            (x_coords_filtered, 
+            y_coords_filtered, 
+            z_coords_filtered, 
+            hom_entries))[0]
 
         world_coords_hom = self.get_4x4_cam_to_world_mat().dot(cam_coords_hom.T).T
         world_coords = np.delete(world_coords_hom, 3, 1)

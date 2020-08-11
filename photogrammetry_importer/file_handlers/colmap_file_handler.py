@@ -82,7 +82,13 @@ def parse_camera_param_list(cam):
 class ColmapFileHandler(object):
 
     @staticmethod
-    def convert_cameras(id_to_col_cameras, id_to_col_images, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op):
+    def convert_cameras(id_to_col_cameras,
+                        id_to_col_images,
+                        image_dp,
+                        image_fp_type,
+                        depth_map_idp,
+                        suppress_distortion_warnings,
+                        op):
         # From photogrammetry_importer\ext\read_write_model.py
         #   CameraModel = collections.namedtuple(
         #       "CameraModel", ["model_id", "model_name", "num_params"])
@@ -125,13 +131,20 @@ class ColmapFileHandler(object):
                 radial_distortion=0)
 
             if depth_map_idp is not None:
-                geometric_ifp = os.path.join(depth_map_idp, col_image.name + '.geometric.bin')
-                photometric_ifp = os.path.join(depth_map_idp, col_image.name + '.photometric.bin')
+                geometric_ifp = os.path.join(
+                    depth_map_idp, col_image.name + '.geometric.bin')
+                photometric_ifp = os.path.join(
+                    depth_map_idp, col_image.name + '.photometric.bin')
                 if os.path.isfile(geometric_ifp):
-                    current_camera.depth_map_fp = geometric_ifp
+                    depth_map_ifp = geometric_ifp
                 elif os.path.isfile(photometric_ifp):
-                    current_camera.depth_map_fp = photometric_ifp
-                current_camera.depth_map_callback = read_array
+                    depth_map_ifp = photometric_ifp
+                else:
+                    depth_map_ifp = None
+                current_camera.set_depth_map(
+                    depth_map_ifp,
+                    read_array,
+                    Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS)
             cameras.append(current_camera)
      
         return cameras

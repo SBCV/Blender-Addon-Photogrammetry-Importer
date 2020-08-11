@@ -293,11 +293,7 @@ def add_cameras(op,
                     "Camera Depth Map Pair Collection %s" % os.path.basename(depth_map_fp),
                     camera_depth_map_pair_collection)
 
-                depth_map = camera.get_depth_map()
-                height, width = depth_map.shape
-
                 depth_map_world_coords = camera.convert_depth_map_to_world_coords(
-                    depth_map,
                     depth_map_display_sparsity=depth_map_display_sparsity)
 
                 if use_default_depth_map_color:

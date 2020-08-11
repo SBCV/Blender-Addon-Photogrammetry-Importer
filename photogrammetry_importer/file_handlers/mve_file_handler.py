@@ -142,8 +142,10 @@ class MVEFileHandler(object):
             if add_depth_maps_as_point_cloud:
                 depth_ifp = os.path.join(subdir, "depth-L0.mvei")
                 if os.path.isfile(depth_ifp):
-                    camera.depth_map_fp = depth_ifp
-                    camera.depth_map_callback = MVEFileHandler.read_depth_map
+                    camera.set_depth_map(
+                        depth_ifp,
+                        MVEFileHandler.read_depth_map,
+                        Camera.DEPTH_MAP_WRT_UNIT_VECTORS)
                 else:
                     log_report('WARNING', 'Depth map at scale 0 is missing (' + depth_ifp + ').', op)
 
