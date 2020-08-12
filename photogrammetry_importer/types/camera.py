@@ -346,8 +346,13 @@ class Camera:
 
         depth_map = self.get_depth_map()
         height, width = depth_map.shape
-        assert self.height == height
-        assert self.width == width
+
+        if self.height == height and self.width == width:
+            x_step_size = 1.0
+            y_step_size = 1.0
+        else:
+            x_step_size = self.width / width
+            y_step_size = self.height / height
 
         fx = self.get_calibration_mat()[0][0]
         fy = self.get_calibration_mat()[1][1]
@@ -374,8 +379,8 @@ class Camera:
         # https://github.com/simonfuhrmann/mve/blob/master/libs/mve/depthmap.cc
         #  math::Vec3f v = invproj * math::Vec3f(
         #       (float)x + 0.5f, (float)y + 0.5f, 1.0f);
-        x_index_coord_list = x_index_list + 0.5
-        y_index_coord_list = y_index_list + 0.5
+        x_index_coord_list = x_step_size * x_index_list + 0.5
+        y_index_coord_list = y_step_size * y_index_list + 0.5
 
         # The cannoncial vectors are defined according to p.155 of 
         # "Multiple View Geometry" by Hartley and Zisserman using a canonical 

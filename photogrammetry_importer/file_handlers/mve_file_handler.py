@@ -84,8 +84,10 @@ class MVEFileHandler(object):
         pixel_aspect = float(ini_config.get(
             section='camera', option='pixel_aspect'))
         if pixel_aspect != 1.0:
-            log_report('WARNING','Focal length differs in x and y direction, setting it to the average value.', op)
-            focal_length_normalized = (focal_length_normalized + focal_length_normalized * pixel_aspect) / 2
+            log_report('WARNING','Focal length differs in x and y direction,' + 
+                ' setting it to the average value.', op)
+            focal_length_normalized = (focal_length_normalized + 
+                focal_length_normalized * pixel_aspect) / 2
         
         max_extend = max(width, height)
         focal_length = focal_length_normalized * max_extend
@@ -123,7 +125,11 @@ class MVEFileHandler(object):
         return camera
 
     @staticmethod
-    def parse_views(views_idp, default_width, default_height, add_depth_maps_as_point_cloud, op):
+    def parse_views(views_idp, 
+                    default_width, 
+                    default_height, 
+                    add_depth_maps_as_point_cloud, 
+                    op):
 
         cameras = []
         subdirs = get_subdirs(views_idp)
@@ -131,23 +137,30 @@ class MVEFileHandler(object):
             folder_name = os.path.basename(subdir)
             # folder_name = view_0000.mve
             camera_name = folder_name.split('_')[1].split('.')[0]
-            undistorted_img_ifp = os.path.join(subdir, "undistorted.png")
+            undistorted_img_ifp = os.path.join(subdir, 'undistorted.png')
             success, width, height = ImageFileHandler.parse_camera_image_file(
-                undistorted_img_ifp, default_width=default_width, default_height=default_height, op=op)
+                undistorted_img_ifp, 
+                default_width=default_width, 
+                default_height=default_height, 
+                op=op)
             assert success
 
-            meta_ifp = os.path.join(subdir, "meta.ini")
-            camera = MVEFileHandler.parse_meta(meta_ifp, width, height, camera_name, op)
+            meta_ifp = os.path.join(subdir, 'meta.ini')
+            camera = MVEFileHandler.parse_meta(
+                meta_ifp, width, height, camera_name, op)
 
             if add_depth_maps_as_point_cloud:
-                depth_ifp = os.path.join(subdir, "depth-L0.mvei")
-                if os.path.isfile(depth_ifp):
-                    camera.set_depth_map(
-                        depth_ifp,
-                        MVEFileHandler.read_depth_map,
-                        Camera.DEPTH_MAP_WRT_UNIT_VECTORS)
-                else:
-                    log_report('WARNING', 'Depth map at scale 0 is missing (' + depth_ifp + ').', op)
+                for level in range(9):
+                    depth_ifp = os.path.join(
+                        subdir, 'depth-L' + str(level) + '.mvei')
+                    if os.path.isfile(depth_ifp):
+                        camera.set_depth_map(
+                            depth_ifp,
+                            MVEFileHandler.read_depth_map,
+                            Camera.DEPTH_MAP_WRT_UNIT_VECTORS)
+                        break
+                if camera.depth_map_fp is None:
+                    log_report('WARNING', 'No depth map found in ' + subdir, op)
 
             cameras.append(camera)
         return cameras
