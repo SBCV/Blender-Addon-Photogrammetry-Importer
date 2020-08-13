@@ -58,8 +58,8 @@ You can also overlay the (sparse) point cloud with the corresponding mesh - see 
 
 In addition, the addon allows to visualize depth maps (reconstructed with Colmap or MVE) as point clouds.
 <p float="left" align="middle">
-  <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/depth_map_3d_view.jpg" width="470" />
-  <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/depth_map_from_camera.jpg" width="470" /> 
+  <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/depth_map_3d_view.jpg" width="400" />
+  <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/depth_map_from_camera.jpg" width="400" /> 
 </p>
 
 
