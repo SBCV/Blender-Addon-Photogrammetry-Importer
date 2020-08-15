@@ -77,7 +77,7 @@ class CameraImportProperties():
         min=0,
         max=1)
     add_depth_maps_as_point_cloud: BoolProperty(
-        name="Add Depth Maps (experimental)",
+        name="Add Depth Maps (EXPERIMENTAL)",
         description = "Add the depth map (if available) as point cloud for each Camera",
         default=False)
     use_default_depth_map_color: BoolProperty(
@@ -86,7 +86,7 @@ class CameraImportProperties():
         default=False)
     depth_map_default_color: FloatVectorProperty(
         name="Depth Map Color",
-        description="Depth map color.",
+        description="Depth map color",
         subtype='COLOR',
         size=3,     # RGBA colors are not compatible with the GPU Module
         default=(0.0, 1.0, 0.0),
@@ -96,8 +96,15 @@ class CameraImportProperties():
     depth_map_display_sparsity: IntProperty(
         name="Depth Map Display Sparsity",
         description =   "Adjust the sparsity of the depth maps. A value of 10 means, " +
-                        "that every 10th depth map value is converted to a 3D point.",
+                        "that every 10th depth map value is converted to a 3D point",
         default=10)
+    depth_map_id_str: StringProperty(
+        name="Depth Map IDs to Display",
+        description =   "A list of camera indices (separated by whitespaces) " +
+                        "used to select the depth maps, which will be " +
+                        "displayed as point clouds. If no indices are " +
+                        "provided, all depth maps are shown",
+        default="")
     add_camera_motion_as_animation: BoolProperty(
         name="Add Camera Motion as Animation",
         description =   "Add an animation reflecting the camera motion. " + 
@@ -204,9 +211,10 @@ class CameraImportProperties():
                 depth_map_box.prop(self, "add_depth_maps_as_point_cloud")
                 if self.add_depth_maps_as_point_cloud or draw_everything:
                     depth_map_box.prop(self, "use_default_depth_map_color")
-                    if self.use_default_depth_map_color:
+                    if self.use_default_depth_map_color or draw_everything:
                         depth_map_box.prop(self, "depth_map_default_color")
                     depth_map_box.prop(self, "depth_map_display_sparsity")
+                    depth_map_box.prop(self, "depth_map_id_str")
 
         box = camera_box.box()
         box.prop(self, "add_camera_motion_as_animation")
@@ -266,7 +274,8 @@ class CameraImportProperties():
                         add_image_plane_emission=self.add_image_plane_emission,
                         use_default_depth_map_color=self.use_default_depth_map_color,
                         depth_map_default_color=self.depth_map_default_color,
-                        depth_map_display_sparsity=self.depth_map_display_sparsity)
+                        depth_map_display_sparsity=self.depth_map_display_sparsity,
+                        depth_map_id_str=self.depth_map_id_str)
 
                 if self.add_camera_motion_as_animation:
                     add_camera_animation(

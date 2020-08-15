@@ -187,7 +187,8 @@ def add_cameras(op,
                 add_image_plane_emission=True,
                 use_default_depth_map_color=False,
                 depth_map_default_color=(1.0, 0.0, 0.0),
-                depth_map_display_sparsity=10):
+                depth_map_display_sparsity=10,
+                depth_map_id_str=""):
 
     """
     ======== The images are currently only shown in BLENDER RENDER ========
@@ -227,7 +228,13 @@ def add_cameras(op,
             "Camera Depth Map Pair Collection",
             parent_collection)
     else:
-        log_report('INFO', 'Adding depth maps: False')
+        log_report('INFO', 'Adding depth maps as point cloud: False')
+
+    depth_map_id_str = depth_map_id_str.rstrip()
+    if depth_map_id_str == "":
+        depth_map_indices = None
+    else:
+        depth_map_indices = list(map(int, depth_map_id_str.split(' ')))
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
@@ -283,35 +290,42 @@ def add_cameras(op,
             camera_image_plane_pair_collection_current.objects.link(camera_object)
             camera_image_plane_pair_collection_current.objects.link(image_plane_obj)
 
-        if add_depth_maps_as_point_cloud:
+        if not add_depth_maps_as_point_cloud:
+            continue
 
-            if camera.depth_map_fp is not None:
-                depth_map_fp = camera.depth_map_fp
+        if camera.depth_map_fp is None:
+            continue
 
-                # Group image plane and camera:
-                camera_depth_map_pair_collection_current = add_collection(
-                    "Camera Depth Map Pair Collection %s" % os.path.basename(depth_map_fp),
-                    camera_depth_map_pair_collection)
+        if depth_map_indices is not None:
+            if index not in depth_map_indices:
+                continue
 
-                depth_map_world_coords = camera.convert_depth_map_to_world_coords(
-                    depth_map_display_sparsity=depth_map_display_sparsity)
+        depth_map_fp = camera.depth_map_fp
 
-                if use_default_depth_map_color:
-                    color = depth_map_default_color
-                else:
-                    color = color_from_value(val=index, min_val=0, max_val=len(cameras))
+        # Group image plane and camera:
+        camera_depth_map_pair_collection_current = add_collection(
+            "Camera Depth Map Pair Collection %s" % os.path.basename(depth_map_fp),
+            camera_depth_map_pair_collection)
 
-                depth_map_anchor_handle = draw_coords(
-                    op,
-                    depth_map_world_coords,
-                    # TODO Setting this to true causes an error message
-                    add_points_to_point_cloud_handle=False,
-                    reconstruction_collection=depth_map_collection,
-                    object_anchor_handle_name= camera.get_blender_obj_gui_str() + "_depth_point_cloud",
-                    color=color)
+        depth_map_world_coords = camera.convert_depth_map_to_world_coords(
+            depth_map_display_sparsity=depth_map_display_sparsity)
 
-                camera_depth_map_pair_collection_current.objects.link(camera_object)
-                camera_depth_map_pair_collection_current.objects.link(depth_map_anchor_handle)
+        if use_default_depth_map_color:
+            color = depth_map_default_color
+        else:
+            color = color_from_value(val=index, min_val=0, max_val=len(cameras))
+
+        depth_map_anchor_handle = draw_coords(
+            op,
+            depth_map_world_coords,
+            # TODO Setting this to true causes an error message
+            add_points_to_point_cloud_handle=False,
+            reconstruction_collection=depth_map_collection,
+            object_anchor_handle_name= camera.get_blender_obj_gui_str() + "_depth_point_cloud",
+            color=color)
+
+        camera_depth_map_pair_collection_current.objects.link(camera_object)
+        camera_depth_map_pair_collection_current.objects.link(depth_map_anchor_handle)
 
     log_report('INFO', 'Duration: ' + str(stop_watch.get_elapsed_time()))
     log_report('INFO', 'Adding Cameras: Done')
