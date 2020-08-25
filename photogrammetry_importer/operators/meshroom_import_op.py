@@ -9,6 +9,7 @@ from photogrammetry_importer.operators.import_op import ImportOperator
 from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
 from photogrammetry_importer.properties.point_import_properties import PointImportProperties
 from photogrammetry_importer.properties.mesh_import_properties import MeshImportProperties
+from photogrammetry_importer.properties.general_import_properties import GeneralImportProperties
 
 from photogrammetry_importer.file_handlers.meshroom_file_handler import MeshroomFileHandler
 from photogrammetry_importer.utility.blender_utility import add_collection
@@ -18,6 +19,7 @@ class ImportMeshroomOperator(   ImportOperator,
                                 CameraImportProperties,
                                 PointImportProperties,
                                 MeshImportProperties,
+                                GeneralImportProperties,
                                 ImportHelper):
 
     """Import a Meshroom MG/SfM/JSON file"""
@@ -85,6 +87,7 @@ class ImportMeshroomOperator(   ImportOperator,
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
         self.import_photogrammetry_mesh(mesh_fp, reconstruction_collection)
+        self.apply_general_options()
 
         return {'FINISHED'}
 
@@ -105,3 +108,4 @@ class ImportMeshroomOperator(   ImportOperator,
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
         self.draw_mesh_options(layout)
+        self.draw_general_options(layout)

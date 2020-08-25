@@ -6,6 +6,7 @@ from bpy_extras.io_utils import ImportHelper
 from photogrammetry_importer.operators.import_op import ImportOperator
 from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
 from photogrammetry_importer.properties.point_import_properties import PointImportProperties
+from photogrammetry_importer.properties.general_import_properties import GeneralImportProperties
 
 from photogrammetry_importer.file_handlers.openmvg_json_file_handler import OpenMVGJSONFileHandler
 from photogrammetry_importer.utility.blender_utility import add_collection
@@ -14,6 +15,7 @@ from photogrammetry_importer.utility.blender_utility import add_collection
 class ImportOpenMVGOperator(ImportOperator,
                             CameraImportProperties, 
                             PointImportProperties,
+                            GeneralImportProperties,
                             ImportHelper):
 
     """Import an OpenMVG JSON file"""
@@ -45,6 +47,7 @@ class ImportOpenMVGOperator(ImportOperator,
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
+        self.apply_general_options()
 
         return {'FINISHED'}
 
@@ -59,3 +62,4 @@ class ImportOpenMVGOperator(ImportOperator,
         layout = self.layout
         self.draw_camera_options(layout)
         self.draw_point_options(layout)
+        self.draw_general_options(layout)

@@ -6,6 +6,7 @@ from photogrammetry_importer.operators.import_op import ImportOperator
 from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
 from photogrammetry_importer.properties.point_import_properties import PointImportProperties
 from photogrammetry_importer.properties.mesh_import_properties import MeshImportProperties
+from photogrammetry_importer.properties.general_import_properties import GeneralImportProperties
 
 from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
 from photogrammetry_importer.utility.blender_utility import add_collection
@@ -13,7 +14,8 @@ from photogrammetry_importer.utility.blender_utility import add_collection
 class ImportColmapOperator( ImportOperator, 
                             CameraImportProperties,
                             PointImportProperties,
-                            MeshImportProperties):
+                            MeshImportProperties,
+                            GeneralImportProperties):
     
     """Import a Colmap model (folder with .txt/.bin) or a Colmap workspace folder 
     with dense point clouds and meshes."""
@@ -46,6 +48,7 @@ class ImportColmapOperator( ImportOperator,
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
         self.import_photogrammetry_mesh(mesh_ifp, reconstruction_collection)
+        self.apply_general_options()
 
         return {'FINISHED'}
 
@@ -65,3 +68,4 @@ class ImportColmapOperator( ImportOperator,
         self.draw_camera_options(layout, draw_depth_map_import=True)
         self.draw_point_options(layout)
         self.draw_mesh_options(layout)
+        self.draw_general_options(layout)

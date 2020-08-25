@@ -7,6 +7,7 @@ from bpy_extras.io_utils import ImportHelper
 from photogrammetry_importer.operators.import_op import ImportOperator
 from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
 from photogrammetry_importer.properties.point_import_properties import PointImportProperties
+from photogrammetry_importer.properties.general_import_properties import GeneralImportProperties
 
 from photogrammetry_importer.file_handlers.image_file_handler import ImageFileHandler
 from photogrammetry_importer.file_handlers.open3D_file_handler import Open3DFileHandler
@@ -18,6 +19,7 @@ from photogrammetry_importer.types.camera import Camera
 class ImportOpen3DOperator( ImportOperator,
                             CameraImportProperties, 
                             PointImportProperties,
+                            GeneralImportProperties,
                             ImportHelper):
 
     """Import an Open3D LOG/JSON file"""
@@ -104,6 +106,7 @@ class ImportOpen3DOperator( ImportOperator,
         
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
+        self.apply_general_options()
 
         return {'FINISHED'}
 
@@ -121,3 +124,4 @@ class ImportOpen3DOperator( ImportOperator,
             draw_image_size=True,
             draw_principal_point=True,
             draw_focal_length=True)
+        self.draw_general_options(layout)

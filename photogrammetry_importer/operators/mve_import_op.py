@@ -5,6 +5,7 @@ from bpy.props import StringProperty
 from photogrammetry_importer.operators.import_op import ImportOperator
 from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
 from photogrammetry_importer.properties.point_import_properties import PointImportProperties
+from photogrammetry_importer.properties.general_import_properties import GeneralImportProperties
 
 from photogrammetry_importer.file_handlers.mve_file_handler import MVEFileHandler
 from photogrammetry_importer.utility.blender_utility import add_collection
@@ -12,7 +13,8 @@ from photogrammetry_importer.utility.blender_utility import add_collection
 
 class ImportMVEOperator(ImportOperator,
                         CameraImportProperties,
-                        PointImportProperties):
+                        PointImportProperties,
+                        GeneralImportProperties):
     
     """Import a Multi-View Environment reconstruction folder."""
     bl_idname = "import_scene.mve_folder"
@@ -42,6 +44,7 @@ class ImportMVEOperator(ImportOperator,
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
+        self.apply_general_options()
 
         return {'FINISHED'}
 
@@ -60,3 +63,4 @@ class ImportMVEOperator(ImportOperator,
         layout = self.layout
         self.draw_camera_options(layout, draw_image_fp=False, draw_image_size=True, draw_depth_map_import=True)
         self.draw_point_options(layout)
+        self.draw_general_options(layout)
