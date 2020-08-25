@@ -98,12 +98,13 @@ class CameraImportProperties():
         description =   "Adjust the sparsity of the depth maps. A value of 10 means, " +
                         "that every 10th depth map value is converted to a 3D point",
         default=10)
-    depth_map_id_str: StringProperty(
-        name="Depth Map IDs to Display",
-        description =   "A list of camera indices (separated by whitespaces) " +
-                        "used to select the depth maps, which will be " +
-                        "displayed as point clouds. If no indices are " +
-                        "provided, all depth maps are shown",
+    depth_map_id_or_name_str: StringProperty(
+        name="Depth Map IDs or Names to Display",
+        description =   "A list of camera indices or names (separated by " +
+                        "whitespaces) used to select the depth maps, which " +
+                        "will be displayed as point clouds. If no indices " +
+                        "are provided, all depth maps are shown. The names " +
+                        "must not contain whitespaces",
         default="")
     add_camera_motion_as_animation: BoolProperty(
         name="Add Camera Motion as Animation",
@@ -214,7 +215,7 @@ class CameraImportProperties():
                     if self.use_default_depth_map_color or draw_everything:
                         depth_map_box.prop(self, "depth_map_default_color")
                     depth_map_box.prop(self, "depth_map_display_sparsity")
-                    depth_map_box.prop(self, "depth_map_id_str")
+                    depth_map_box.prop(self, "depth_map_id_or_name_str")
 
         box = camera_box.box()
         box.prop(self, "add_camera_motion_as_animation")
@@ -275,7 +276,7 @@ class CameraImportProperties():
                         use_default_depth_map_color=self.use_default_depth_map_color,
                         depth_map_default_color=self.depth_map_default_color,
                         depth_map_display_sparsity=self.depth_map_display_sparsity,
-                        depth_map_id_str=self.depth_map_id_str)
+                        depth_map_id_or_name_str=self.depth_map_id_or_name_str)
 
                 if self.add_camera_motion_as_animation:
                     add_camera_animation(

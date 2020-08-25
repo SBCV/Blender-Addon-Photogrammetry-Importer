@@ -16,6 +16,7 @@ from photogrammetry_importer.utility.blender_animation_utility import add_transf
 from photogrammetry_importer.utility.blender_animation_utility import add_camera_intrinsics_animation
 from photogrammetry_importer.utility.blender_opengl_utility import draw_coords
 from photogrammetry_importer.utility.stop_watch import StopWatch
+from photogrammetry_importer.utility.type_utility import is_int
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class DummyCamera(object):
@@ -188,7 +189,7 @@ def add_cameras(op,
                 use_default_depth_map_color=False,
                 depth_map_default_color=(1.0, 0.0, 0.0),
                 depth_map_display_sparsity=10,
-                depth_map_id_str=""):
+                depth_map_id_or_name_str=""):
 
     """
     ======== The images are currently only shown in BLENDER RENDER ========
@@ -230,11 +231,20 @@ def add_cameras(op,
     else:
         log_report('INFO', 'Adding depth maps as point cloud: False')
 
-    depth_map_id_str = depth_map_id_str.rstrip()
-    if depth_map_id_str == "":
+    depth_map_id_or_name_str = depth_map_id_or_name_str.rstrip()
+    if depth_map_id_or_name_str == "":
         depth_map_indices = None
     else:
-        depth_map_indices = list(map(int, depth_map_id_str.split(' ')))
+        cam_rel_fp_to_idx = {}
+        for idx, camera in enumerate(cameras):
+            rel_fp = camera.get_relative_fp()
+            cam_rel_fp_to_idx[rel_fp] = idx
+        depth_map_indices = []
+        for id_or_name in depth_map_id_or_name_str.split(' '):
+            if is_int(id_or_name):
+                depth_map_indices.append(depth_map_indices)
+            else:
+                depth_map_indices.append(cam_rel_fp_to_idx[id_or_name])
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):

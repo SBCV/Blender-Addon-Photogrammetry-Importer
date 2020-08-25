@@ -2,7 +2,8 @@ import os
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.file_handlers.ply_file_handler import PLYFileHandler
 from photogrammetry_importer.utility.blender_logging_utility import log_report
-
+from photogrammetry_importer.utility.type_utility import is_float
+from photogrammetry_importer.utility.type_utility import is_int
 
 class DataSemantics(object):
 
@@ -17,22 +18,6 @@ class DataSemantics(object):
 
     def is_color_initialized(self):
         return not None in [self.r_idx, self.g_idx, self.b_idx]
-
-
-def is_int(some_str):
-    try:
-        int(some_str)
-        return True
-    except ValueError:
-        return False
-
-
-def is_float(some_str):
-    try:
-        float(some_str)
-        return True
-    except ValueError:
-        return False
 
 
 class PointDataFileHandler(object):

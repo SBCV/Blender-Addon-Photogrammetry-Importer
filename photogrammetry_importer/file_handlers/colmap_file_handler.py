@@ -46,15 +46,15 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 def parse_camera_param_list(cam):
     name = cam.model
     params = cam.params 
-    f, fx, fy, cx, cy, r = None, None, None, None, None, None
+    fx, fy, cx, cy, skew, r = None, None, None, None, None, None
     if name == "SIMPLE_PINHOLE":
-        f, cx, cy = params
+        fx, cx, cy = params
     elif name == "PINHOLE":
         fx, fy, cx, cy = params
     elif name == "SIMPLE_RADIAL":
-        f, cx, cy, r = params
+        fx, cx, cy, r = params
     elif name == "RADIAL":
-        f, cx, cy, k1, k2 = params
+        fx, cx, cy, k1, k2 = params
         r = [k1, k2]
     elif name == "OPENCV":
         fx, fy, cx, cy, k1, k2, p1, p2 = params
@@ -68,16 +68,22 @@ def parse_camera_param_list(cam):
     elif name == "FOV":
         fx, fy, cx, cy, r = params
     elif name == "SIMPLE_RADIAL_FISHEYE":
-        f, cx, cy, r = params
+        fx, cx, cy, r = params
     elif name == "RADIAL_FISHEYE":
-        f, cx, cy, k1, k2 = params
+        fx, cx, cy, k1, k2 = params
         r = [k1, k2]
     elif name == "THIN_PRISM_FISHEYE":
         fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, sx1, sy1 = params
         r = [k1, k2, p1, p2, k3, k4, sx1, sy1]
-    if f is None:
-        f = (fx + fy) * 0.5
-    return f, cx, cy, r
+    # PERSPECTIVE is defined in this Colmap fork
+    #  https://github.com/Kai-46/VisSatSatelliteStereo
+    elif name == "PERSPECTIVE":
+        fx, fy, cx, cy, skew = params
+    if fy is None:
+        fy = fx
+    if skew is None:
+        skew = 0.0
+    return fx, fy, cx, cy, skew, r
 
 class ColmapFileHandler(object):
 
@@ -118,13 +124,13 @@ class ColmapFileHandler(object):
             current_camera.width = camera_model.width
             current_camera.height = camera_model.height
 
-            focal_length, cx, cy, r = parse_camera_param_list(camera_model)
+            fx, fy, cx, cy, skew, r = parse_camera_param_list(camera_model)
             if not suppress_distortion_warnings:
                 check_radial_distortion(r, current_camera._relative_fp, op)
 
             camera_calibration_matrix = np.array([
-                [focal_length, 0, cx],
-                [0, focal_length, cy],
+                [fx, skew, cx],
+                [0, fy, cy],
                 [0, 0, 1]])
             current_camera.set_calibration(
                 camera_calibration_matrix, 
@@ -144,7 +150,8 @@ class ColmapFileHandler(object):
                 current_camera.set_depth_map(
                     depth_map_ifp,
                     read_array,
-                    Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS)
+                    Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS,
+                    shift_depth_map_to_pixel_center=False)
             cameras.append(current_camera)
      
         return cameras
@@ -206,8 +213,6 @@ class ColmapFileHandler(object):
         # images contain pose information
         id_to_col_cameras, id_to_col_images, id_to_col_points3D = read_model(
             model_idp, ext=ext)
-
-        log_report('INFO', 'id_to_col_cameras: ' + str(id_to_col_cameras), op)
 
         cameras = ColmapFileHandler.convert_cameras(
             id_to_col_cameras,

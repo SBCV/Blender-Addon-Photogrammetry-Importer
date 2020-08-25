@@ -157,7 +157,8 @@ class MVEFileHandler(object):
                         camera.set_depth_map(
                             depth_ifp,
                             MVEFileHandler.read_depth_map,
-                            Camera.DEPTH_MAP_WRT_UNIT_VECTORS)
+                            Camera.DEPTH_MAP_WRT_UNIT_VECTORS,
+                            shift_depth_map_to_pixel_center=True)
                         break
                 if camera.depth_map_fp is None:
                     log_report('WARNING', 'No depth map found in ' + subdir, op)
