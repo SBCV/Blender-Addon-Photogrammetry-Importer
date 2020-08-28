@@ -1,6 +1,7 @@
 import os
 import bpy
-from bpy.props import (BoolProperty)
+from bpy.props import BoolProperty
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class MeshImportProperties():
     """ This class encapsulates Blender UI properties that are required to import a mesh. """
@@ -18,7 +19,7 @@ class MeshImportProperties():
                     
     def import_photogrammetry_mesh(self, mesh_fp, reconstruction_collection):
         if self.import_mesh and mesh_fp is not None:
-            self.report({'INFO'}, 'Importing mesh: ...')
+            log_report('INFO', 'Importing mesh: ...', self)
             previous_collection = bpy.context.collection
 
             if os.path.splitext(mesh_fp)[1].lower() == '.obj':
@@ -32,4 +33,4 @@ class MeshImportProperties():
             imported_object = bpy.context.selected_objects[-1]
             reconstruction_collection.objects.link(imported_object)
             previous_collection.objects.unlink(imported_object)
-            self.report({'INFO'}, 'Importing mesh: Done')
+            log_report('INFO', 'Importing mesh: Done', self)

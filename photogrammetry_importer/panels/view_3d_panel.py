@@ -173,7 +173,7 @@ class SaveOpenGLRenderImageOperator(bpy.types.Operator):
         return cam is not None
 
     def execute(self, context):
-        self.report({'INFO'}, 'Save opengl render as image: ...')
+        log_report('INFO', 'Save opengl render as image: ...', self)
         write_point_size = context.scene.opengl_panel_write_settings.write_point_size
         cam = get_selected_camera()
         image_name = "OpenGL Render"
@@ -230,7 +230,6 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
         animation_data = obj.animation_data
         fcurves = animation_data.action.fcurves
         fcu = fcurves[0]
-        # print(fcu.data_path, fcu.array_index)
         kp_indices = [int(kp.co[0]) for kp in fcu.keyframe_points]
         return kp_indices
 

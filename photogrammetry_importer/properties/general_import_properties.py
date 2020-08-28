@@ -2,6 +2,7 @@ import os
 import sys
 import bpy
 from bpy.props import BoolProperty
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class GeneralImportProperties():
     """ This class encapsulates general Blender UI properties. """
@@ -16,7 +17,7 @@ class GeneralImportProperties():
                     
     def apply_general_options(self):
         if self.adjust_clipping_distance:
-            self.report({'INFO'}, 'Adjust clipping distance of 3D view: ...')
+            log_report('INFO', 'Adjust clipping distance of 3D view: ...', self)
             active_space = None
             for area in bpy.context.screen.areas:
                 if area.type == 'VIEW_3D':
@@ -29,4 +30,4 @@ class GeneralImportProperties():
                 active_space.clip_end = 2**55-1
             else:
                 active_space.clip_end = 2**23-1
-            self.report({'INFO'}, 'Adjust clipping distance of 3D view: Done')
+            log_report('INFO', 'Adjust clipping distance of 3D view: Done', self)
