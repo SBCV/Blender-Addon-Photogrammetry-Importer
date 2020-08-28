@@ -202,8 +202,8 @@ class OpenMVGJSONFileHandler:
         :param path_to_images: Path to the input images (used to infer the color of the structural points)
         :return:
         """
-        op.report({'INFO'}, 'parse_openmvg_file: ...')
-        op.report({'INFO'},'input_openMVG_file_path: ' + input_openMVG_file_path)
+        log_report('INFO', 'parse_openmvg_file: ...', op)
+        log_report('INFO', 'input_openMVG_file_path: ' + input_openMVG_file_path, op)
         input_file = open(input_openMVG_file_path, 'r')
         json_data = json.load(input_file)
 
@@ -213,6 +213,6 @@ class OpenMVGJSONFileHandler:
             cam.view_index: cam.get_absolute_fp() for cam in cams}
         points = OpenMVGJSONFileHandler.parse_points(
             json_data, op, view_index_to_absolute_fp)
-        op.report({'INFO'},'parse_openmvg_file: Done')
+        log_report('INFO', 'parse_openmvg_file: Done', op)
         return cams, points
 

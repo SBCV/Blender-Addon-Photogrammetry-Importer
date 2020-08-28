@@ -29,10 +29,10 @@ class MeshroomFileHandler:
         is_valid_file = 'views' in json_data and 'intrinsics' in json_data and 'poses' in json_data
 
         if not is_valid_file:
-            op.report(
-                {'ERROR'},
+            log_report(
+                'ERROR',
                 'FILE FORMAT ERROR: Incorrect SfM/JSON file. Must contain the SfM reconstruction results: ' +
-                'view, intrinsics and poses.')
+                'view, intrinsics and poses.', op)
             return cams, image_index_to_camera_index
 
         views = json_data['views']              # is a list of dicts (view)  
@@ -112,9 +112,9 @@ class MeshroomFileHandler:
         is_valid_file = 'structure' in json_data
 
         if not is_valid_file:
-            op.report(
-                {'ERROR'},
-                'FILE FORMAT ERROR: Incorrect SfM/JSON file. Must contain the SfM reconstruction results: structure.')
+            log_report('ERROR',
+                'FILE FORMAT ERROR: Incorrect SfM/JSON file. Must contain ' + 
+                ' the SfM reconstruction results: structure.', op)
             return points
 
         structure = json_data['structure']
@@ -134,8 +134,8 @@ class MeshroomFileHandler:
         :param sfm_sfm_fp:
         :return:
         """
-        op.report({'INFO'}, 'parse_sfm_sfm_file: ...')
-        op.report({'INFO'},'sfm_sfm_fp: ' + sfm_sfm_fp)
+        log_report('INFO', 'parse_sfm_sfm_file: ...', op)
+        log_report('INFO', 'sfm_sfm_fp: ' + sfm_sfm_fp, op)
         input_file = open(sfm_sfm_fp, 'r')
         json_data = json.load(input_file)
 
@@ -146,7 +146,7 @@ class MeshroomFileHandler:
                 json_data, image_index_to_camera_index, op)
         else:
             points = []
-        op.report({'INFO'},'parse_sfm_sfm_file: Done')
+        log_report('INFO','parse_sfm_sfm_file: Done', op)
         return cams, points
 
     @staticmethod
@@ -259,8 +259,8 @@ class MeshroomFileHandler:
         :param meshroom_ifp:
         :return:
         """
-        op.report({'INFO'}, 'parse_meshroom_file: ...')
-        op.report({'INFO'},'meshroom_ifp: ' + meshroom_ifp)
+        log_report('INFO', 'parse_meshroom_file: ...', op)
+        log_report('INFO', 'meshroom_ifp: ' + meshroom_ifp, op)
 
         ext = os.path.splitext(meshroom_ifp)[1].lower()
         if ext == '.mg':
@@ -278,5 +278,5 @@ class MeshroomFileHandler:
             cams = []
             points = []
 
-        op.report({'INFO'},'parse_meshroom_file: Done')
+        log_report('INFO', 'parse_meshroom_file: Done', op)
         return cams, points, mesh_fp

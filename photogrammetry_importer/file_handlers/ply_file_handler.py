@@ -20,6 +20,7 @@ Created by Sebastian Bullinger
 import numpy as np
 from photogrammetry_importer.ext.plyfile import PlyData, PlyElement
 from photogrammetry_importer.types.point import Point
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 # REMARK: In PLY file format FLOAT is SINGLE precision (32 bit) and DOUBLE is DOUBLE PRECISION (64 bit)
@@ -37,12 +38,12 @@ class PLYFileHandler:
         value_keys = [x for x, y in sorted(ply_data['vertex'].data.dtype.fields.items(),key=lambda k: k[1])]
         non_scalar_value_keys = ['x', 'y', 'z', 'red', 'green', 'blue', 'nx', 'ny', 'nz', 'measurements']
         scalar_value_keys = [value_key for value_key in value_keys if not value_key in non_scalar_value_keys]
-        print('Found the following vertex properties: ' + str(value_keys))
+        log_report('INFO', 'Found the following vertex properties: ' + str(value_keys))
 
         #scalar_value_keys = [value_key for (value_key, some_value) in ]
         #logger.info(scalar_value_keys)
 
-        print('Found ' + str(len(ply_data['vertex'].data)) + ' vertices')
+        log_report('INFO', 'Found ' + str(len(ply_data['vertex'].data)) + ' vertices')
         for point_index, line in enumerate(ply_data['vertex'].data):
             coord = np.array([line['x'], line['y'], line['z']])
             if use_color:
@@ -165,12 +166,12 @@ class PLYFileHandler:
 
     @staticmethod
     def parse_ply_file(path_to_file):
-        print('Parse PLY File: ...')
-        print('path_to_file', path_to_file)
+        log_report('INFO', 'Parse PLY File: ...')
+        log_report('INFO', 'path_to_file' + path_to_file)
         ply_data = PlyData.read(path_to_file)
 
         vertices, _, _ = PLYFileHandler.__ply_data_vertices_to_vetex_list(ply_data)
-        print('Parse PLY File: Done')
+        log_report('INFO', 'Parse PLY File: Done')
         return vertices
 
     @staticmethod
@@ -207,23 +208,23 @@ class PLYFileHandler:
                        plain_text_output=True,
                        with_measurements=False):
 
-        print('write_ply_file: ' + output_path_to_file)
+        log_report('INFO', 'write_ply_file: ' + output_path_to_file)
 
         ply_data_vertex_data_dtype_list = PLYFileHandler.build_type_list(
             vertices, with_colors, with_normals, with_measurements)
 
-        print('ply_data_vertex_data_dtype_list', ply_data_vertex_data_dtype_list)
+        log_report('INFO', 'ply_data_vertex_data_dtype_list' + str(ply_data_vertex_data_dtype_list))
 
-        # PRINTING output_ply_data_vertex_element SHOWS ONLY THE HEADER
+        # Printing output_ply_data_vertex_element SHOWS ONLY THE HEADER
         output_ply_data_vertex_element = PLYFileHandler.__vertices_to_ply_vertex_element(
             vertices, ply_data_vertex_data_dtype_list)
 
         if faces is None or len(faces) == 0:
-            print('Write File With Vertices Only (no faces)')
+            log_report('INFO', 'Write File With Vertices Only (no faces)')
             output_data = PlyData([output_ply_data_vertex_element], text=plain_text_output)
         else:
-            print('Write File With Faces')
-            print('Number faces' + str(len(faces)))
+            log_report('INFO', 'Write File With Faces')
+            log_report('INFO', 'Number faces' + str(len(faces)))
 
             ply_data_face_data_type = [('vertex_indices', 'i4', (3,))]
 

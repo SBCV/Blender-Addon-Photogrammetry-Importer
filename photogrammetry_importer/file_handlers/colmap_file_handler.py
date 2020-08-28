@@ -114,6 +114,9 @@ class ColmapFileHandler(object):
             current_camera.image_fp_type = image_fp_type
             current_camera.image_dp = image_dp
             current_camera._relative_fp = col_image.name
+
+            # log_report('INFO', 'image_dp: ' + str(image_dp))
+            # log_report('INFO', 'col_image.name: ' + str(col_image.name))
             
             camera_model = id_to_col_cameras[col_image.camera_id]
     
@@ -249,7 +252,7 @@ class ColmapFileHandler(object):
     @staticmethod
     def parse_colmap_folder(idp, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
-        op.report({'INFO'}, 'idp: ' + str(idp))
+        log_report('INFO', 'idp: ' + str(idp), op)
 
         if ColmapFileHandler.is_valid_model_folder(idp):
             model_idp = idp
@@ -269,7 +272,7 @@ class ColmapFileHandler(object):
 
     @staticmethod
     def write_colmap_model(odp, cameras, points, op):
-        op.report({'INFO'}, 'Write Colmap model folder: ' + odp)
+        log_report('INFO', 'Write Colmap model folder: ' + odp, op)
 
         if not os.path.isdir(odp):
             os.mkdir(odp)

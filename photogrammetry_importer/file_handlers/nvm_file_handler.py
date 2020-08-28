@@ -5,7 +5,8 @@ import numpy as np
 
 from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.utility.blender_camera_utility import check_radial_distortion 
+from photogrammetry_importer.utility.blender_camera_utility import check_radial_distortion
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class NVMFileHandler(object):
 
@@ -29,7 +30,7 @@ class NVMFileHandler(object):
         i.e. the y and z axis of the CAMERA MATRICES are inverted
         therefore, the y and z axis of the TRANSLATION VECTOR are also inverted
         """
-        # op.report({'INFO'}, '_parse_cameras: ...')
+        # log_report('INFO', '_parse_cameras: ...', op)
         cameras = []
 
         for i in range(num_cameras):
@@ -90,15 +91,15 @@ class NVMFileHandler(object):
             current_camera.set_calibration(
                 camera_calibration_matrix, 
                 radial_distortion=radial_distortion)
-            # op.report({'INFO'}, 'Calibration mat:')
-            # op.report({'INFO'}, str(camera_calibration_matrix))
+            # log_report('INFO', 'Calibration mat:', op)
+            # log_report('INFO', str(camera_calibration_matrix), op)
 
             current_camera.image_fp_type = image_fp_type
             current_camera.image_dp = image_dp
             current_camera._relative_fp = relative_path
             current_camera.id = i
             cameras.append(current_camera)
-        # op.report({'INFO'}, '_parse_cameras: Done')
+        # log_report('INFO', '_parse_cameras: Done', op)
         return cameras
 
     @staticmethod
@@ -133,15 +134,15 @@ class NVMFileHandler(object):
         else:
             assert False
         if calib_mat is not None:
-            op.report({'INFO'}, 'Found Fixed Calibration in NVM File.')
-            # op.report({'INFO'}, 'Fixed calibration mat:')
-            # op.report({'INFO'}, str(calib_mat))
+            log_report('INFO', 'Found Fixed Calibration in NVM File.', op)
+            # log_report('INFO', 'Fixed calibration mat:', op)
+            # log_report('INFO', str(calib_mat), op)
         return calib_mat
 
     @staticmethod
     def parse_nvm_file(input_visual_fsm_file_name, image_dp, image_fp_type, suppress_distortion_warnings, op):
 
-        op.report({'INFO'}, 'Parse NVM file: ' + input_visual_fsm_file_name)
+        log_report('INFO', 'Parse NVM file: ' + input_visual_fsm_file_name, op)
         input_file = open(input_visual_fsm_file_name, 'r')
         # Documentation of *.NVM data format
         # http://ccwu.me/vsfm/doc.html#nvm
@@ -159,34 +160,35 @@ class NVMFileHandler(object):
         assert current_line == ''
 
         amount_cameras = int((input_file.readline()).rstrip())
-        print('Amount Cameras (Images in NVM file): ' + str(amount_cameras))
+        log_report('INFO', 'Amount Cameras (Images in NVM file): ' + str(amount_cameras), op)
 
         cameras = NVMFileHandler._parse_cameras(
-            input_file, amount_cameras, calibration_matrix, image_dp, image_fp_type, suppress_distortion_warnings, op)
+            input_file, amount_cameras, calibration_matrix, image_dp, 
+            image_fp_type, suppress_distortion_warnings, op)
         current_line = (input_file.readline()).rstrip()
         assert current_line == ''
         current_line = (input_file.readline()).rstrip()
         if current_line.isdigit():
             amount_points = int(current_line)
-            print('Amount Sparse Points (Points in NVM file): ' + str(amount_points))
+            log_report('INFO', 'Amount Sparse Points (Points in NVM file): ' + str(amount_points), op)
             points = NVMFileHandler._parse_nvm_points(input_file, amount_points)
         else:
             points = []
 
-        op.report({'INFO'}, 'Parse NVM file: Done')
+        log_report('INFO', 'Parse NVM file: Done', op)
         return cameras, points
 
     @staticmethod
     def create_nvm_first_line(cameras, op):
 
-        op.report({'INFO'}, 'create_nvm_first_line: ...')
+        log_report('INFO', 'create_nvm_first_line: ...', op)
         # The first line can be either
         #   'NVM_V3'
         # or
         #   'NVM_V3 FixedK fx cx fy cy r'
 
         calib_mat = cameras[0].get_calibration_mat()
-        op.report({'INFO'}, 'calib_mat: ' + str(calib_mat))
+        log_report('INFO', 'calib_mat: ' + str(calib_mat), op)
         # radial_dist = None
         # if cameras[0].has_radial_distortion():
         #     radial_dist = cameras[0].has_radial_distortion()
@@ -198,7 +200,7 @@ class NVMFileHandler(object):
                 op.report({'INFO'}, 'calib_mat: ' + str(calib_mat))
                 fixed_calibration = False
                 break
-        op.report({'INFO'}, 'fixed_calibration: ' + str(fixed_calibration))
+        log_report('INFO', 'fixed_calibration: ' + str(fixed_calibration), op)
         if fixed_calibration:
             fl = 'NVM_V3 FixedK'
             fl += ' ' + str(calib_mat[0][0])
@@ -208,8 +210,8 @@ class NVMFileHandler(object):
             fl += ' ' + str(0)      # TODO Radial distortion
         else:
             fl = 'NVM_V3'
-        op.report({'INFO'}, 'fl: ' + fl)
-        op.report({'INFO'}, 'create_nvm_first_line: Done')
+        log_report('INFO', 'fl: ' + fl, op)
+        log_report('INFO', 'create_nvm_first_line: Done', op)
         return fl
 
     @staticmethod
@@ -219,7 +221,7 @@ class NVMFileHandler(object):
     @staticmethod
     def write_nvm_file(op, output_nvm_file_name, cameras, points):
 
-        op.report({'INFO'}, 'Write NVM file: ' + output_nvm_file_name)
+        log_report('INFO', 'Write NVM file: ' + output_nvm_file_name, op)
 
         nvm_content = []
         nvm_content.append(NVMFileHandler.nvm_line(
@@ -227,7 +229,7 @@ class NVMFileHandler(object):
         nvm_content.append(NVMFileHandler.nvm_line(''))
         amount_cameras = len(cameras)
         nvm_content.append(NVMFileHandler.nvm_line(str(amount_cameras)))
-        print('Amount Cameras (Images in NVM file):', amount_cameras)
+        log_report('INFO', 'Amount Cameras (Images in NVM file):' + str(amount_cameras), op)
 
         # Write the camera section
         # From the VSFM docs:
@@ -249,7 +251,7 @@ class NVMFileHandler(object):
         nvm_content.append(' ' + os.linesep)
         number_points = len(points)
         nvm_content.append(str(number_points) + ' ' + os.linesep)
-        print('Found ' + str(number_points) + ' object points')
+        log_report('INFO', 'Found ' + str(number_points) + ' object points', op)
 
         num_features = 2
         image_idx = 0
@@ -285,7 +287,7 @@ class NVMFileHandler(object):
         output_file = open(output_nvm_file_name, 'wb')
         output_file.writelines([item.encode() for item in nvm_content])
 
-        op.report({'INFO'}, 'Write NVM file: Done')
+        log_report('INFO', 'Write NVM file: Done', op)
 
     @staticmethod
     def compute_camera_coordinate_system_translation_vector(c, R):

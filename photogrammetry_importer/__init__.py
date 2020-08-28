@@ -85,7 +85,8 @@ def register():
     # === Uncomment for fast debugging ===
     # bpy.app.handlers.load_post.append(load_handler)
 
-    print("Registered {} with {} modules".format(bl_info["name"], len(modules)))
+    log_report('INFO', 'Registered {} with {} modules'.format(
+        bl_info['name'], len(modules)))
 
 def unregister():
     bpy.utils.unregister_class(PhotogrammetryImporterPreferences)
@@ -95,9 +96,9 @@ def unregister():
 
     bpy.utils.unregister_class(OpenGLPanel)
 
-    print("Unregistered {}".format(bl_info["name"]))
+    log_report('INFO', 'Unregistered {}'.format(bl_info['name']))
 
 
 if __name__ == '__main__':
-    print('main called')
+    log_report('INFO', 'main called')
     
