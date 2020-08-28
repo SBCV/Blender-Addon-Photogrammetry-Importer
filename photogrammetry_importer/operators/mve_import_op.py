@@ -9,6 +9,7 @@ from photogrammetry_importer.properties.general_import_properties import General
 
 from photogrammetry_importer.file_handlers.mve_file_handler import MVEFileHandler
 from photogrammetry_importer.utility.blender_utility import add_collection
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class ImportMVEOperator(ImportOperator,
@@ -28,7 +29,7 @@ class ImportMVEOperator(ImportOperator,
         path = self.directory
         # Remove trailing slash
         path = os.path.dirname(path)
-        self.report({'INFO'}, 'path: ' + str(path))
+        log_report('INFO', 'path: ' + str(path), self)
         
         cameras, points = MVEFileHandler.parse_mve_workspace(
             path,
@@ -38,8 +39,8 @@ class ImportMVEOperator(ImportOperator,
             self.suppress_distortion_warnings,
             self)
 
-        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
-        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        log_report('INFO', 'Number cameras: ' + str(len(cameras)), self)
+        log_report('INFO', 'Number points: ' + str(len(points)), self)
 
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)

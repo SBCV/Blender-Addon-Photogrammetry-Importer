@@ -13,6 +13,7 @@ from photogrammetry_importer.properties.general_import_properties import General
 
 from photogrammetry_importer.file_handlers.meshroom_file_handler import MeshroomFileHandler
 from photogrammetry_importer.utility.blender_utility import add_collection
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class ImportMeshroomOperator(   ImportOperator,
@@ -70,18 +71,18 @@ class ImportMeshroomOperator(   ImportOperator,
     def execute(self, context):
 
         path = os.path.join(self.directory, self.filepath)
-        self.report({'INFO'}, 'path: ' + str(path))
+        log_report('INFO', 'path: ' + str(path), self)
 
         self.image_dp = self.get_default_image_path(
             path, self.image_dp)
-        self.report({'INFO'}, 'image_dp: ' + str(self.image_dp))
+        log_report('INFO', 'image_dp: ' + str(self.image_dp), self)
         
         cameras, points, mesh_fp = MeshroomFileHandler.parse_meshroom_file(
             path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, 
             self.sfm_node_type, self.sfm_node_number, self.mesh_node_type, self.mesh_node_number, self)
         
-        self.report({'INFO'}, 'Number cameras: ' + str(len(cameras)))
-        self.report({'INFO'}, 'Number points: ' + str(len(points)))
+        log_report('INFO', 'Number cameras: ' + str(len(cameras)), self)
+        log_report('INFO', 'Number points: ' + str(len(points)), self)
         
         reconstruction_collection = add_collection('Reconstruction Collection')
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
