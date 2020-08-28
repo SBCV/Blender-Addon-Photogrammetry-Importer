@@ -8,6 +8,7 @@ import time
 import bpy 
 from mathutils import Matrix
 from mathutils import Vector
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 def invert_y_and_z_axis(input_matrix_or_vector):
@@ -97,5 +98,6 @@ def adjust_render_settings_if_possible(op, cameras):
         bpy.context.scene.render.resolution_x = width
         bpy.context.scene.render.resolution_y = height
     else:
-        op.report({'WARNING'}, 'Adjustment of render settings not possible, ' + 
-                    'since the reconstructed cameras show different resolutions.')
+        log_report(
+            'WARNING', 'Adjustment of render settings not possible, ' + 
+            'since the reconstructed cameras show different resolutions.', op)

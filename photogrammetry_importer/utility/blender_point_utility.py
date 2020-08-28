@@ -5,6 +5,7 @@ from mathutils import Vector
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.utility.blender_utility import add_obj
 from photogrammetry_importer.utility.stop_watch import StopWatch
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 def copy_values_to_image(value_tripplets, image_name):
@@ -92,7 +93,7 @@ def create_particle_color_nodes(node_tree, points, set_particle_color_flag, part
 def add_points_as_mesh( op, 
                         points, 
                         reconstruction_collection):
-    op.report({'INFO'}, 'Adding Points as Mesh: ...')
+    log_report('INFO', 'Adding Points as Mesh: ...', op)
     stop_watch = StopWatch()
     point_cloud_obj_name = "Mesh Point Cloud"
     point_cloud_mesh = bpy.data.meshes.new(point_cloud_obj_name)
@@ -102,8 +103,8 @@ def add_points_as_mesh( op,
     point_cloud_mesh.from_pydata(point_world_coordinates, [], [])
     point_cloud_obj = add_obj(point_cloud_mesh, point_cloud_obj_name, reconstruction_collection)
 
-    op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
-    op.report({'INFO'}, 'Adding Points as Mesh: Done')
+    log_report('INFO', 'Duration: ' + str(stop_watch.get_elapsed_time()), op)
+    log_report('INFO', 'Adding Points as Mesh: Done', op)
     return point_cloud_obj.name
 
 def add_points_as_particle_system(op, 
@@ -114,7 +115,7 @@ def add_points_as_particle_system(op,
                                   reconstruction_collection,
                                   set_particle_color_flag,
                                   particle_overwrite_color=None):
-    op.report({'INFO'}, 'Adding Points as Particle System: ...')
+    log_report('INFO', 'Adding Points as Particle System: ...', op)
     stop_watch = StopWatch()
     particle_obj_name = "Particle Shape" 
     point_cloud_obj_name = "Particle Point Cloud"
@@ -127,7 +128,7 @@ def add_points_as_particle_system(op,
     point_cloud_mesh.from_pydata(point_world_coordinates, [], [])
     point_cloud_obj = add_obj(point_cloud_mesh, point_cloud_obj_name, reconstruction_collection)
 
-    op.report({'INFO'}, 'Mesh Type: ' + str(mesh_type))
+    log_report('INFO', 'Mesh Type: ' + str(mesh_type), op)
 
     # The default size of elements added with 
     #   primitive_cube_add, primitive_uv_sphere_add, etc. is (2,2,2)
@@ -201,6 +202,6 @@ def add_points_as_particle_system(op,
         
     bpy.context.view_layer.update()
 
-    op.report({'INFO'}, 'Duration: ' + str(stop_watch.get_elapsed_time()))
-    op.report({'INFO'}, 'Adding Points as Particle System: Done')
+    log_report('INFO', 'Duration: ' + str(stop_watch.get_elapsed_time()), op)
+    log_report('INFO', 'Adding Points as Particle System: Done', op)
     return point_cloud_obj.name

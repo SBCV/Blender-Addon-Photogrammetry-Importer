@@ -1,6 +1,7 @@
 import bpy
 from mathutils import Quaternion
 from mathutils import Matrix
+from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 def remove_quaternion_discontinuities(target_obj):
 
@@ -57,7 +58,7 @@ def add_transformation_animation(   op,
                                     number_interpolation_frames, 
                                     interpolation_type=None,
                                     remove_rotation_discontinuities=True):
-    op.report({'INFO'}, 'Adding transformation animation: ...')
+    log_report('INFO', 'Adding transformation animation: ...', op)
 
     scn = bpy.context.scene
     scn.frame_start = 0
@@ -66,8 +67,8 @@ def add_transformation_animation(   op,
     animated_obj = bpy.data.objects[animated_obj_name]
 
     for index, transformation in enumerate(transformations_sorted):
-        # op.report({'INFO'}, 'index: ' + str(index))
-        # op.report({'INFO'}, 'transformation: ' + str(transformation))
+        # log_report('INFO', 'index: ' + str(index), op)
+        # log_report('INFO', 'transformation: ' + str(transformation), op)
 
         current_keyframe_index = index * step_size
 
@@ -102,7 +103,7 @@ def add_transformation_animation(   op,
                 animated_obj,
                 interpolation_type)
 
-    op.report({'INFO'}, 'Adding transformation animation: Done')           
+    log_report('INFO', 'Adding transformation animation: Done', op)           
 
 
 def add_camera_intrinsics_animation(op,
@@ -110,7 +111,7 @@ def add_camera_intrinsics_animation(op,
                                     intrinsics_sorted, 
                                     number_interpolation_frames):
 
-    op.report({'INFO'}, 'Adding camera intrinsic parameter animation: ...')
+    log_report('INFO', 'Adding camera intrinsic parameter animation: ...', op)
 
     step_size = number_interpolation_frames + 1
     animated_obj = bpy.data.objects[animated_obj_name]
@@ -138,4 +139,4 @@ def add_camera_intrinsics_animation(op,
             index=-1, 
             frame=current_keyframe_index)
 
-    op.report({'INFO'}, 'Adding camera intrinsic parameter animation: Done')
+    log_report('INFO', 'Adding camera intrinsic parameter animation: Done', op)

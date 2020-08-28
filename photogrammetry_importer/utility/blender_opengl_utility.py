@@ -162,9 +162,9 @@ def copy_buffer_to_pixel(buffer, image):
     # Option 1 (faster)
     # sw = StopWatch()
     image.pixels = [v / 255 for v in buffer]
-    # print('sw.get_elapsed_time()', sw.get_elapsed_time())
+    # log_report('INFO', 'sw.get_elapsed_time(): ' + str(sw.get_elapsed_time()))
 
     # Option 2 (slower)
     # sw = StopWatch()
     # image.pixels = (np.asarray(buffer, dtype=np.uint8) / 255).tolist()
-    # print('sw.get_elapsed_time()', sw.get_elapsed_time())
+    # log_report('INFO', 'sw.get_elapsed_time(): ' + str(sw.get_elapsed_time()))
