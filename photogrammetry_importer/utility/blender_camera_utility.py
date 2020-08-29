@@ -235,16 +235,21 @@ def add_cameras(op,
     if depth_map_id_or_name_str == "":
         depth_map_indices = None
     else:
+        depth_map_indices = []
         cam_rel_fp_to_idx = {}
         for idx, camera in enumerate(cameras):
             rel_fp = camera.get_relative_fp()
             cam_rel_fp_to_idx[rel_fp] = idx
-        depth_map_indices = []
         for id_or_name in depth_map_id_or_name_str.split(' '):
             if is_int(id_or_name):
-                depth_map_indices.append(depth_map_indices)
+                depth_map_indices.append(int(id_or_name))
             else:
-                depth_map_indices.append(cam_rel_fp_to_idx[id_or_name])
+                if id_or_name in cam_rel_fp_to_idx:
+                    depth_map_indices.append(cam_rel_fp_to_idx[id_or_name])
+                else:
+                    log_report('WARNING',
+                        'Could not find depth map name ' + id_or_name + '. ' +
+                        'Possible values are: ' + str(cam_rel_fp_to_idx.keys()))
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
