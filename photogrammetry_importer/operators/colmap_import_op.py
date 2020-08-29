@@ -36,7 +36,6 @@ class ImportColmapOperator( ImportOperator,
 
         self.image_dp = self.get_default_image_path(
             path, self.image_dp)
-        log_report('INFO', 'image_dp: ' + str(self.image_dp), self)
         cameras, points, mesh_ifp = ColmapFileHandler.parse_colmap_folder(
             path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, self)
 

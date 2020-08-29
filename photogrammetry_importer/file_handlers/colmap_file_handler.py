@@ -237,6 +237,8 @@ class ColmapFileHandler(object):
         assert ColmapFileHandler.is_valid_workspace_folder(workspace_idp)
 
         model_idp = os.path.join(workspace_idp, 'sparse')
+        image_idp = os.path.join(workspace_idp, 'images')
+        depth_map_idp = os.path.join(workspace_idp, 'stereo', 'depth_maps')
         poisson_mesh_ifp = os.path.join(workspace_idp, 'meshed-poisson.ply')
         delaunay_mesh_ifp = os.path.join(workspace_idp, 'meshed-delaunay.ply')
         if os.path.isfile(poisson_mesh_ifp):
@@ -245,9 +247,8 @@ class ColmapFileHandler(object):
             mesh_ifp = delaunay_mesh_ifp
         else:
             mesh_ifp = None
-        depth_map_idp = os.path.join(workspace_idp, 'stereo', 'depth_maps')
 
-        return model_idp, depth_map_idp, mesh_ifp
+        return model_idp, image_idp, depth_map_idp, mesh_ifp
 
     @staticmethod
     def parse_colmap_folder(idp, image_dp, image_fp_type, suppress_distortion_warnings, op):
@@ -259,11 +260,15 @@ class ColmapFileHandler(object):
             mesh_ifp = None
             depth_map_idp = None
         elif ColmapFileHandler.is_valid_workspace_folder(idp):
-            model_idp, depth_map_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
+            model_idp, image_idp_workspace, depth_map_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
+            if os.path.isdir(image_idp_workspace):
+                image_dp = image_idp_workspace
+                log_report('INFO', 'Using image directory in workspace.', op)
         else:
             log_report('ERROR', 'Invalid colmap model / workspace', op)
             assert False
 
+        log_report('INFO', 'image_dp: ' + image_dp, op)
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(
             model_idp, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op)
 
