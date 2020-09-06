@@ -1,33 +1,23 @@
 # Blender-Addon-Photogrammetry-Importer
 This repository contains a Blender addon to import reconstruction results of several libraries.
 
-Supported libraries / data formats:
+Supported libraries (data formats):
 
-- [x] Colmap reconstructions ([https://github.com/colmap/colmap](https://github.com/colmap/colmap)) 
-	* Colmap model folders (binary and txt format), Colmap workspaces, NVM, PLY 
-- [x] Meshroom reconstructions ([https://alicevision.github.io/](https://alicevision.github.io/))
-	* MG, JSON, SfM, PLY
-- [x] MVE reconstructions ([https://github.com/simonfuhrmann/mve](https://github.com/simonfuhrmann/mve))
-	* MVE folders
-- [x] Open3D reconstructions ([http://www.open3d.org/](http://www.open3d.org/))
-	* JSON, LOG, PLY
-- [x] OpenSfM reconstructions ([https://github.com/mapillary/OpenSfM](https://github.com/mapillary/OpenSfM))
-	* JSON
-- [x] OpenMVG reconstructions ([https://github.com/openMVG/openMVG](https://github.com/openMVG/openMVG))
-	* JSON, NVM, PLY
-- [x] Regard3D reconstructions ([https://www.regard3d.org/](https://www.regard3d.org/))
-	* (OpenMVG) JSON
-- [x] VisualSFM reconstructions ([http://ccwu.me/vsfm/](http://ccwu.me/vsfm/))
-	* NVM
+- [x] [Colmap](https://github.com/colmap/colmap) (Model folders (BIN and TXT), dense workspaces, NVM, PLY)  
+- [x] [Meshroom](https://alicevision.github.io/) (MG, JSON, SfM, PLY)
+- [x] [MVE ](https://github.com/simonfuhrmann/mve) (Workspaces)
+- [x] [Open3D](http://www.open3d.org/) (JSON, LOG, PLY)
+- [x] [OpenSfM](https://github.com/mapillary/OpenSfM) (JSON)
+- [x] [OpenMVG](https://github.com/openMVG/openMVG) (JSON, NVM, PLY)
+- [x] [Regard3D](https://www.regard3d.org/) (OpenMVG JSON)
+- [x] [VisualSFM](http://ccwu.me/vsfm/) (NVM)
 
 In addition, the addon supports some common point cloud data formats:
 
-- [x] Polygon files ([http://paulbourke.net/dataformats/ply/](http://paulbourke.net/dataformats/ply/))
-	* PLY
-- [x] Simple ASCII point files ([https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O))
-	* ASC, PTS, CSV
+- [x] [Polygon files ](http://paulbourke.net/dataformats/ply/) (PLY)
+- [x] [Simple ASCII point files](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O) (ASC, PTS, CSV)
 
-Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
+Compatible with Blender 2.80 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
 ## Getting Started
 - [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
