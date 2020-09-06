@@ -19,29 +19,29 @@ Blender-Addon-Photgrammetry-Importer
 
 The repository of this documentation contains a Blender addon to import reconstruction results of several libraries.
 
-Supported libraries / data formats:
+Supported libraries (data formats):
 
-- Colmap reconstructions (https://github.com/colmap/colmap) 
-	* Colmap model folders (binary and txt format), Colmap workspaces, NVM, PLY 
-- Meshroom reconstructions (https://alicevision.github.io/)
-	* MG, JSON, SfM, PLY
-- Multi-View Environment reconstructions (https://github.com/simonfuhrmann/mve)
-	* MVE workspaces
-- Open3D reconstructions (http://www.open3d.org/)
-	* JSON, LOG, PLY
-- OpenSfM reconstructions (https://github.com/mapillary/OpenSfM)
-	* JSON
-- OpenMVG reconstructions (https://github.com/openMVG/openMVG)
-	* JSON, NVM, PLY
-- Polygon Files (http://paulbourke.net/dataformats/ply/)
-	* PLY
-- Regard3D reconstructions (https://www.regard3d.org/)
-	* (OpenMVG) JSON
-- VisualSFM reconstructions (http://ccwu.me/vsfm/)
-	* NVM
-	
+.. hlist::
+   :columns: 1
 
-Tested for Blender 2.81. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the `2.79 branch <https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279>`_.
+   - `Colmap <https://github.com/colmap/colmap>`_ (Model folders (BIN and TXT), workspaces, NVM, PLY) 
+   - `Meshroom <https://alicevision.github.io/>`_ (MG, JSON, SfM, PLY)
+   - `Multi-View Environment reconstructions <https://github.com/simonfuhrmann/mve>`_ (MVE workspaces)
+   - `Open3D <http://www.open3d.org/>`_ (JSON, LOG, PLY)
+   - `OpenSfM <https://github.com/mapillary/OpenSfM>`_ (JSON)
+   - `OpenMVG <https://github.com/openMVG/openMVG>`_ (JSON, NVM, PLY)
+   - `Regard3D <https://www.regard3d.org/>`_ (OpenMVG JSON)
+   - `VisualSFM <http://ccwu.me/vsfm/>`_ (NVM)
+
+In addition, the addon supports some common point cloud data formats:
+
+.. hlist::
+   :columns: 1
+
+   - `Polygon files <http://paulbourke.net/dataformats/ply/>`_ (PLY)
+   - `Simple ASCII point files <https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O>`_ (ASC, PTS, CSV)
+
+Compatible with Blender 2.8.0 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the `2.79 branch <https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279>`_.
 
 Getting Started
 ===============
