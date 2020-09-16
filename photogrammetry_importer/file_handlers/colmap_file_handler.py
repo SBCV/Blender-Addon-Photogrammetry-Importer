@@ -31,7 +31,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 # }
 
 # From https://github.com/colmap/colmap/blob/dev/src/base/camera_models.h
-#   SIMPLE_PINHOLE: f, cx, cy 
+#   SIMPLE_PINHOLE: f, cx, cy
 #   PINHOLE: fx, fy, cx, cy
 #   SIMPLE_RADIAL: f, cx, cy, k
 #   RADIAL: f, cx, cy, k1, k2
@@ -45,7 +45,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 def parse_camera_param_list(cam):
     name = cam.model
-    params = cam.params 
+    params = cam.params
     fx, fy, cx, cy, skew, r = None, None, None, None, None, None
     if name == "SIMPLE_PINHOLE":
         fx, cx, cy = params
@@ -117,9 +117,9 @@ class ColmapFileHandler(object):
 
             # log_report('INFO', 'image_dp: ' + str(image_dp))
             # log_report('INFO', 'col_image.name: ' + str(col_image.name))
-            
+
             camera_model = id_to_col_cameras[col_image.camera_id]
-    
+
             # log_report('INFO', 'image_id: ' + str(col_image.id))
             # log_report('INFO', 'camera_id: ' + str(col_image.camera_id))
             # log_report('INFO', 'camera_model: ' + str(camera_model))
@@ -136,7 +136,7 @@ class ColmapFileHandler(object):
                 [0, fy, cy],
                 [0, 0, 1]])
             current_camera.set_calibration(
-                camera_calibration_matrix, 
+                camera_calibration_matrix,
                 radial_distortion=0)
 
             if depth_map_idp is not None:
@@ -156,7 +156,6 @@ class ColmapFileHandler(object):
                     Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS,
                     shift_depth_map_to_pixel_center=False)
             cameras.append(current_camera)
-     
         return cameras
 
     @staticmethod
@@ -164,14 +163,14 @@ class ColmapFileHandler(object):
         # From photogrammetry_importer\ext\read_write_model.py
         #   Point3D = collections.namedtuple(
         #       "Point3D", ["id", "xyz", "rgb", "error", "image_ids", "point2D_idxs"])
-        
+
         col_points3D = id_to_col_points3D.values()
         points3D = []
         for col_point3D in col_points3D:
             current_point = Point(
-                coord=col_point3D.xyz, 
-                color=col_point3D.rgb,  
-                id=col_point3D.id, 
+                coord=col_point3D.xyz,
+                color=col_point3D.rgb,
+                id=col_point3D.id,
                 scalars=None)
             points3D.append(current_point)
 
@@ -180,9 +179,11 @@ class ColmapFileHandler(object):
     @staticmethod
     def get_model_folder_ext(idp):
         ifp_s = os.listdir(idp)
-        if len(set(ifp_s).intersection(['cameras.txt', 'images.txt', 'points3D.txt'])) == 3:
+        txt_list = ['cameras.txt', 'images.txt', 'points3D.txt']
+        bin_list = ['cameras.bin', 'images.bin', 'points3D.bin']
+        if len(set(ifp_s).intersection(txt_list)) == 3:
             ext = '.txt'
-        elif len(set(ifp_s).intersection(['cameras.bin', 'images.bin', 'points3D.bin'])) == 3:
+        elif len(set(ifp_s).intersection(bin_list)) == 3:
             ext = '.bin'
         else:
             ext = None
@@ -205,7 +206,13 @@ class ColmapFileHandler(object):
         return valid
 
     @staticmethod
-    def parse_colmap_model_folder(model_idp, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op):
+    def parse_colmap_model_folder(
+            model_idp,
+            image_dp,
+            image_fp_type,
+            depth_map_idp,
+            suppress_distortion_warnings,
+            op):
 
         log_report('INFO', 'Parse Colmap model folder: ' + model_idp, op)
 
@@ -260,7 +267,8 @@ class ColmapFileHandler(object):
             mesh_ifp = None
             depth_map_idp = None
         elif ColmapFileHandler.is_valid_workspace_folder(idp):
-            model_idp, image_idp_workspace, depth_map_idp, mesh_ifp = ColmapFileHandler.parse_colmap_workspace_folder(idp)
+            model_idp, image_idp_workspace, depth_map_idp, mesh_ifp = \
+                ColmapFileHandler.parse_colmap_workspace_folder(idp)
             if os.path.isdir(image_idp_workspace):
                 image_dp = image_idp_workspace
                 log_report('INFO', 'Using image directory in workspace.', op)
@@ -270,7 +278,12 @@ class ColmapFileHandler(object):
 
         log_report('INFO', 'image_dp: ' + image_dp, op)
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(
-            model_idp, image_dp, image_fp_type, depth_map_idp, suppress_distortion_warnings, op)
+            model_idp,
+            image_dp,
+            image_fp_type,
+            depth_map_idp,
+            suppress_distortion_warnings,
+            op)
 
         return cameras, points, mesh_ifp
 
@@ -301,41 +314,39 @@ class ColmapFileHandler(object):
 
             pp = cam.get_principal_point()
             colmap_cam = ColmapCamera(
-                id=cam.id, 
-                model=colmap_camera_model_name, 
-                width=cam.width, 
-                height=cam.height, 
+                id=cam.id,
+                model=colmap_camera_model_name,
+                width=cam.width,
+                height=cam.height,
                 params=np.array([cam.get_focal_length(), pp[0], pp[1]]))
             colmap_cams[cam.id] = colmap_cam
 
             colmap_image = ColmapImage(
-                id=cam.id, 
-                qvec=cam.get_quaternion(), 
+                id=cam.id,
+                qvec=cam.get_quaternion(),
                 tvec=cam.get_translation_vec(),
-                camera_id=cam.id, 
+                camera_id=cam.id,
                 name=cam.get_file_name(),
-                xys=[], 
+                xys=[],
                 point3D_ids=[])
             colmap_images[cam.id] = colmap_image
 
         colmap_points3D = {}
         for point in points:
             colmap_point = ColmapPoint3D(
-                id=point.id, 
-                xyz=point.coord, 
+                id=point.id,
+                xyz=point.coord,
                 rgb=point.color,
-                error=0, 
+                error=0,
                 # The default settings in Colmap show only points with 3+ observations
-                image_ids=[0, 1, 2],        
+                image_ids=[0, 1, 2],
                 point2D_idxs=[0, 1, 2]
             )
             colmap_points3D[point.id] = colmap_point
 
         write_model(
-            colmap_cams, 
-            colmap_images, 
-            colmap_points3D, 
-            odp, 
+            colmap_cams,
+            colmap_images,
+            colmap_points3D,
+            odp,
             ext='.txt')
-
-        

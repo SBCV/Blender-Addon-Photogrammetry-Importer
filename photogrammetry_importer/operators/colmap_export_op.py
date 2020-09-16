@@ -20,20 +20,20 @@ class ExportColmapOperator(ExportOperator, ExportHelper):
         name="Directory Path",
         description="Directory path used for exporting the Colmap model",
         type=bpy.types.OperatorFileListElement)
-        
+
     filename_ext = ""
     #filter_folder : BoolProperty(default=True, options={'HIDDEN'})
-        
+
     def execute(self, context):
-        
+
         assert len(self.files) == 1
         odp = os.path.join(self.directory, self.files[0].name)
 
         cameras, points = self.export_selected_cameras_and_vertices_of_meshes(odp)
-        for cam in cameras:            
+        for cam in cameras:
             assert cam.get_calibration_mat() is not None
-        
+
         ColmapFileHandler.write_colmap_model(
-            odp, cameras, points, self) 
-                 
+            odp, cameras, points, self)
+
         return {'FINISHED'}
