@@ -1,16 +1,17 @@
 __author__ = 'sebastian'
 
-import numpy as np
 import math
 import os
+import numpy as np
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class Camera(object):
-    """ 
-    This class represents a reconstructed camera and provides functionality to manage
-    intrinsic and extrinsic camera parameters as well as image information. 
     """
-    panoramic_type_equirectangular = "EQUIRECTANGULAR" 
+    This class represents a reconstructed camera and provides functionality
+    to manage intrinsic and extrinsic camera parameters as well as image
+    information.
+    """
+    panoramic_type_equirectangular = "EQUIRECTANGULAR"
 
     IMAGE_FP_TYPE_NAME = "NAME"
     IMAGE_FP_TYPE_RELATIVE = "RELATIVE"
@@ -28,9 +29,9 @@ class Camera(object):
         # use for these attributes the getter and setter methods
         self._quaternion = np.array([0, 0, 0, 0], dtype=float)
         self._rotation_mat = np.zeros((3, 3), dtype=float)
-        
+
         self._calibration_mat = np.zeros((3, 3), dtype=float)
-        
+
         self.image_fp_type = None
         self.image_dp = None
         self._relative_fp = None
@@ -52,7 +53,8 @@ class Camera(object):
         return self.__str__()
 
     def __str__(self):
-        return str('Camera: ' + self._relative_fp + ' ' + str(self._center) + ' ' + str(self.normal))
+        return str('Camera: ' + self._relative_fp + ' ' + str(self._center) +
+            ' ' + str(self.normal))
 
     def get_file_name(self):
         return os.path.basename(self.get_absolute_fp())
@@ -78,7 +80,7 @@ class Camera(object):
             return relative_fp
         elif self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
             assert absolute_fp is not None
-            return absolute_fp 
+            return absolute_fp
         else:
             assert False
 
@@ -93,20 +95,20 @@ class Camera(object):
         if self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
             assert False # Not supported for undistorted images
         return self._get_absolute_fp(
-            self._undistorted_relative_fp, self._undistorted_absolute_fp)    
+            self._undistorted_relative_fp, self._undistorted_absolute_fp)
 
     def _get_absolute_fp(self, relative_fp, absolute_fp):
         if self.image_fp_type == Camera.IMAGE_FP_TYPE_NAME:
-            assert self.image_dp is not None 
+            assert self.image_dp is not None
             assert relative_fp is not None
             return os.path.join(self.image_dp, os.path.basename(relative_fp))
         elif self.image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE:
-            assert self.image_dp is not None 
+            assert self.image_dp is not None
             assert relative_fp is not None
             return os.path.join(self.image_dp, relative_fp)
         elif self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
             assert absolute_fp is not None
-            return absolute_fp 
+            return absolute_fp
         else:
             assert False
 
@@ -122,8 +124,8 @@ class Camera(object):
         has_fp = False
         if requirements:
             fp = self._get_absolute_fp(
-                self._undistorted_relative_fp, 
-                self._undistorted_absolute_fp) 
+                self._undistorted_relative_fp,
+                self._undistorted_absolute_fp)
             if os.path.isfile(fp):
                 has_fp = True
         return has_fp
@@ -135,20 +137,19 @@ class Camera(object):
         # Blender supports only object names with length 63
         # However, we need also space for additional suffixes
         image_fp_suffix = image_fp_stem[-40:]
-        return image_fp_suffix 
-        
+        return image_fp_suffix
 
     def set_calibration(self, calibration_mat, radial_distortion):
         self._calibration_mat = np.asarray(calibration_mat, dtype=float)
         self._radial_distortion = radial_distortion
         assert self._radial_distortion is not None
-        
+
     def has_focal_length(self):
         return self._calibration_mat[0][0] > 0
 
     def get_focal_length(self):
         return self._calibration_mat[0][0]
-    
+
     def get_field_of_view(self):
         assert self.width is not None and self.height is not None
         angle = math.atan(max(self.width, self.height) / (self.get_focal_length() * 2.0)) * 2.0
@@ -159,11 +160,11 @@ class Camera(object):
 
     def check_calibration_mat(self):
         assert self.has_focal_length() and self.is_principal_point_initialized()
-    
+
     def get_calibration_mat(self):
         self.check_calibration_mat()
         return self._calibration_mat
-    
+
     def set_calibration_mat(self, calibration_mat):
         self._calibration_mat = calibration_mat
 
@@ -176,7 +177,7 @@ class Camera(object):
         cx = calibration_mat[0][2]
         cy = calibration_mat[1][2]
         return np.asarray([cx,cy], dtype=float)
-    
+
     def is_principal_point_initialized(self):
         cx_zero = np.isclose(self._calibration_mat[0][2], 0.0)
         cy_zero = np.isclose(self._calibration_mat[1][2], 0.0)
@@ -194,7 +195,9 @@ class Camera(object):
 
     @staticmethod
     def compute_calibration_mat(focal_length, cx, cy):
-        return np.array([[focal_length, 0, cx], [0, focal_length, cy], [0,0,1]], dtype=float)
+        return np.array(
+            [[focal_length, 0, cx], [0, focal_length, cy], [0,0,1]],
+            dtype=float)
 
     def set_quaternion(self, quaternion):
         self._quaternion = quaternion
@@ -212,13 +215,18 @@ class Camera(object):
         if check_rotation:
             assert Camera.is_rotation_mat_valid(self._rotation_mat)
         self._center = center
-        self._translation_vec = - np.dot(self._rotation_mat, center)    # t = -R C
+        # t = -R C
+        self._translation_vec = - np.dot(self._rotation_mat, center)
 
-    def set_camera_translation_vector_after_rotation(self, translation_vector, check_rotation=True):
+    def set_camera_translation_vector_after_rotation(
+            self,
+            translation_vector,
+            check_rotation=True):
         if check_rotation:
             assert Camera.is_rotation_mat_valid(self._rotation_mat)
         self._translation_vec = translation_vector
-        self._center = - np.dot(self._rotation_mat.transpose(), translation_vector) # C = -R^T t
+        # C = -R^T t
+        self._center = - np.dot(self._rotation_mat.transpose(), translation_vector) 
 
     def get_quaternion(self):
         return self._quaternion
@@ -231,7 +239,7 @@ class Camera(object):
 
     def get_camera_center(self):
         return self._center
-    
+
     def set_4x4_cam_to_world_mat(self, cam_to_world_mat, check_rotation=True):
         self.set_rotation_mat(
             cam_to_world_mat[0:3, 0:3].transpose(), check_rotation=check_rotation)
@@ -248,7 +256,7 @@ class Camera(object):
     @staticmethod
     def quaternion_to_rotation_matrix(q):
         """
-        Original C++ Method ('SetQuaternionRotation()') defined in  pba/src/pba/DataInterface.h
+        Original C++ Method ('SetQuaternionRotation()') defined in pba/src/pba/DataInterface.h
         Parallel bundle adjustment (pba) code (used by visualsfm) is provided here:
         http://grail.cs.washington.edu/projects/mcba/
         """
@@ -359,10 +367,9 @@ class Camera(object):
         world_coords = np.delete(world_coords_hom, 3, 1)
         return world_coords
 
-    def convert_depth_map_to_cam_coords(  self,
-                                            depth_map_display_sparsity=100):
+    def convert_depth_map_to_cam_coords(self, depth_map_display_sparsity=100):
 
-        assert 0 < depth_map_display_sparsity
+        assert depth_map_display_sparsity > 0
 
         depth_map = self.get_depth_map()
 
@@ -374,7 +381,8 @@ class Camera(object):
             x_step_size = self.width / width
             y_step_size = self.height / height
 
-        fx, fy, skew, cx, cy = self.split_intrinsic_mat(self.get_calibration_mat())
+        fx, fy, skew, cx, cy = self.split_intrinsic_mat(
+            self.get_calibration_mat())
 
         # Use the local coordinate system of the camera to analyze its viewing directions
         # The Blender camera coordinate system looks along the negative z axis (blue),
@@ -401,8 +409,8 @@ class Camera(object):
             u_index_coord_list = x_step_size * x_index_list
             v_index_coord_list = y_step_size * y_index_list
 
-        # The cannoncial vectors are defined according to p.155 of 
-        # "Multiple View Geometry" by Hartley and Zisserman using a canonical 
+        # The cannoncial vectors are defined according to p.155 of
+        # "Multiple View Geometry" by Hartley and Zisserman using a canonical
         # focal length of 1 , i.e. vec = [(x - cx) / fx, (y - cy) / fy, 1]
         skew_correction = (cy - v_index_coord_list) * skew / (fx * fy)
         x_coords_canonical = (u_index_coord_list - cx) / fx + skew_correction
@@ -431,16 +439,16 @@ class Camera(object):
             z_coords_filtered = z_coords_canonical_filtered * depth_values_filtered
 
         elif self.depth_map_semantic == Camera.DEPTH_MAP_WRT_UNIT_VECTORS:
-            # In this case the depth values are defined w.r.t. the normalized 
+            # In this case the depth values are defined w.r.t. the normalized
             # canonical vectors. This kind of depth data is used by MVE.
             cannonical_norms_filtered = np.linalg.norm(
                 np.array(
-                    [x_coords_canonical_filtered, 
-                    y_coords_canonical_filtered, 
-                    z_coords_canonical_filtered], 
+                    [x_coords_canonical_filtered,
+                    y_coords_canonical_filtered,
+                    z_coords_canonical_filtered],
                     dtype=float),
                 axis=0)
-            # Instead of normalizing the x,y and z component, we divide the 
+            # Instead of normalizing the x,y and z component, we divide the
             # depth values by the corresponding norm.
             normalized_depth_values_filtered = depth_values_filtered / cannonical_norms_filtered
             x_coords_filtered = x_coords_canonical_filtered * normalized_depth_values_filtered
@@ -451,8 +459,8 @@ class Camera(object):
             assert False
 
         cam_coords = np.dstack(
-            (x_coords_filtered, 
-            y_coords_filtered, 
+            (x_coords_filtered,
+            y_coords_filtered,
             z_coords_filtered))[0]
 
         return cam_coords
