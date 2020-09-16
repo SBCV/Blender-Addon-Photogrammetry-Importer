@@ -20,22 +20,24 @@ Created by Sebastian Bullinger
 
 bl_info = {
     "name": "Photogrammetry Import Export Addon",
-    "description": "Allows to import and export photogrammetry results (cameras, points and meshes).",
+    "description": "Allows to import and export photogrammetry results " +
+        "(cameras, points and meshes).",
     "author": "Sebastian Bullinger",
     "version": (2, 0, 0),
     "blender": (2, 80, 0),
     "location": "File / Import and File/Export",
     "warning": "",
-    "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html",
+    "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs" +
+        ".io/en/latest/installation.html",
     "tracker_url": "https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/issues",
     "category": "Import-Export" }
 
+import importlib
 import bpy
 
 # load and reload submodules
 ##################################
 
-import importlib
 from .utility import developer_utility
 importlib.reload(developer_utility)
 modules = developer_utility.setup_addon_modules(__path__, __name__, "bpy" in locals())
@@ -71,7 +73,7 @@ bpy.app.handlers.load_post.append(redraw_points)
 #     log_op = LogOp()
 #     draw_points(log_op, points)
 # =========================================================================
-# 
+#
 
 def register():
     bpy.utils.register_class(PhotogrammetryImporterPreferences)
@@ -101,4 +103,3 @@ def unregister():
 
 if __name__ == '__main__':
     log_report('INFO', 'main called')
-    
