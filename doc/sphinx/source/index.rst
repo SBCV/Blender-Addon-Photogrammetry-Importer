@@ -26,7 +26,7 @@ Supported libraries (data formats):
 
    - `Colmap <https://github.com/colmap/colmap>`_ (Model folders (BIN and TXT), workspaces, NVM, PLY) 
    - `Meshroom <https://alicevision.github.io/>`_ (MG, JSON, SfM, PLY)
-   - `Multi-View Environment reconstructions <https://github.com/simonfuhrmann/mve>`_ (MVE workspaces)
+   - `MVE <https://github.com/simonfuhrmann/mve>`_ (MVE workspaces)
    - `Open3D <http://www.open3d.org/>`_ (JSON, LOG, PLY)
    - `OpenSfM <https://github.com/mapillary/OpenSfM>`_ (JSON)
    - `OpenMVG <https://github.com/openMVG/openMVG>`_ (JSON, NVM, PLY)
