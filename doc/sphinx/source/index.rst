@@ -17,7 +17,7 @@ Blender-Addon-Photgrammetry-Importer
 			"
 	There should be only one H1 in a document.
 
-The repository of this documentation contains a Blender addon to import reconstruction results of several libraries.
+This documentation describes an `addon for Blender <https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer>`_ that allows to import different reconstruction results of several :code:`Structure from Motion` and :code:`Multi-View Stereo` libraries.
 
 Supported libraries (data formats):
 
