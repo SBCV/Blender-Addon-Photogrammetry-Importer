@@ -1,5 +1,3 @@
-import bpy
-
 from bpy.props import (StringProperty,
                        BoolProperty,
                        EnumProperty,
@@ -15,7 +13,10 @@ from photogrammetry_importer.utility.blender_camera_utility import add_camera_an
 from photogrammetry_importer.types.camera import Camera
 
 class CameraImportProperties():
-    """ This class encapsulates Blender UI properties that are required to visualize the reconstructed cameras correctly. """
+    """
+    This class encapsulates Blender UI properties that are required to
+    visualize the reconstructed cameras correctly.
+    """
     image_fp_items = [
         (Camera.IMAGE_FP_TYPE_NAME, "File Name", "", 1),
         (Camera.IMAGE_FP_TYPE_RELATIVE, "Relative Path", "", 2),
@@ -23,71 +24,87 @@ class CameraImportProperties():
         ]
     image_fp_type: EnumProperty(
         name="Image File Path Type",
-        description = "Choose how image file paths are treated, i.e. absolute path, relative path or file name.",
+        description = "Choose how image file paths are treated, " +
+            "i.e. absolute path, relative path or file name",
         items=image_fp_items)
     image_dp: StringProperty(
         name="Image Directory",
-        description =   "Assuming the reconstruction result is located in <some/path/rec.ext> or <some/path/colmap_model>. " +
-                        "The addons uses <some/path/images> (if available) or <some/path> as default image path." ,
-        default=""
-        # Can not use subtype='DIR_PATH' while importing another file (i.e. .nvm)
-        )
+        description = "Assuming that the SfM reconstruction result is " +
+            "located in <some/path/rec.ext> or <some/path/rec_directory>. " +
+            "The addons uses either <some/path/images> (if available) " +
+            "or <some/path> as default image path. For MVS reconstruction " +
+            "results of Colmap, Meshroom or MVE the addon may or may not " +
+            "search for the images inside the corresponding workspace",
+        # Can not use subtype='DIR_PATH' while importing another file (i.e. nvm)
+        default="")
     import_cameras: BoolProperty(
         name="Import Cameras",
-        description = "Import Cameras", 
+        description = "Import Cameras",
         default=True)
     default_width: IntProperty(
         name="Default Width",
-        description = "Width, which will be used used if corresponding image is not found.", 
+        description = "Width, which will be used used if corresponding " +
+            "image is not found",
         default=-1)
     default_height: IntProperty(
-        name="Default Height", 
-        description = "Height, which will be used used if corresponding image is not found.",
+        name="Default Height",
+        description = "Height, which will be used used if corresponding " +
+            "image is not found",
         default=-1)
     default_focal_length: FloatProperty(
         name="Focal length in pixel",
-        description = "Value for missing focal length in LOG (Open3D) file. ", 
+        description = "Value for missing focal length in LOG (Open3D) file. ",
         default=float('nan'))
     default_pp_x: FloatProperty(
         name="Principal Point X Component",
-        description = "Principal Point X Component, which will be used if not contained in the NVM (VisualSfM) / LOG (Open3D) file. " + \
-                      "If no value is provided, the principal point is set to the image center.", 
+        description = "Principal Point X Component, which will be used if " +
+            "not contained in the NVM (VisualSfM) / LOG (Open3D) file. If no " +
+            "value is provided, the principal point is set to the image " +
+            "center",
         default=float('nan'))
     default_pp_y: FloatProperty(
-        name="Principal Point Y Component", 
-        description = "Principal Point Y Component, which will be used if not contained in the NVM (VisualSfM) / LOG (Open3D) file. " + \
-                      "If no value is provided, the principal point is set to the image center.", 
+        name="Principal Point Y Component",
+        description = "Principal Point Y Component, which will be used if " +
+            "not contained in the NVM (VisualSfM) / LOG (Open3D) file. If no " +
+            "value is provided, the principal point is set to the image " +
+            "center",
         default=float('nan'))
     add_background_images: BoolProperty(
         name="Add a Background Image for each Camera",
-        description = "The background image is only visible by viewing the scene from a specific camera.", 
+        description = "The background image is only visible by viewing the " +
+            "scene from a specific camera",
         default=True)
     add_image_planes: BoolProperty(
         name="Add an Image Plane for each Camera",
-        description = "Add an Image Plane for each Camera - only for non-panoramic cameras.", 
+        description = "Add an Image Plane for each Camera - only for " +
+            "non-panoramic cameras",
         default=False)
     add_image_plane_emission: BoolProperty(
         name="Add Image Plane Color Emission",
-        description = "Add image plane color emission to increase the visibility of the image planes.", 
+        description = "Add image plane color emission to increase the " +
+            "visibility of the image planes",
         default=True)
     image_plane_transparency: FloatProperty(
-        name="Image Plane Transparency Value", 
-        description = "Transparency value of the image planes: 0 = invisible, 1 = opaque.",
+        name="Image Plane Transparency Value",
+        description = "Transparency value of the image planes: " +
+            "0 = invisible, 1 = opaque",
         default=0.5,
         min=0,
         max=1)
     add_depth_maps_as_point_cloud: BoolProperty(
         name="Add Depth Maps (EXPERIMENTAL)",
-        description = "Add the depth map (if available) as point cloud for each Camera",
+        description = "Add the depth map (if available) as point cloud " +
+            "for each Camera",
         default=False)
     use_default_depth_map_color: BoolProperty(
         name="Use Default Depth Map Color",
-        description = "If not selected, each depth map is colorized with a different (random) color.",
+        description = "If not selected, each depth map is colorized with " +
+            "a different (random) color",
         default=False)
     depth_map_default_color: FloatVectorProperty(
         name="Depth Map Color",
         description="Depth map color",
-        subtype='COLOR',
+        subtype="COLOR",
         size=3,     # RGBA colors are not compatible with the GPU Module
         default=(0.0, 1.0, 0.0),
         min=0.0,
@@ -95,25 +112,25 @@ class CameraImportProperties():
         )
     depth_map_display_sparsity: IntProperty(
         name="Depth Map Display Sparsity",
-        description =   "Adjust the sparsity of the depth maps. A value of 10 means, " +
-                        "that every 10th depth map value is converted to a 3D point",
+        description = "Adjust the sparsity of the depth maps. A value of 10 " +
+            "means that every 10th depth map value is converted to a 3D point",
         default=10)
     depth_map_id_or_name_str: StringProperty(
         name="Depth Map IDs or Names to Display",
-        description =   "A list of camera indices or names (separated by " +
-                        "whitespaces) used to select the depth maps, which " +
-                        "will be displayed as point clouds. If no indices " +
-                        "are provided, all depth maps are shown. The names " +
-                        "must not contain whitespaces",
+        description = "A list of camera indices or names (separated by " +
+            "whitespaces) used to select the depth maps, which will be " +
+            "displayed as point clouds. If no indices are provided, all " +
+            "depth maps are shown. The names must not contain whitespaces",
         default="")
     add_camera_motion_as_animation: BoolProperty(
         name="Add Camera Motion as Animation",
-        description =   "Add an animation reflecting the camera motion. " + 
-                        " The order of the cameras is determined by the corresponding file name.", 
+        description = "Add an animation reflecting the camera motion. The " +
+            "order of the cameras is determined by the corresponding file " +
+            "name",
         default=True)
     number_interpolation_frames: IntProperty(
         name="Number of Frames Between two Reconstructed Cameras",
-        description = "The poses of the animated camera are interpolated.", 
+        description = "The poses of the animated camera are interpolated",
         default=0,
         min=0)
 
@@ -134,38 +151,42 @@ class CameraImportProperties():
         ]
     interpolation_type: EnumProperty(
         name="Interpolation Type",
-        description = "Blender string that defines the type of the interpolation.", 
+        description = "Blender string that defines the type of the interpolation",
         items=interpolation_items)
 
     consider_missing_cameras_during_animation: BoolProperty(
         name="Adjust Frame Numbers of Camera Animation",
-        description =   "Assume there are three consecutive images A,B and C, but only A and C have been reconstructed. " + 
-                        "This option adjusts the frame number of C and the number of interpolation frames between camera A and C.",
+        description = "Assume there are three consecutive images A,B and " +
+            "C, but only A and C have been reconstructed. This option " +
+            "adjusts the frame number of C and the number of interpolation " +
+            "frames between camera A and C",
         default=True)
 
     remove_rotation_discontinuities: BoolProperty(
         name="Remove Rotation Discontinuities",
-        description =   "The addon uses quaternions q to represent the rotation." + 
-                        "A quaternion q and its negative -q describe the same rotation. " + 
-                        "This option allows to remove different signs.",
+        description = "The addon uses quaternions q to represent the " +
+            "rotation. A quaternion q and its negative -q describe the same " +
+            "rotation. This option allows to remove different signs",
         default=True)
 
     suppress_distortion_warnings: BoolProperty(
         name="Suppress Distortion Warnings",
-        description = "Radial distortion might lead to incorrect alignments of cameras and points. "  +
-                      "Enable this option to suppress corresponding warnings. " +
-                      "If possible, consider to re-compute the reconstruction using a camera model without radial distortion.", 
+        description = "Radial distortion might lead to incorrect alignments "  +
+            "of cameras and points. Enable this option to suppress " +
+            "corresponding warnings. If possible, consider to re-compute the " +
+            "reconstruction using a camera model without radial distortion",
         default=False)
-    
+
     adjust_render_settings: BoolProperty(
         name="Adjust Render Settings",
-        description = "Adjust the render settings according to the corresponding images. "  +
-                      "All images have to be captured with the same device). " +
-                      "If disabled the visualization of the camera cone in 3D view might be incorrect.", 
+        description = "Adjust the render settings according to the "  +
+            "corresponding images - all images have to be captured with the " +
+            "same device. If disabled the visualization of the camera cone " +
+            "in 3D view might be incorrect",
         default=True)
 
     camera_extent: FloatProperty(
-        name="Initial Camera Extent (in Blender Units)", 
+        name="Initial Camera Extent (in Blender Units)",
         description = "Initial Camera Extent (Visualization)",
         default=1)
 
@@ -181,7 +202,7 @@ class CameraImportProperties():
 
         if draw_image_fp or draw_everything:
             camera_box.prop(self, "image_fp_type")
-            if self.image_fp_type == "NAME" or self.image_fp_type == "RELATIVE" or draw_everything:
+            if self.image_fp_type in ["NAME", "RELATIVE"] or draw_everything:
                 camera_box.prop(self, "image_dp")
 
         if draw_focal_length or draw_image_size or draw_principal_point or draw_everything:
@@ -229,14 +250,14 @@ class CameraImportProperties():
         camera_box.prop(self, "adjust_render_settings")
 
     def enhance_camera_with_intrinsics(self, cameras):
-        # This function should be overwritten, 
+        # This function should be overwritten,
         # if the intrinsic parameters are not part of the reconstruction data
         # (e.g. log file)
         success = True
         return cameras, success
 
     def enhance_camera_with_images(self, cameras):
-        # This function should be overwritten, 
+        # This function should be overwritten,
         # if image size is not part of the reconstruction data
         # (e.g. nvm file)
         success = True
@@ -251,22 +272,22 @@ class CameraImportProperties():
                 # The principal point information may be provided in the reconstruction data
                 if not principal_points_initialized(cameras):
                     set_principal_point_for_cameras(
-                        cameras, 
+                        cameras,
                         self.default_pp_x,
                         self.default_pp_y,
                         self)
-                
+
                 if self.adjust_render_settings:
                     adjust_render_settings_if_possible(
-                        self, 
+                        self,
                         cameras)
 
                 if self.import_cameras:
                     add_cameras(
-                        self, 
-                        cameras, 
+                        self,
+                        cameras,
                         parent_collection,
-                        image_dp=self.image_dp, 
+                        image_dp=self.image_dp,
                         add_background_images=self.add_background_images,
                         add_image_planes=self.add_image_planes,
                         add_depth_maps_as_point_cloud=self.add_depth_maps_as_point_cloud,
