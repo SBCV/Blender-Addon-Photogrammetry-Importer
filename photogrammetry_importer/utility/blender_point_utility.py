@@ -9,9 +9,9 @@ from photogrammetry_importer.utility.stop_watch import StopWatch
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 # Max width from https://docs.blender.org/api/current/bpy.types.Image.html
-max_width = 65536
+MAX_WIDTH = 65536
 # If there are more points than this set viewport display type to none
-max_initial_points_to_display = 50000
+MAX_INITIAL_POINTS_TO_DISPLAY = 50000
 
 def copy_values_to_image(value_tripplets, image_name):
     image = bpy.data.images[image_name]
@@ -35,8 +35,8 @@ def compute_particle_coord_texture(coords, name='ParticleCoord'):
         alpha=False,
         # is_data=True,
         float_buffer=True,
-        width=max_width if len(coords) > max_width else len(coords), 
-        height=math.ceil(len(coords)/max_width))
+        width=MAX_WIDTH if len(coords) > MAX_WIDTH else len(coords), 
+        height=math.ceil(len(coords)/MAX_WIDTH))
 
     copy_values_to_image(coords, image.name)
     image = bpy.data.images[image.name]
@@ -48,8 +48,8 @@ def compute_particle_color_texture(colors, name='ParticleColor'):
     # To view the texture we set the height of the texture to vis_image_height 
     image = bpy.data.images.new(
         name=name, 
-        width=max_width if len(colors) > max_width else len(colors), 
-        height=math.ceil(len(colors)/max_width))
+        width=MAX_WIDTH if len(colors) > MAX_WIDTH else len(colors), 
+        height=math.ceil(len(colors)/MAX_WIDTH))
 
     copy_values_to_image(colors, image.name)
     image = bpy.data.images[image.name]
@@ -87,8 +87,8 @@ def create_particle_color_nodes(node_tree, points, set_particle_color_flag, part
         node_tree.links.new(
             particle_info_node.outputs['Index'], 
             divide_node.inputs[0])
-        divide_node.inputs[1].default_value = max_width if len(points) > max_width else len(points)
-        if len(points) > max_width:
+        divide_node.inputs[1].default_value = MAX_WIDTH if len(points) > MAX_WIDTH else len(points)
+        if len(points) > MAX_WIDTH:
             # Add nodes to handle multiple rows of pixels in the image
             # Handle x position in image
             fraction_node = node_tree.nodes.new('ShaderNodeMath')
@@ -107,7 +107,7 @@ def create_particle_color_nodes(node_tree, points, set_particle_color_flag, part
                 floor_node.inputs[0])
             divide_y_node = node_tree.nodes.new('ShaderNodeMath')
             divide_y_node.operation = 'DIVIDE'
-            divide_y_node.inputs[1].default_value = math.ceil(len(points)/max_width)
+            divide_y_node.inputs[1].default_value = math.ceil(len(points)/MAX_WIDTH)
             node_tree.links.new(
                 floor_node.outputs['Value'], 
                 divide_y_node.inputs[0])
@@ -234,7 +234,7 @@ def add_points_as_particle_system(op,
         settings.use_emit_random = False
         settings.render_type = 'OBJECT'
         settings.instance_object = particle_obj
-        if len(points) > max_initial_points_to_display:
+        if len(points) > MAX_INITIAL_POINTS_TO_DISPLAY:
             settings.display_method = 'NONE'
         
     bpy.context.view_layer.update()
