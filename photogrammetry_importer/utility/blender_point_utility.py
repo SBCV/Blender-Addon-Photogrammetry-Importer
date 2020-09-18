@@ -1,5 +1,6 @@
 import bpy
 import numpy as np
+import math
 from mathutils import Vector
 
 from photogrammetry_importer.types.point import Point
@@ -7,6 +8,10 @@ from photogrammetry_importer.utility.blender_utility import add_obj
 from photogrammetry_importer.utility.stop_watch import StopWatch
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
+# Max width from https://docs.blender.org/api/current/bpy.types.Image.html
+max_width = 65536
+# If there are more points than this set viewport display type to none
+max_initial_points_to_display = 50000
 
 def copy_values_to_image(value_tripplets, image_name):
     image = bpy.data.images[image_name]
@@ -30,10 +35,10 @@ def compute_particle_coord_texture(coords, name='ParticleCoord'):
         alpha=False,
         # is_data=True,
         float_buffer=True,
-        width=len(coords), 
-        height=1)
+        width=max_width if len(coords) > max_width else len(coords), 
+        height=math.ceil(len(coords)/max_width))
 
-    copy_values_to_image(colors, image.name)
+    copy_values_to_image(coords, image.name)
     image = bpy.data.images[image.name]
     # https://docs.blender.org/api/current/bpy.types.Image.html#bpy.types.Image.pack
     image.pack()
@@ -43,8 +48,8 @@ def compute_particle_color_texture(colors, name='ParticleColor'):
     # To view the texture we set the height of the texture to vis_image_height 
     image = bpy.data.images.new(
         name=name, 
-        width=len(colors), 
-        height=1)
+        width=max_width if len(colors) > max_width else len(colors), 
+        height=math.ceil(len(colors)/max_width))
 
     copy_values_to_image(colors, image.name)
     image = bpy.data.images[image.name]
@@ -72,18 +77,48 @@ def create_particle_color_nodes(node_tree, points, set_particle_color_flag, part
 
         coords, colors = Point.split_points(points)
         particle_color_node.image = compute_particle_color_texture(colors)
+        particle_color_node.interpolation = 'Closest'
 
         particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
+        shader_node_combine = node_tree.nodes.new('ShaderNodeCombineXYZ')
+        # The first divider node, fractional part specifies x position, integer part specifies y
         divide_node = node_tree.nodes.new('ShaderNodeMath')
         divide_node.operation = 'DIVIDE'
         node_tree.links.new(
             particle_info_node.outputs['Index'], 
             divide_node.inputs[0])
-        divide_node.inputs[1].default_value = len(points)
-        shader_node_combine = node_tree.nodes.new('ShaderNodeCombineXYZ')
-        node_tree.links.new(
-            divide_node.outputs['Value'], 
-            shader_node_combine.inputs['X'])
+        divide_node.inputs[1].default_value = max_width if len(points) > max_width else len(points)
+        if len(points) > max_width:
+            # Add nodes to handle multiple rows of pixels in the image
+            # Handle x position in image
+            fraction_node = node_tree.nodes.new('ShaderNodeMath')
+            fraction_node.operation = 'FRACT'
+            node_tree.links.new(
+                divide_node.outputs['Value'], 
+                fraction_node.inputs[0])
+            node_tree.links.new(
+                fraction_node.outputs['Value'], 
+                shader_node_combine.inputs['X'])
+            # Handle y position in image
+            floor_node = node_tree.nodes.new('ShaderNodeMath')
+            floor_node.operation = 'FLOOR'
+            node_tree.links.new(
+                divide_node.outputs['Value'], 
+                floor_node.inputs[0])
+            divide_y_node = node_tree.nodes.new('ShaderNodeMath')
+            divide_y_node.operation = 'DIVIDE'
+            divide_y_node.inputs[1].default_value = math.ceil(len(points)/max_width)
+            node_tree.links.new(
+                floor_node.outputs['Value'], 
+                divide_y_node.inputs[0])
+            node_tree.links.new(
+                divide_y_node.outputs['Value'], 
+                shader_node_combine.inputs['Y'])
+        else:
+            # We can use a simpler node setup as there is only one row of pixels in the image
+            node_tree.links.new(
+                divide_node.outputs['Value'], 
+                shader_node_combine.inputs['X'])
         node_tree.links.new(
             shader_node_combine.outputs['Vector'], 
             particle_color_node.inputs['Vector'])
@@ -199,6 +234,8 @@ def add_points_as_particle_system(op,
         settings.use_emit_random = False
         settings.render_type = 'OBJECT'
         settings.instance_object = particle_obj
+        if len(points) > max_initial_points_to_display:
+            settings.display_method = 'NONE'
         
     bpy.context.view_layer.update()
 
