@@ -17,7 +17,7 @@ Blender-Addon-Photgrammetry-Importer
 			"
 	There should be only one H1 in a document.
 
-The repository of this documentation contains a Blender addon to import reconstruction results of several libraries.
+This documentation describes an `addon for Blender <https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer>`_ that allows to import different reconstruction results of several :code:`Structure from Motion` and :code:`Multi-View Stereo` libraries.
 
 Supported libraries (data formats):
 
@@ -26,7 +26,7 @@ Supported libraries (data formats):
 
    - `Colmap <https://github.com/colmap/colmap>`_ (Model folders (BIN and TXT), workspaces, NVM, PLY) 
    - `Meshroom <https://alicevision.github.io/>`_ (MG, JSON, SfM, PLY)
-   - `Multi-View Environment reconstructions <https://github.com/simonfuhrmann/mve>`_ (MVE workspaces)
+   - `MVE <https://github.com/simonfuhrmann/mve>`_ (MVE workspaces)
    - `Open3D <http://www.open3d.org/>`_ (JSON, LOG, PLY)
    - `OpenSfM <https://github.com/mapillary/OpenSfM>`_ (JSON)
    - `OpenMVG <https://github.com/openMVG/openMVG>`_ (JSON, NVM, PLY)
