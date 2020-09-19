@@ -1,43 +1,36 @@
 '''
 Copyright (C) 2018 Sebastian Bullinger
-
-
 Created by Sebastian Bullinger
-
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
 bl_info = {
     "name": "Photogrammetry Import Export Addon",
-    "description": "Allows to import and export photogrammetry results " +
-        "(cameras, points and meshes).",
+    "description": "Allows to import and export photogrammetry results (cameras, points and meshes).",
     "author": "Sebastian Bullinger",
     "version": (2, 0, 0),
     "blender": (2, 80, 0),
     "location": "File / Import and File/Export",
     "warning": "",
-    "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs" +
-        ".io/en/latest/installation.html",
+    "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html",
     "tracker_url": "https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/issues",
     "category": "Import-Export" }
 
-import importlib
 import bpy
 
 # load and reload submodules
 ##################################
 
+import importlib
 from .utility import developer_utility
 importlib.reload(developer_utility)
 modules = developer_utility.setup_addon_modules(__path__, __name__, "bpy" in locals())
