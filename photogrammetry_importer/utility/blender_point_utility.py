@@ -38,7 +38,7 @@ def compute_particle_coord_texture(coords, name='ParticleCoord'):
         width=MAX_WIDTH if len(coords) > MAX_WIDTH else len(coords), 
         height=math.ceil(len(coords)/MAX_WIDTH))
 
-    copy_values_to_image(coords, image.name)
+    copy_values_to_image(colors, image.name)
     image = bpy.data.images[image.name]
     # https://docs.blender.org/api/current/bpy.types.Image.html#bpy.types.Image.pack
     image.pack()
