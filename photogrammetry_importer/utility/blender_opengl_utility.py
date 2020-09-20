@@ -9,8 +9,6 @@ from gpu_extras.batch import batch_for_shader
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.utility.blender_opengl_draw_manager import DrawManager
 from photogrammetry_importer.utility.blender_utility import add_empty
-from photogrammetry_importer.utility.blender_point_utility import compute_particle_coord_texture
-from photogrammetry_importer.utility.blender_point_utility import compute_particle_color_texture
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 

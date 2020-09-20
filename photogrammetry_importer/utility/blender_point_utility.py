@@ -22,23 +22,6 @@ def copy_values_to_image(value_tripplets, image_name):
         #local_pixels[column_offset + 3] = 1.0    # already set by default   
     image.pixels = local_pixels[:]
 
-
-def compute_particle_coord_texture(coords, name='ParticleCoord'):
-
-    image = bpy.data.images.new(
-        name=name, 
-        alpha=False,
-        # is_data=True,
-        float_buffer=True,
-        width=len(coords), 
-        height=1)
-
-    copy_values_to_image(colors, image.name)
-    image = bpy.data.images[image.name]
-    # https://docs.blender.org/api/current/bpy.types.Image.html#bpy.types.Image.pack
-    image.pack()
-    return image
-
 def compute_particle_color_texture(colors, name='ParticleColor'):
     # To view the texture we set the height of the texture to vis_image_height 
     image = bpy.data.images.new(
