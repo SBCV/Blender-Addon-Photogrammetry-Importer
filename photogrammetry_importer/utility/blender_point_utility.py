@@ -55,6 +55,7 @@ def create_particle_color_nodes(node_tree, points, set_particle_color_flag, part
 
         coords, colors = Point.split_points(points)
         particle_color_node.image = compute_particle_color_texture(colors)
+        particle_color_node.interpolation = 'Closest'
 
         particle_info_node = node_tree.nodes.new('ShaderNodeParticleInfo')
         divide_node = node_tree.nodes.new('ShaderNodeMath')
