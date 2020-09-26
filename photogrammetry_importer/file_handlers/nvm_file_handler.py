@@ -12,7 +12,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class NVMFileHandler(object):
 
-    # Check the LoadNVM function in util.h of the 
+    # Check the LoadNVM function in util.h of the
     # Multicore bundle adjustment code for more details.
     # http://grail.cs.washington.edu/projects/mcba/
     # pba/src/pba/util.h
@@ -34,7 +34,7 @@ class NVMFileHandler(object):
         in computer graphics like in bundler, blender, etc.)
         That means
             the y axis in the image is pointing downwards (not upwards)
-            the camera is looking along the positive z axis (points in 
+            the camera is looking along the positive z axis (points in
                 front of the camera show a positive z value)
 
         The camera coordinate system in computer vision VISUALSFM uses camera

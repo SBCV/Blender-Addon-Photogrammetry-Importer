@@ -23,7 +23,7 @@ from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-# REMARK: In PLY file format FLOAT is SINGLE precision (32 bit) 
+# REMARK: In PLY file format FLOAT is SINGLE precision (32 bit)
 # and DOUBLE is DOUBLE PRECISION (64 bit)
 class PLYFileHandler:
     @staticmethod
