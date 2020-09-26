@@ -6,98 +6,127 @@ from bpy.props import IntProperty
 from bpy_extras.io_utils import ImportHelper
 
 from photogrammetry_importer.operators.import_op import ImportOperator
-from photogrammetry_importer.properties.camera_import_properties import CameraImportProperties
-from photogrammetry_importer.properties.point_import_properties import PointImportProperties
-from photogrammetry_importer.properties.mesh_import_properties import MeshImportProperties
-from photogrammetry_importer.properties.general_import_properties import GeneralImportProperties
+from photogrammetry_importer.properties.camera_import_properties import (
+    CameraImportProperties,
+)
+from photogrammetry_importer.properties.point_import_properties import (
+    PointImportProperties,
+)
+from photogrammetry_importer.properties.mesh_import_properties import (
+    MeshImportProperties,
+)
+from photogrammetry_importer.properties.general_import_properties import (
+    GeneralImportProperties,
+)
 
-from photogrammetry_importer.file_handlers.meshroom_file_handler import MeshroomFileHandler
+from photogrammetry_importer.file_handlers.meshroom_file_handler import (
+    MeshroomFileHandler,
+)
 from photogrammetry_importer.utility.blender_utility import add_collection
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-class ImportMeshroomOperator(   ImportOperator,
-                                CameraImportProperties,
-                                PointImportProperties,
-                                MeshImportProperties,
-                                GeneralImportProperties,
-                                ImportHelper):
+class ImportMeshroomOperator(
+    ImportOperator,
+    CameraImportProperties,
+    PointImportProperties,
+    MeshImportProperties,
+    GeneralImportProperties,
+    ImportHelper,
+):
 
     """Import a Meshroom MG/SfM/JSON file"""
+
     bl_idname = "import_scene.meshroom_sfm_json"
     bl_label = "Import Meshroom SfM/JSON/MG"
-    bl_options = {'PRESET'}
+    bl_options = {"PRESET"}
 
     filepath: StringProperty(
         name="Meshroom JSON File Path",
-        description="File path used for importing the Meshroom SfM/JSON/MG file")
+        description="File path used for importing the Meshroom SfM/JSON/MG file",
+    )
     directory: StringProperty()
-    filter_glob: StringProperty(default="*.sfm;*.json;*.mg", options={'HIDDEN'})
+    filter_glob: StringProperty(
+        default="*.sfm;*.json;*.mg", options={"HIDDEN"}
+    )
 
     # Structure From Motion Node
     sfm_node_items = [
         ("AUTOMATIC", "AUTOMATIC", "", 1),
         ("ConvertSfMFormatNode", "ConvertSfMFormatNode", "", 2),
-        ("StructureFromMotionNode", "StructureFromMotionNode", "", 3)
-        ]
+        ("StructureFromMotionNode", "StructureFromMotionNode", "", 3),
+    ]
     sfm_node_type: EnumProperty(
         name="Structure From Motion Node Type",
-        description = "Use this property to select the node with the structure from motion results to import.", 
-        items=sfm_node_items)
+        description="Use this property to select the node with the structure from motion results to import.",
+        items=sfm_node_items,
+    )
     sfm_node_number: IntProperty(
         name="ConvertSfMFormat Node Number",
-        description = "Use this property to select the desired node." +
-            "By default the node with the highest number is imported.",
-        default=-1)
+        description="Use this property to select the desired node."
+        + "By default the node with the highest number is imported.",
+        default=-1,
+    )
 
     # Mesh Node
     mesh_node_items = [
         ("AUTOMATIC", "AUTOMATIC", "", 1),
         ("Texturing", "Texturing", "", 2),
         ("MeshFiltering", "MeshFiltering", "", 3),
-        ("Meshing", "Meshing", "", 4)
-        ]
+        ("Meshing", "Meshing", "", 4),
+    ]
     mesh_node_type: EnumProperty(
         name="Mesh Node Type",
-        description = "Use this property to select the node with the mesh results to import.", 
-        items=mesh_node_items)
+        description="Use this property to select the node with the mesh results to import.",
+        items=mesh_node_items,
+    )
 
     mesh_node_number: IntProperty(
         name="Mesh Node Number",
-        description = "Use this property to select the desired node." + 
-            "By default the node with the highest number is imported.",
-        default=-1)
+        description="Use this property to select the desired node."
+        + "By default the node with the highest number is imported.",
+        default=-1,
+    )
 
     def execute(self, context):
 
         path = os.path.join(self.directory, self.filepath)
-        log_report('INFO', 'path: ' + str(path), self)
+        log_report("INFO", "path: " + str(path), self)
 
-        self.image_dp = self.get_default_image_path(
-            path, self.image_dp)
-        log_report('INFO', 'image_dp: ' + str(self.image_dp), self)
-        
+        self.image_dp = self.get_default_image_path(path, self.image_dp)
+        log_report("INFO", "image_dp: " + str(self.image_dp), self)
+
         cameras, points, mesh_fp = MeshroomFileHandler.parse_meshroom_file(
-            path, self.image_dp, self.image_fp_type, self.suppress_distortion_warnings, 
-            self.sfm_node_type, self.sfm_node_number, self.mesh_node_type, self.mesh_node_number, self)
-        
-        log_report('INFO', 'Number cameras: ' + str(len(cameras)), self)
-        log_report('INFO', 'Number points: ' + str(len(points)), self)
-        
-        reconstruction_collection = add_collection('Reconstruction Collection')
+            path,
+            self.image_dp,
+            self.image_fp_type,
+            self.suppress_distortion_warnings,
+            self.sfm_node_type,
+            self.sfm_node_number,
+            self.mesh_node_type,
+            self.mesh_node_number,
+            self,
+        )
+
+        log_report("INFO", "Number cameras: " + str(len(cameras)), self)
+        log_report("INFO", "Number points: " + str(len(points)), self)
+
+        reconstruction_collection = add_collection("Reconstruction Collection")
         self.import_photogrammetry_cameras(cameras, reconstruction_collection)
         self.import_photogrammetry_points(points, reconstruction_collection)
         self.import_photogrammetry_mesh(mesh_fp, reconstruction_collection)
         self.apply_general_options()
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
     def invoke(self, context, event):
         addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[addon_name].preferences
+        import_export_prefs = bpy.context.preferences.addons[
+            addon_name
+        ].preferences
         self.initialize_options(import_export_prefs)
         context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
+        return {"RUNNING_MODAL"}
 
     def draw(self, context):
         layout = self.layout

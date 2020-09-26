@@ -11,35 +11,38 @@ import math
 #       - Properties defined in the parent class, which inherits from bpy.types.Operator and ImportHelper
 #         are not considered
 
-from bpy.props import (CollectionProperty,
-                       StringProperty,
-                       BoolProperty,
-                       EnumProperty,
-                       FloatProperty,
-                       IntProperty)
+from bpy.props import (
+    CollectionProperty,
+    StringProperty,
+    BoolProperty,
+    EnumProperty,
+    FloatProperty,
+    IntProperty,
+)
 
-from bpy_extras.io_utils import ImportHelper
-from bpy_extras.io_utils import axis_conversion
+from bpy_extras.io_utils import ImportHelper, axis_conversion
 
 custom_property_types = [
     bpy.types.BoolProperty,
     bpy.types.IntProperty,
     bpy.types.FloatProperty,
     bpy.types.StringProperty,
-    bpy.types.EnumProperty]
+    bpy.types.EnumProperty,
+]
+
 
 def is_custom_property(prop):
     return type(prop) in custom_property_types
 
-class ImportOperator(bpy.types.Operator):
 
+class ImportOperator(bpy.types.Operator):
     def initialize_options(self, source):
         # Side note:
         #   "vars(my_obj)" does not work in Blender
         #   "dir(my_obj)" shows the attributes, but not the corresponding type
         #   "my_obj.rna_type.properties.items()" lists attribute names with corresponding types
         for name, prop in source.rna_type.properties.items():
-            if name == 'bl_idname':
+            if name == "bl_idname":
                 continue
             if not is_custom_property(prop):
                 continue
@@ -48,14 +51,16 @@ class ImportOperator(bpy.types.Operator):
             setattr(self, name, getattr(source, name))
 
     def get_addon_name(self):
-        return __name__.split('.')[0]
+        return __name__.split(".")[0]
 
     def get_default_image_path(self, reconstruction_fp, image_dp):
         if image_dp is None:
             return None
-        elif image_dp == '':
+        elif image_dp == "":
             image_default_same_dp = os.path.dirname(reconstruction_fp)
-            image_default_sub_dp = os.path.join(image_default_same_dp, 'images')
+            image_default_sub_dp = os.path.join(
+                image_default_same_dp, "images"
+            )
             if os.path.isdir(image_default_sub_dp):
                 image_dp = image_default_sub_dp
             else:
