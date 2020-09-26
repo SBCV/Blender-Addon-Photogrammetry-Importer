@@ -1,12 +1,13 @@
 import os
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.file_handlers.ply_file_handler import PLYFileHandler
+from photogrammetry_importer.file_handlers.ply_file_handler import (
+    PLYFileHandler,
+)
 from photogrammetry_importer.utility.blender_logging_utility import log_report
-from photogrammetry_importer.utility.type_utility import is_float
-from photogrammetry_importer.utility.type_utility import is_int
+from photogrammetry_importer.utility.type_utility import is_float, is_int
+
 
 class DataSemantics(object):
-
     def __init__(self):
         self.x_idx = None
         self.y_idx = None
@@ -21,7 +22,6 @@ class DataSemantics(object):
 
 
 class PointDataFileHandler(object):
-
     @staticmethod
     def read_lines_as_tuples(ifc, delimiter):
         lines_as_tup = []
@@ -32,7 +32,7 @@ class PointDataFileHandler(object):
 
     @staticmethod
     def guess_data_semantics(data_tuple):
-        log_report('INFO', 'Guessing data semantics')
+        log_report("INFO", "Guessing data semantics")
         data_semantics = DataSemantics()
         # Data must start with subsequent float values
         # representing the three-dimensional position
@@ -46,7 +46,7 @@ class PointDataFileHandler(object):
 
         # Search for three subsequent int values between 0 and 255
         # (which indicate RGB color information)
-        for idx in [3, num_data_entries-3]:
+        for idx in [3, num_data_entries - 3]:
             if not is_int(data_tuple[idx]):
                 continue
             if not is_int(data_tuple[idx + 1]):
@@ -71,13 +71,13 @@ class PointDataFileHandler(object):
         # If not int values are found, we assume that the color information
         # is stored as pseudo colors, i.e. we are looking for 3 subsequent
         # floats between (0,1).
-        for idx in [3, num_data_entries-3]:
+        for idx in [3, num_data_entries - 3]:
             assert is_float(data_tuple[idx])
             if not 0 <= float(data_tuple[idx]) <= 1:
                 continue
-            if not 0 <= float(data_tuple[idx+1]) <= 1:
+            if not 0 <= float(data_tuple[idx + 1]) <= 1:
                 continue
-            if not 0 <= float(data_tuple[idx+2]) <= 1:
+            if not 0 <= float(data_tuple[idx + 2]) <= 1:
                 continue
             data_semantics.r_idx = idx
             data_semantics.g_idx = idx + 1
@@ -90,31 +90,31 @@ class PointDataFileHandler(object):
     @staticmethod
     def parse_header(line):
         data_semantics = DataSemantics()
-        data_tuple = line.lstrip('//').rstrip().split(' ')
+        data_tuple = line.lstrip("//").rstrip().split(" ")
 
         for idx, val in enumerate(data_tuple):
-            if val == 'X':
+            if val == "X":
                 data_semantics.x_idx = idx
-            elif val == 'Y':
+            elif val == "Y":
                 data_semantics.y_idx = idx
-            elif val == 'Z':
+            elif val == "Z":
                 data_semantics.z_idx = idx
-            elif val == 'R':
+            elif val == "R":
                 data_semantics.r_idx = idx
                 data_semantics.pseudo_color = False
-            elif val == 'G':
+            elif val == "G":
                 data_semantics.g_idx = idx
                 data_semantics.pseudo_color = False
-            elif val == 'B':
+            elif val == "B":
                 data_semantics.b_idx = idx
                 data_semantics.pseudo_color = False
-            elif val == 'Rf':
+            elif val == "Rf":
                 data_semantics.r_idx = idx
                 data_semantics.pseudo_color = True
-            elif val == 'Gf':
+            elif val == "Gf":
                 data_semantics.g_idx = idx
                 data_semantics.pseudo_color = True
-            elif val == 'Bf':
+            elif val == "Bf":
                 data_semantics.b_idx = idx
                 data_semantics.pseudo_color = True
 
@@ -124,12 +124,12 @@ class PointDataFileHandler(object):
     def parse_asc_or_pts_or_csv(ifp, delimiter, only_data):
 
         points = []
-        with open(ifp, 'r') as ifc:
+        with open(ifp, "r") as ifc:
 
             data_semantics = None
             if not only_data:
                 line = ifc.readline()
-                if line.startswith('//'):
+                if line.startswith("//"):
                     data_semantics = PointDataFileHandler.parse_header(line)
                     line = ifc.readline()
                     num_points = int(line.strip())
@@ -137,13 +137,15 @@ class PointDataFileHandler(object):
                     num_points = int(line.strip())
 
             lines_as_tuples = PointDataFileHandler.read_lines_as_tuples(
-                ifc, delimiter=delimiter)
+                ifc, delimiter=delimiter
+            )
 
             if data_semantics is None:
                 # Determine the semantics of the data
                 data_tuple = lines_as_tuples[0]
                 data_semantics = PointDataFileHandler.guess_data_semantics(
-                    data_tuple)
+                    data_tuple
+                )
 
             if data_semantics.pseudo_color:
                 factor = 255
@@ -155,35 +157,39 @@ class PointDataFileHandler(object):
                     coord=[
                         float(data_tuple[data_semantics.x_idx]),
                         float(data_tuple[data_semantics.y_idx]),
-                        float(data_tuple[data_semantics.z_idx])],
+                        float(data_tuple[data_semantics.z_idx]),
+                    ],
                     color=[
                         int(factor * float(data_tuple[data_semantics.r_idx])),
                         int(factor * float(data_tuple[data_semantics.g_idx])),
-                        int(factor * float(data_tuple[data_semantics.b_idx]))],
+                        int(factor * float(data_tuple[data_semantics.b_idx])),
+                    ],
                     id=idx,
-                    scalars=None)
+                    scalars=None,
+                )
                 points.append(point)
 
         return points
 
-
     @staticmethod
     def parse_point_data_file(ifp):
-        log_report('INFO', 'Parse Point Data File: ...')
+        log_report("INFO", "Parse Point Data File: ...")
 
         ext = os.path.splitext(ifp)[1].lower()
-        if ext == '.ply':
+        if ext == ".ply":
             points = PLYFileHandler.parse_ply_file(ifp)
-        elif ext == '.csv':
+        elif ext == ".csv":
             points = PointDataFileHandler.parse_asc_or_pts_or_csv(
-                ifp, delimiter=',', only_data=True)
-        elif ext in ['.asc', '.pts']:
+                ifp, delimiter=",", only_data=True
+            )
+        elif ext in [".asc", ".pts"]:
             # https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O
             points = PointDataFileHandler.parse_asc_or_pts_or_csv(
-                ifp, delimiter=' ', only_data=False)
+                ifp, delimiter=" ", only_data=False
+            )
         else:
-            log_report('ERROR', 'Extension ' + ext + ' not supported.', self)
+            log_report("ERROR", "Extension " + ext + " not supported.", self)
             assert False
 
-        log_report('INFO', 'Parse Point Data File: Done')
+        log_report("INFO", "Parse Point Data File: Done")
         return points

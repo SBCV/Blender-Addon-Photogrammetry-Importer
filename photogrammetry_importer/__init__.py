@@ -1,4 +1,4 @@
-'''
+"""
 Copyright (C) 2018 Sebastian Bullinger
 Created by Sebastian Bullinger
     This program is free software: you can redistribute it and/or modify
@@ -11,7 +11,7 @@ Created by Sebastian Bullinger
     GNU General Public License for more details.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+"""
 
 bl_info = {
     "name": "Photogrammetry Import Export Addon",
@@ -23,7 +23,8 @@ bl_info = {
     "warning": "",
     "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html",
     "tracker_url": "https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/issues",
-    "category": "Import-Export" }
+    "category": "Import-Export",
+}
 
 import bpy
 
@@ -32,22 +33,32 @@ import bpy
 
 import importlib
 from .utility import developer_utility
+
 importlib.reload(developer_utility)
-modules = developer_utility.setup_addon_modules(__path__, __name__, "bpy" in locals())
+modules = developer_utility.setup_addon_modules(
+    __path__, __name__, "bpy" in locals()
+)
 
 # The root dir is Blenders addon folder.
 # Therefore, we need the "photogrammetry_importer" specifier for this addon
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
-from photogrammetry_importer.preferences.addon_preferences import PhotogrammetryImporterPreferences
+from photogrammetry_importer.preferences.addon_preferences import (
+    PhotogrammetryImporterPreferences,
+)
 
-from photogrammetry_importer.registration.registration import register_importers
-from photogrammetry_importer.registration.registration import unregister_importers
-from photogrammetry_importer.registration.registration import register_exporters
-from photogrammetry_importer.registration.registration import unregister_exporters
+from photogrammetry_importer.registration.registration import (
+    register_importers,
+    unregister_importers,
+    register_exporters,
+    unregister_exporters,
+)
 
 from photogrammetry_importer.panels.view_3d_panel import OpenGLPanel
-from photogrammetry_importer.utility.blender_opengl_utility import redraw_points
+from photogrammetry_importer.utility.blender_opengl_utility import (
+    redraw_points,
+)
+
 bpy.app.handlers.load_post.append(redraw_points)
 
 # =========================================================================
@@ -68,6 +79,7 @@ bpy.app.handlers.load_post.append(redraw_points)
 # =========================================================================
 #
 
+
 def register():
     bpy.utils.register_class(PhotogrammetryImporterPreferences)
 
@@ -80,8 +92,11 @@ def register():
     # === Uncomment for fast debugging ===
     # bpy.app.handlers.load_post.append(load_handler)
 
-    log_report('INFO', 'Registered {} with {} modules'.format(
-        bl_info['name'], len(modules)))
+    log_report(
+        "INFO",
+        "Registered {} with {} modules".format(bl_info["name"], len(modules)),
+    )
+
 
 def unregister():
     bpy.utils.unregister_class(PhotogrammetryImporterPreferences)
@@ -91,8 +106,8 @@ def unregister():
 
     bpy.utils.unregister_class(OpenGLPanel)
 
-    log_report('INFO', 'Unregistered {}'.format(bl_info['name']))
+    log_report("INFO", "Unregistered {}".format(bl_info["name"]))
 
 
-if __name__ == '__main__':
-    log_report('INFO', 'main called')
+if __name__ == "__main__":
+    log_report("INFO", "main called")
