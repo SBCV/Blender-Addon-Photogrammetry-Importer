@@ -7,91 +7,111 @@ from gpu.types import GPUOffScreen
 from gpu_extras.batch import batch_for_shader
 
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.utility.blender_opengl_draw_manager import DrawManager
+from photogrammetry_importer.utility.blender_opengl_draw_manager import (
+    DrawManager,
+)
 from photogrammetry_importer.utility.blender_utility import add_empty
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-def draw_coords_with_color( op, 
-                            coords,
-                            colors, 
-                            add_points_to_point_cloud_handle, 
-                            reconstruction_collection=None,
-                            object_anchor_handle_name="OpenGL Point Cloud"):
+def draw_coords_with_color(
+    op,
+    coords,
+    colors,
+    add_points_to_point_cloud_handle,
+    reconstruction_collection=None,
+    object_anchor_handle_name="OpenGL Point Cloud",
+):
 
     object_anchor_handle = add_empty(
-        object_anchor_handle_name, reconstruction_collection)
+        object_anchor_handle_name, reconstruction_collection
+    )
     if add_points_to_point_cloud_handle:
-        object_anchor_handle['particle_coords'] = coords
-        object_anchor_handle['particle_colors'] = colors
-        bpy.context.scene['contains_opengl_point_clouds'] = True
+        object_anchor_handle["particle_coords"] = coords
+        object_anchor_handle["particle_colors"] = colors
+        bpy.context.scene["contains_opengl_point_clouds"] = True
 
     draw_manager = DrawManager.get_singleton()
     draw_manager.register_points_draw_callback(
-        object_anchor_handle, coords, colors)
+        object_anchor_handle, coords, colors
+    )
     return object_anchor_handle
 
 
-def draw_points(op, 
-                points, 
-                add_points_to_point_cloud_handle, 
-                reconstruction_collection=None,
-                object_anchor_handle_name="OpenGL Point Cloud"):
+def draw_points(
+    op,
+    points,
+    add_points_to_point_cloud_handle,
+    reconstruction_collection=None,
+    object_anchor_handle_name="OpenGL Point Cloud",
+):
 
-    log_report('INFO', 'Add particle draw handlers', op)
+    log_report("INFO", "Add particle draw handlers", op)
 
     coords, colors = Point.split_points(points)
     object_anchor_handle = draw_coords_with_color(
-        op, 
-        coords, 
-        colors, 
-        add_points_to_point_cloud_handle, 
-        reconstruction_collection, 
-        object_anchor_handle_name)
+        op,
+        coords,
+        colors,
+        add_points_to_point_cloud_handle,
+        reconstruction_collection,
+        object_anchor_handle_name,
+    )
     return object_anchor_handle
 
-def draw_coords(op, 
-                coords, 
-                add_points_to_point_cloud_handle, 
-                reconstruction_collection=None,
-                object_anchor_handle_name="OpenGL Coord Point Cloud",
-                color=(0, 0, 255, 1.0)):
+
+def draw_coords(
+    op,
+    coords,
+    add_points_to_point_cloud_handle,
+    reconstruction_collection=None,
+    object_anchor_handle_name="OpenGL Coord Point Cloud",
+    color=(0, 0, 255, 1.0),
+):
     if len(color) == 3:
-        color = (color[0], color[1], color[2], 1) 
+        color = (color[0], color[1], color[2], 1)
     assert len(color) == 4
     colors = [color for coord in coords]
     object_anchor_handle = draw_coords_with_color(
-        op, 
-        coords, 
-        colors, 
-        add_points_to_point_cloud_handle, 
-        reconstruction_collection, 
-        object_anchor_handle_name)
+        op,
+        coords,
+        colors,
+        add_points_to_point_cloud_handle,
+        reconstruction_collection,
+        object_anchor_handle_name,
+    )
     return object_anchor_handle
+
 
 @persistent
 def redraw_points(dummy):
 
-    # This test is very cheap, so it will not cause 
+    # This test is very cheap, so it will not cause
     # huge overheads for scenes without point clouds
-    if 'contains_opengl_point_clouds' in bpy.context.scene:
+    if "contains_opengl_point_clouds" in bpy.context.scene:
 
-        log_report('INFO', 'Checking scene for missing point cloud draw handlers', dummy)
+        log_report(
+            "INFO",
+            "Checking scene for missing point cloud draw handlers",
+            dummy,
+        )
         for obj in bpy.data.objects:
-            if 'particle_coords' in obj and 'particle_colors' in obj:
-                coords = obj['particle_coords']
-                colors = obj['particle_colors']
+            if "particle_coords" in obj and "particle_colors" in obj:
+                coords = obj["particle_coords"]
+                colors = obj["particle_colors"]
 
                 draw_manager = DrawManager.get_singleton()
-                draw_manager.register_points_draw_callback(
-                    obj, coords, colors)
-                viz_point_size = bpy.context.scene.opengl_panel_viz_settings.viz_point_size
+                draw_manager.register_points_draw_callback(obj, coords, colors)
+                viz_point_size = (
+                    bpy.context.scene.opengl_panel_viz_settings.viz_point_size
+                )
                 draw_manager.set_point_size(viz_point_size)
 
         for area in bpy.context.screen.areas:
-            if area.type == 'VIEW_3D':
+            if area.type == "VIEW_3D":
                 area.tag_redraw()
                 break
+
 
 def render_opengl_image(image_name, cam, point_size):
     draw_manager = DrawManager.get_singleton()
@@ -110,26 +130,29 @@ def render_opengl_image(image_name, cam, point_size):
     with offscreen.bind():
 
         bgl.glPointSize(point_size)
-        #bgl.glClear(bgl.GL_COLOR_BUFFER_BIT)
-        #bgl.glClear(bgl.GL_DEPTH_BUFFER_BIT)
+        # bgl.glClear(bgl.GL_COLOR_BUFFER_BIT)
+        # bgl.glClear(bgl.GL_DEPTH_BUFFER_BIT)
 
         view_matrix = cam.matrix_world.inverted()
         projection_matrix = cam.calc_matrix_camera(
-            bpy.context.evaluated_depsgraph_get(), 
-            x=width,
-            y=height)
+            bpy.context.evaluated_depsgraph_get(), x=width, y=height
+        )
         perspective_matrix = projection_matrix @ view_matrix
 
         gpu.matrix.load_matrix(perspective_matrix)
         gpu.matrix.load_projection_matrix(Matrix.Identity(4))
-        
-        shader = gpu.shader.from_builtin('3D_FLAT_COLOR')
+
+        shader = gpu.shader.from_builtin("3D_FLAT_COLOR")
         shader.bind()
-        batch = batch_for_shader(shader, "POINTS", {"pos": coords, "color": colors})
+        batch = batch_for_shader(
+            shader, "POINTS", {"pos": coords, "color": colors}
+        )
         batch.draw(shader)
-        
+
         buffer = bgl.Buffer(bgl.GL_BYTE, width * height * 4)
-        bgl.glReadPixels(0, 0, width, height, bgl.GL_RGBA, bgl.GL_UNSIGNED_BYTE, buffer)
+        bgl.glReadPixels(
+            0, 0, width, height, bgl.GL_RGBA, bgl.GL_UNSIGNED_BYTE, buffer
+        )
 
     offscreen.free()
 
@@ -149,13 +172,13 @@ def create_image_lazy(image_name, width, height):
 
 def copy_buffer_to_pixel(buffer, image):
 
-    # According to 
+    # According to
     #   https://developer.blender.org/D2734
     #   https://docs.blender.org/api/current/gpu.html#copy-offscreen-rendering-result-back-to-ram
-    # the buffer protocol is currently not implemented for 
+    # the buffer protocol is currently not implemented for
     # bgl.Buffer and bpy.types.Image.pixels
     # (this makes the extraction very slow)
-    
+
     # # from photogrammetry_importer.utility.stop_watch import StopWatch
     # Option 1 (faster)
     # sw = StopWatch()

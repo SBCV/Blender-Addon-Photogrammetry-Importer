@@ -1,5 +1,6 @@
 import time
 
+
 class StopWatch(object):
     """Class to measure computation times."""
 
