@@ -2,6 +2,12 @@ import os
 import bpy
 from bpy.props import BoolProperty, EnumProperty
 
+from photogrammetry_importer.preferences.dependency_preferences import (
+    InstallOptionalDependencies,
+    UninstallOptionalDependencies,
+    get_dependencies,
+    get_module_status_description,
+)
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 from photogrammetry_importer.properties.camera_import_properties import (
     CameraImportProperties,
@@ -37,47 +43,58 @@ class PhotogrammetryImporterPreferences(
 
     # Importer
     colmap_importer_bool: BoolProperty(name="Colmap Importer", default=True)
-
     meshroom_importer_bool: BoolProperty(
         name="Meshroom Importer", default=True
     )
-
     mve_importer_bool: BoolProperty(name="MVE Importer", default=True)
-
     open3d_importer_bool: BoolProperty(name="Open3D Importer", default=True)
-
     opensfm_importer_bool: BoolProperty(name="OpenSfM Importer", default=True)
-
     openmvg_importer_bool: BoolProperty(name="OpenMVG Importer", default=True)
-
     ply_importer_bool: BoolProperty(name="PLY Importer", default=True)
-
     visualsfm_importer_bool: BoolProperty(
         name="VisualSfM Importer", default=True
     )
-
     # Exporter
     colmap_exporter_bool: BoolProperty(name="Colmap Exporter", default=True)
-
     visualsfm_exporter_bool: BoolProperty(
         name="VisualSfM Exporter", default=True
     )
 
     @classmethod
     def register(cls):
+        bpy.utils.register_class(InstallOptionalDependencies)
+        bpy.utils.register_class(UninstallOptionalDependencies)
         bpy.utils.register_class(ResetPreferences)
         bpy.utils.register_class(UpdateImportersAndExporters)
 
     @classmethod
     def unregister(cls):
+        bpy.utils.unregister_class(InstallOptionalDependencies)
+        bpy.utils.unregister_class(UninstallOptionalDependencies)
         bpy.utils.unregister_class(ResetPreferences)
         bpy.utils.unregister_class(UpdateImportersAndExporters)
 
     def draw(self, context):
         layout = self.layout
+        install_dependency_box = layout.box()
+        install_dependency_box.operator(
+            InstallOptionalDependencies.bl_idname, icon="CONSOLE"
+        )
+        install_dependency_box.operator(
+            UninstallOptionalDependencies.bl_idname, icon="CONSOLE"
+        )
+        dependencies = get_dependencies()
+        for dependency in dependencies:
+            status = get_module_status_description(dependency)
+            install_dependency_box.label(
+                text=f"{dependency.gui_name}: {status}"
+            )
+        install_dependency_box.label(
+            text="After uninstalling the dependencies one may restart Blender to clear the references to the module within Blender."
+        )
 
         reset_box = layout.box()
-        reset_box.operator("photogrammetry_importer.reset_preferences")
+        reset_box.operator(ResetPreferences.bl_idname)
 
         importer_exporter_box = layout.box()
         importer_exporter_box.label(text="Active Importers / Exporters:")
@@ -98,9 +115,7 @@ class PhotogrammetryImporterPreferences(
         exporter_box.prop(self, "colmap_exporter_bool")
         exporter_box.prop(self, "visualsfm_exporter_bool")
 
-        importer_exporter_box.operator(
-            "photogrammetry_importer.update_importers_and_exporters"
-        )
+        importer_exporter_box.operator(UpdateImportersAndExporters.bl_idname)
 
         import_options_box = layout.box()
         import_options_box.label(text="Default Import Options:")
