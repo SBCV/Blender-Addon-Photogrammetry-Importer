@@ -1,3 +1,4 @@
+import importlib
 import bpy
 
 from photogrammetry_importer.operators.colmap_import_op import (
@@ -30,66 +31,65 @@ from photogrammetry_importer.operators.colmap_export_op import (
 # Import Functions
 def colmap_import_operator_function(self, context):
     self.layout.operator(
-        ImportColmapOperator.bl_idname, text="Colmap Import (model/workspace)"
+        ImportColmapOperator.bl_idname, text="Colmap (model/workspace)"
     )
 
 
 def meshroom_import_operator_function(self, context):
     self.layout.operator(
         ImportMeshroomOperator.bl_idname,
-        text="Meshroom Import (.sfm/.json/.mg)",
+        text="Meshroom (.sfm/.json/.mg)",
     )
 
 
 def mve_import_operator_function(self, context):
-    self.layout.operator(
-        ImportMVEOperator.bl_idname, text="MVE Import (workspace)"
-    )
+    self.layout.operator(ImportMVEOperator.bl_idname, text="MVE (workspace)")
 
 
 def open3d_import_operator_function(self, context):
     self.layout.operator(
-        ImportOpen3DOperator.bl_idname, text="Open3D Import (.log/.json)"
+        ImportOpen3DOperator.bl_idname, text="Open3D (.log/.json)"
     )
 
 
 def opensfm_import_operator_function(self, context):
     self.layout.operator(
-        ImportOpenSfMOperator.bl_idname, text="OpenSfM Import (.json)"
+        ImportOpenSfMOperator.bl_idname, text="OpenSfM (.json)"
     )
 
 
 def openmvg_import_operator_function(self, context):
     self.layout.operator(
         ImportOpenMVGOperator.bl_idname,
-        text="OpenMVG / Regard3D Import (.json)",
+        text="OpenMVG / Regard3D (.json)",
     )
 
 
 def point_data_import_operator_function(self, context):
+    module_spec = importlib.util.find_spec("pyntcloud")
+    if module_spec is not None:
+        suffix = "(.ply/.pcd/.las/.asc/.pts/.csv)"
+    else:
+        suffix = "[Pyntcloud is NOT installed]"
     self.layout.operator(
         ImportPointDataOperator.bl_idname,
-        text="Point Data Import (.ply/.asc/.pts/.csv)",
+        text="Point Data " + suffix,
     )
 
 
 def visualsfm_import_operator_function(self, context):
-    self.layout.operator(
-        ImportNVMOperator.bl_idname, text="VisualSfM Import (.nvm)"
-    )
+    self.layout.operator(ImportNVMOperator.bl_idname, text="VisualSfM (.nvm)")
 
 
 # Export Functions
 def colmap_export_operator_function(self, context):
     self.layout.operator(
-        ExportColmapOperator.bl_idname, text="Colmap Export (folder)"
+        ExportColmapOperator.bl_idname, text="Colmap (folder)"
     )
 
 
 def visualsfm_export_operator_function(self, context):
-    self.layout.operator(
-        ExportNVMOperator.bl_idname, text="VisualSfM Export (.nvm)"
-    )
+    self.layout.operator(ExportNVMOperator.bl_idname, text="VisualSfM (.nvm)")
 
 
 # Define register/unregister Functions

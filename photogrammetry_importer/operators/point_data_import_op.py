@@ -44,14 +44,14 @@ class ImportPointDataOperator(
     )
     directory: StringProperty()
     filter_glob: StringProperty(
-        default="*.ply;*.asc;*.pts;*.csv", options={"HIDDEN"}
+        default="*.ply;*.pcd;*.las;*.asc;*.pts;*.csv", options={"HIDDEN"}
     )
 
     def execute(self, context):
         path = os.path.join(self.directory, self.filepath)
         log_report("INFO", "path: " + str(path), self)
 
-        points = PointDataFileHandler.parse_point_data_file(path)
+        points = PointDataFileHandler.parse_point_data_file(path, self)
         log_report("INFO", "Number points: " + str(len(points)), self)
 
         transformations_sorted = (

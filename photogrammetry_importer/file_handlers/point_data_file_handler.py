@@ -1,4 +1,7 @@
 import os
+import numpy as np
+import importlib
+
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.file_handlers.ply_file_handler import (
     PLYFileHandler,
@@ -15,10 +18,20 @@ class DataSemantics(object):
         self.r_idx = None
         self.g_idx = None
         self.b_idx = None
+        self.num_data_entries = None
         self.pseudo_color = None
 
-    def is_color_initialized(self):
-        return not None in [self.r_idx, self.g_idx, self.b_idx]
+    def is_initialized(self):
+        return not None in [
+            self.x_idx,
+            self.y_idx,
+            self.z_idx,
+            self.r_idx,
+            self.g_idx,
+            self.b_idx,
+            self.num_data_entries,
+            self.pseudo_color,
+        ]
 
 
 class PointDataFileHandler(object):
@@ -31,9 +44,9 @@ class PointDataFileHandler(object):
         return lines_as_tup
 
     @staticmethod
-    def guess_data_semantics(data_tuple):
-        log_report("INFO", "Guessing data semantics")
+    def guess_data_semantics_from_tuple(data_tuple):
         data_semantics = DataSemantics()
+        data_semantics.num_data_entries = len(data_tuple)
         # Data must start with subsequent float values
         # representing the three-dimensional position
         for idx in [0, 1, 2]:
@@ -55,9 +68,9 @@ class PointDataFileHandler(object):
                 continue
             if not 0 <= int(data_tuple[idx]) <= 255:
                 continue
-            if not 0 <= int(data_tuple[idx]) <= 255:
+            if not 0 <= int(data_tuple[idx + 1]) <= 255:
                 continue
-            if not 0 <= int(data_tuple[idx]) <= 255:
+            if not 0 <= int(data_tuple[idx + 2]) <= 255:
                 continue
             data_semantics.r_idx = idx
             data_semantics.g_idx = idx + 1
@@ -65,7 +78,7 @@ class PointDataFileHandler(object):
             data_semantics.pseudo_color = False
             break
 
-        if data_semantics.is_color_initialized():
+        if data_semantics.is_initialized():
             return data_semantics
 
         # If not int values are found, we assume that the color information
@@ -84,112 +97,152 @@ class PointDataFileHandler(object):
             data_semantics.b_idx = idx + 2
             data_semantics.pseudo_color = True
             break
-
+        assert data_semantics.is_initialized()
         return data_semantics
 
     @staticmethod
-    def parse_header(line):
+    def get_data_semantics_from_header(line):
         data_semantics = DataSemantics()
         data_tuple = line.lstrip("//").rstrip().split(" ")
+        data_semantics.num_data_entries = len(data_tuple)
 
         for idx, val in enumerate(data_tuple):
-            if val == "X":
+            val = val.lower()
+            if val == "x":
                 data_semantics.x_idx = idx
-            elif val == "Y":
+            elif val == "y":
                 data_semantics.y_idx = idx
-            elif val == "Z":
+            elif val == "z":
                 data_semantics.z_idx = idx
-            elif val == "R":
+            elif val in ["r", "red"]:
                 data_semantics.r_idx = idx
                 data_semantics.pseudo_color = False
-            elif val == "G":
+            elif val in ["g", "green"]:
                 data_semantics.g_idx = idx
                 data_semantics.pseudo_color = False
-            elif val == "B":
+            elif val in ["b", "blue"]:
                 data_semantics.b_idx = idx
                 data_semantics.pseudo_color = False
-            elif val == "Rf":
+            elif val == "rf":
                 data_semantics.r_idx = idx
                 data_semantics.pseudo_color = True
-            elif val == "Gf":
+            elif val == "gf":
                 data_semantics.g_idx = idx
                 data_semantics.pseudo_color = True
-            elif val == "Bf":
+            elif val == "bf":
                 data_semantics.b_idx = idx
                 data_semantics.pseudo_color = True
-
+        assert data_semantics.is_initialized()
         return data_semantics
 
     @staticmethod
-    def parse_asc_or_pts_or_csv(ifp, delimiter, only_data):
-
+    def get_data_semantics_from_ascii(ifp, delimiter, has_header):
         points = []
         with open(ifp, "r") as ifc:
-
             data_semantics = None
-            if not only_data:
+            if has_header:
                 line = ifc.readline()
                 if line.startswith("//"):
-                    data_semantics = PointDataFileHandler.parse_header(line)
+                    log_report("INFO", "Reading data semantics from header")
+                    data_semantics = (
+                        PointDataFileHandler.get_data_semantics_from_header(
+                            line
+                        )
+                    )
                     line = ifc.readline()
-                    num_points = int(line.strip())
-                else:
-                    num_points = int(line.strip())
-
-            lines_as_tuples = PointDataFileHandler.read_lines_as_tuples(
-                ifc, delimiter=delimiter
-            )
+                num_points = int(line.strip())
 
             if data_semantics is None:
-                # Determine the semantics of the data
-                data_tuple = lines_as_tuples[0]
-                data_semantics = PointDataFileHandler.guess_data_semantics(
-                    data_tuple
+                log_report(
+                    "INFO", "No header available, guessing data semantics"
                 )
-
-            if data_semantics.pseudo_color:
-                factor = 255
-            else:
-                factor = 1
-
-            for idx, data_tuple in enumerate(lines_as_tuples):
-                point = Point(
-                    coord=[
-                        float(data_tuple[data_semantics.x_idx]),
-                        float(data_tuple[data_semantics.y_idx]),
-                        float(data_tuple[data_semantics.z_idx]),
-                    ],
-                    color=[
-                        int(factor * float(data_tuple[data_semantics.r_idx])),
-                        int(factor * float(data_tuple[data_semantics.g_idx])),
-                        int(factor * float(data_tuple[data_semantics.b_idx])),
-                    ],
-                    id=idx,
-                    scalars=None,
+                lines_as_tuples = PointDataFileHandler.read_lines_as_tuples(
+                    ifc, delimiter=delimiter
                 )
-                points.append(point)
-
-        return points
+                data_semantics = (
+                    PointDataFileHandler.guess_data_semantics_from_tuple(
+                        lines_as_tuples[0]
+                    )
+                )
+            return data_semantics
 
     @staticmethod
-    def parse_point_data_file(ifp):
+    def convert_data_semantics_to_list(data_semantics):
+
+        named_list = [
+            "s" + str(idx) for idx in range(data_semantics.num_data_entries)
+        ]
+        named_list[data_semantics.x_idx] = "x"
+        named_list[data_semantics.y_idx] = "y"
+        named_list[data_semantics.z_idx] = "z"
+        named_list[data_semantics.r_idx] = "red"
+        named_list[data_semantics.g_idx] = "green"
+        named_list[data_semantics.b_idx] = "blue"
+        return named_list
+
+    @staticmethod
+    def parse_point_data_file(ifp, op):
         log_report("INFO", "Parse Point Data File: ...")
-
-        ext = os.path.splitext(ifp)[1].lower()
-        if ext == ".ply":
-            points = PLYFileHandler.parse_ply_file(ifp)
-        elif ext == ".csv":
-            points = PointDataFileHandler.parse_asc_or_pts_or_csv(
-                ifp, delimiter=",", only_data=True
+        # https://pyntcloud.readthedocs.io/en/latest/io.html
+        # https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O
+        module_spec = importlib.util.find_spec("pyntcloud")
+        if module_spec is None:
+            log_report(
+                "ERROR",
+                "Importing this file type requires the pyntcloud library.",
+                op,
             )
-        elif ext in [".asc", ".pts"]:
-            # https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O
-            points = PointDataFileHandler.parse_asc_or_pts_or_csv(
-                ifp, delimiter=" ", only_data=False
-            )
-        else:
-            log_report("ERROR", "Extension " + ext + " not supported.", self)
             assert False
+        from pyntcloud import PyntCloud
 
+        assert os.path.isfile(ifp)
+        ext = os.path.splitext(ifp)[1].lower()
+        if ext in [".asc", ".pts"]:
+            sep = " "
+            data_semantics = PointDataFileHandler.get_data_semantics_from_ascii(
+                ifp, sep, has_header=True
+            )
+            names = PointDataFileHandler.convert_data_semantics_to_list(
+                data_semantics
+            )
+            point_cloud = PyntCloud.from_file(
+                ifp, sep=sep, header=0, names=names
+            )
+            pseudo_color = data_semantics.pseudo_color
+        elif ext == ".csv":
+            sep = ","
+            data_semantics = PointDataFileHandler.get_data_semantics_from_ascii(
+                ifp, sep, has_header=False
+            )
+            names = PointDataFileHandler.convert_data_semantics_to_list(
+                data_semantics
+            )
+            point_cloud = PyntCloud.from_file(
+                ifp, sep=sep, header=0, names=names
+            )
+            pseudo_color = data_semantics.pseudo_color
+        else:
+            pseudo_color = False
+            point_cloud = PyntCloud.from_file(ifp)
+        xyz_arr = point_cloud.points.loc[:, ["x", "y", "z"]].to_numpy()
+        color_arr = point_cloud.points.loc[
+            :, ["red", "green", "blue"]
+        ].to_numpy()
+        if pseudo_color:
+            color_arr *= 255
+        num_points = xyz_arr.shape[0]
+        log_report("INFO", f"num_points {num_points}", op)
+        log_report("INFO", f"xyz_arr[0] {xyz_arr.dtype}", op)
+        log_report("INFO", f"color_arr[0] {color_arr.dtype}", op)
+        points = []
+        for idx in range(num_points):
+            point = Point(
+                coord=xyz_arr[idx].astype("float64"),
+                color=color_arr[idx].astype("int"),
+                id=idx,
+                scalars=dict(),
+            )
+            points.append(point)
+        log_report("INFO", f"Number Points {len(points)}")
         log_report("INFO", "Parse Point Data File: Done")
         return points
