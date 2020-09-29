@@ -127,7 +127,7 @@ class OpenGLPanel(bpy.types.Panel):
             text="OpenGL Visualization Point Size",
         )
         row = viz_box.row()
-        row.operator("photogrammetry_importer.update_point_cloud_viz")
+        row.operator(UpdatePointCloudVisualizationOperator.bl_idname)
 
         write_box = layout.box()
         write_box.label(
@@ -142,7 +142,7 @@ class OpenGLPanel(bpy.types.Panel):
         save_box = write_box.box()
         save_box.label(text="Save results:")
         row = save_box.row()
-        row.operator("photogrammetry_importer.save_opengl_render_image")
+        row.operator(SaveOpenGLRenderImageOperator.bl_idname)
 
         export_box = write_box.box()
         export_box.label(text="Export results:")
@@ -153,7 +153,7 @@ class OpenGLPanel(bpy.types.Panel):
             text="File Format",
         )
         row = export_box.row()
-        row.operator("photogrammetry_importer.export_opengl_render_image")
+        row.operator(ExportOpenGLRenderImageOperator.bl_idname)
         row = export_box.row()
         row.prop(
             context.scene.opengl_panel_export_animation_settings,
@@ -161,7 +161,7 @@ class OpenGLPanel(bpy.types.Panel):
             text="Use Camera Keyframes",
         )
         row = export_box.row()
-        row.operator("photogrammetry_importer.export_opengl_render_animation")
+        row.operator(ExportOpenGLRenderAnimationOperator.bl_idname)
 
 
 class UpdatePointCloudVisualizationOperator(bpy.types.Operator):
