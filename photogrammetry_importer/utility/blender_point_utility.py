@@ -58,15 +58,33 @@ def create_particle_color_nodes(
             particle_color_node = node_tree.nodes.new("ShaderNodeTexImage")
 
         particle_color_node.image = compute_particle_color_texture(colors)
+        texture_size = len(colors)
         particle_color_node.interpolation = "Closest"
 
         particle_info_node = node_tree.nodes.new("ShaderNodeParticleInfo")
+
+        # Idea: we use the particle idx to compute a texture coordinate
+
+        # Shift the un-normalized texture coordinate by a half pixel
+        shift_half_pixel_node = node_tree.nodes.new("ShaderNodeMath")
+        shift_half_pixel_node.operation = "ADD"
+        node_tree.links.new(
+            particle_info_node.outputs["Index"],
+            shift_half_pixel_node.inputs[0],
+        )
+        shift_half_pixel_node.inputs[1].default_value = 0.5
+
+        # Compute normalized texture coordinates (value between 0 and 1)
+        # by dividing by the number of particles
         divide_node = node_tree.nodes.new("ShaderNodeMath")
         divide_node.operation = "DIVIDE"
         node_tree.links.new(
-            particle_info_node.outputs["Index"], divide_node.inputs[0]
+            shift_half_pixel_node.outputs["Value"],
+            divide_node.inputs[0],
         )
-        divide_node.inputs[1].default_value = len(colors)
+        divide_node.inputs[1].default_value = texture_size
+
+        # Compute texture coordinate (x axis corresponds to particle idx)
         shader_node_combine = node_tree.nodes.new("ShaderNodeCombineXYZ")
         node_tree.links.new(
             divide_node.outputs["Value"], shader_node_combine.inputs["X"]
