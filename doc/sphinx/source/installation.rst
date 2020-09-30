@@ -67,6 +67,8 @@ This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to read the (missin
 Option 1: Installation using the GUI (recommended)
 --------------------------------------------------
 
+Requires Blender 2.83.5 or newer.
+
 .. image:: ../../images/install_dependencies_annotations.jpg
    :scale: 75 %
    :align: center
