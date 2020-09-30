@@ -3,7 +3,10 @@ import numpy as np
 from mathutils import Vector
 
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.utility.blender_utility import add_obj
+from photogrammetry_importer.utility.blender_utility import (
+    add_collection,
+    add_obj,
+)
 from photogrammetry_importer.utility.stop_watch import StopWatch
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
@@ -35,7 +38,7 @@ def compute_particle_color_texture(colors, name="ParticleColor"):
 
 
 def create_particle_color_nodes(
-    node_tree, points, set_particle_color_flag, particle_overwrite_color=None
+    node_tree, colors, set_particle_color_flag, particle_overwrite_color=None
 ):
 
     if set_particle_color_flag:
@@ -54,7 +57,6 @@ def create_particle_color_nodes(
         else:
             particle_color_node = node_tree.nodes.new("ShaderNodeTexImage")
 
-        coords, colors = Point.split_points(points)
         particle_color_node.image = compute_particle_color_texture(colors)
         particle_color_node.interpolation = "Closest"
 
@@ -64,7 +66,7 @@ def create_particle_color_nodes(
         node_tree.links.new(
             particle_info_node.outputs["Index"], divide_node.inputs[0]
         )
-        divide_node.inputs[1].default_value = len(points)
+        divide_node.inputs[1].default_value = len(colors)
         shader_node_combine = node_tree.nodes.new("ShaderNodeCombineXYZ")
         node_tree.links.new(
             divide_node.outputs["Value"], shader_node_combine.inputs["X"]
@@ -77,51 +79,17 @@ def create_particle_color_nodes(
     return particle_color_node
 
 
-def add_points_as_mesh(op, points, reconstruction_collection):
-    log_report("INFO", "Adding Points as Mesh: ...", op)
-    stop_watch = StopWatch()
-    point_cloud_obj_name = "Mesh Point Cloud"
-    point_cloud_mesh = bpy.data.meshes.new(point_cloud_obj_name)
-    point_cloud_mesh.update()
-    point_cloud_mesh.validate()
-    point_world_coordinates = [tuple(point.coord) for point in points]
-    point_cloud_mesh.from_pydata(point_world_coordinates, [], [])
-    point_cloud_obj = add_obj(
-        point_cloud_mesh, point_cloud_obj_name, reconstruction_collection
-    )
-
-    log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()), op)
-    log_report("INFO", "Adding Points as Mesh: Done", op)
-    return point_cloud_obj.name
-
-
-def add_points_as_particle_system(
-    op,
-    points,
+def add_particle(
+    colors,
+    particle_obj_name,
+    particle_material_name,
+    set_particle_color_flag,
+    particle_overwrite_color,
+    add_particle_color_emission,
     mesh_type,
     point_extent,
-    add_particle_color_emission,
     reconstruction_collection,
-    set_particle_color_flag,
-    particle_overwrite_color=None,
 ):
-    log_report("INFO", "Adding Points as Particle System: ...", op)
-    stop_watch = StopWatch()
-    particle_obj_name = "Particle Shape"
-    point_cloud_obj_name = "Particle Point Cloud"
-    point_cloud_mesh = bpy.data.meshes.new(point_cloud_obj_name)
-    point_cloud_mesh.update()
-    point_cloud_mesh.validate()
-
-    point_world_coordinates = [tuple(point.coord) for point in points]
-
-    point_cloud_mesh.from_pydata(point_world_coordinates, [], [])
-    point_cloud_obj = add_obj(
-        point_cloud_mesh, point_cloud_obj_name, reconstruction_collection
-    )
-
-    log_report("INFO", "Mesh Type: " + str(mesh_type), op)
-
     # The default size of elements added with
     #   primitive_cube_add, primitive_uv_sphere_add, etc. is (2,2,2)
     point_scale = point_extent * 0.5
@@ -140,17 +108,36 @@ def add_points_as_particle_system(
     reconstruction_collection.objects.link(particle_obj)
     bpy.context.collection.objects.unlink(particle_obj)
 
-    material_name = "PointCloudMaterial"
-    material = bpy.data.materials.new(name=material_name)
+    add_particle_material(
+        colors,
+        particle_obj,
+        particle_material_name,
+        set_particle_color_flag,
+        particle_overwrite_color,
+        add_particle_color_emission,
+    )
+
+    return particle_obj
+
+
+def add_particle_material(
+    colors,
+    particle_obj,
+    particle_material_name,
+    set_particle_color_flag,
+    particle_overwrite_color,
+    add_particle_color_emission,
+):
+    material = bpy.data.materials.new(name=particle_material_name)
     particle_obj.data.materials.append(material)
 
-    # enable cycles, otherwise the material has no nodes
+    # Enable cycles - otherwise the material has no nodes
     bpy.context.scene.render.engine = "CYCLES"
     material.use_nodes = True
     node_tree = material.node_tree
 
     # Print all available nodes with:
-    # bpy.data.materials['material_name'].node_tree.nodes.keys()
+    # bpy.data.materials['particle_material_name'].node_tree.nodes.keys()
 
     if "Material Output" in node_tree.nodes:  # is created by default
         material_output_node = node_tree.nodes["Material Output"]
@@ -166,9 +153,8 @@ def add_points_as_particle_system(
         material_output_node.inputs["Surface"],
     )
 
-    assert len(point_world_coordinates) == len(points)
     particle_color_node = create_particle_color_nodes(
-        node_tree, points, set_particle_color_flag, particle_overwrite_color
+        node_tree, colors, set_particle_color_flag, particle_overwrite_color
     )
 
     # Add links for base color and emission to improve color visibility
@@ -182,6 +168,18 @@ def add_points_as_particle_system(
             principled_bsdf_node.inputs["Emission"],
         )
 
+
+def add_particle_system(
+    coords, particle_obj, point_cloud_obj_name, reconstruction_collection
+):
+    point_cloud_mesh = bpy.data.meshes.new(point_cloud_obj_name)
+    point_cloud_mesh.update()
+    point_cloud_mesh.validate()
+    point_cloud_mesh.from_pydata(coords, [], [])
+    point_cloud_obj = add_obj(
+        point_cloud_mesh, point_cloud_obj_name, reconstruction_collection
+    )
+
     if len(point_cloud_obj.particle_systems) == 0:
         point_cloud_obj.modifiers.new("particle sys", type="PARTICLE_SYSTEM")
         particle_sys = point_cloud_obj.particle_systems[0]
@@ -189,15 +187,84 @@ def add_points_as_particle_system(
         settings.type = "HAIR"
         settings.use_advanced_hair = True
         settings.emit_from = "VERT"
-        settings.count = len(points)
+        settings.count = len(coords)
         # The final object extent is hair_length * obj.scale
         settings.hair_length = 100  # This must not be 0
         settings.use_emit_random = False
         settings.render_type = "OBJECT"
         settings.instance_object = particle_obj
+    return point_cloud_obj
+
+
+def add_points_as_particle_system(
+    op,
+    points,
+    mesh_type,
+    point_extent,
+    add_particle_color_emission,
+    reconstruction_collection,
+    set_particle_color_flag,
+    particle_overwrite_color=None,
+):
+    log_report("INFO", "Adding Points as Particle System: ...", op)
+    stop_watch = StopWatch()
+
+    # The particle systems in Blender do not work for large particle numbers
+    # (see https://developer.blender.org/T81103). Thus, we represent large
+    # point clouds with multiple smaller particle systems
+    max_number_particles = 10000
+
+    particle_system_collection = add_collection(
+        "Particle System", reconstruction_collection
+    )
+
+    for i in range(0, len(points), max_number_particles):
+
+        particle_obj_name = f"Particle Shape {i}"
+        particle_material_name = f"Point Cloud Material {i}"
+        point_cloud_obj_name = f"Particle Point Cloud {i}"
+
+        points_subset = points[i : i + max_number_particles]
+        coords, colors = Point.split_points(points_subset)
+
+        particle_obj = add_particle(
+            colors,
+            particle_obj_name,
+            particle_material_name,
+            set_particle_color_flag,
+            particle_overwrite_color,
+            add_particle_color_emission,
+            mesh_type,
+            point_extent,
+            particle_system_collection,
+        )
+        point_cloud_obj = add_particle_system(
+            coords,
+            particle_obj,
+            point_cloud_obj_name,
+            particle_system_collection,
+        )
 
     bpy.context.view_layer.update()
 
     log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()), op)
     log_report("INFO", "Adding Points as Particle System: Done", op)
+    return point_cloud_obj.name
+
+
+def add_points_as_mesh(op, points, reconstruction_collection):
+    log_report("INFO", "Adding Points as Mesh: ...", op)
+    stop_watch = StopWatch()
+    point_cloud_obj_name = "Mesh Point Cloud"
+    point_cloud_mesh = bpy.data.meshes.new(point_cloud_obj_name)
+    point_cloud_mesh.update()
+    point_cloud_mesh.validate()
+    point_world_coordinates = [tuple(point.coord) for point in points]
+    point_cloud_mesh.from_pydata(point_world_coordinates, [], [])
+    point_cloud_obj = add_obj(
+        point_cloud_mesh, point_cloud_obj_name, reconstruction_collection
+    )
+
+    log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()), op)
+    log_report("INFO", "Adding Points as Mesh: Done", op)
     return point_cloud_obj.name
