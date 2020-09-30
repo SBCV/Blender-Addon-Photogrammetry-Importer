@@ -19,9 +19,9 @@ In addition, the addon supports some common point cloud data formats:
 - [x] [LASer files](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) (LAS) <sup>3</sup>
 - [x] [Simple ASCII point files](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O) (ASC, PTS, CSV) <sup>3</sup>
 
-<sup>1</sup> Requires Pillow to read image sizes from disk.
+<sup>1</sup> Requires [Pillow](https://pypi.org/project/Pillow/) to read image sizes from disk.
 <sup>2</sup> Requires Pillow for point color computation.
-<sup>3</sup> Requires Pyntcloud for parsing.
+<sup>3</sup> Requires [Pyntcloud](https://pypi.org/project/pyntcloud/) for parsing.
 
 Compatible with Blender 2.80 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
