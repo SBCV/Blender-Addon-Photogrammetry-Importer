@@ -7,14 +7,17 @@ Changelog with most relevant features. Recently added features are listed at the
 2020
 ====
 
-* Added support for simple ASCII point files
+* Fixed a bug in the texture coordinate computation of the particle system
+* Added a workaround to circumvent a bug in Blender, which appears only for large point clouds 
+* Added GUI elements to install/uninstall the dependencies (Pillow, Pyntcloud)
+* Addon uses now the Pyntcloud library to import PLY, PCD, LAS, ASC, PTS and CSV files
 * Added an option to import depth maps of MVE workspaces
 * Added an option to import depth maps of Colmap as point clouds
 * Added support for MVE workspaces
+* Added addon preferences to configure the import/export default settings
 * Added addon preferences to enable/disable importers and exporters
 * Added an OpenSfM importer
 * OpenGL data is now persistent (stored in blend file) and is available after reopening
-* Panel allows to change the OpenGL point size
 * Added a panel with options to export renderings of the point cloud using OpenGL
 * Added support for Colmap dense workspaces
 * Added support for Meshroom projects (.mg files)

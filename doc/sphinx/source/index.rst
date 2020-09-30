@@ -26,20 +26,25 @@ Supported libraries (data formats):
 
    - `Colmap <https://github.com/colmap/colmap>`_ (Model folders (BIN and TXT), workspaces, NVM, PLY) 
    - `Meshroom <https://alicevision.github.io/>`_ (MG, JSON, SfM, PLY)
-   - `MVE <https://github.com/simonfuhrmann/mve>`_ (MVE workspaces)
-   - `Open3D <http://www.open3d.org/>`_ (JSON, LOG, PLY)
+   - `MVE <https://github.com/simonfuhrmann/mve>`_ (MVE workspaces) :sup:`1`
+   - `Open3D <http://www.open3d.org/>`_ (JSON, LOG, PLY) :sup:`1`
    - `OpenSfM <https://github.com/mapillary/OpenSfM>`_ (JSON)
-   - `OpenMVG <https://github.com/openMVG/openMVG>`_ (JSON, NVM, PLY)
+   - `OpenMVG <https://github.com/openMVG/openMVG>`_ (JSON, NVM, PLY) :sup:`2`
    - `Regard3D <https://www.regard3d.org/>`_ (OpenMVG JSON)
-   - `VisualSFM <http://ccwu.me/vsfm/>`_ (NVM)
+   - `VisualSFM <http://ccwu.me/vsfm/>`_ (NVM) :sup:`1`
 
 In addition, the addon supports some common point cloud data formats:
 
 .. hlist::
    :columns: 1
 
-   - `Polygon files <http://paulbourke.net/dataformats/ply/>`_ (PLY)
-   - `Simple ASCII point files <https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O>`_ (ASC, PTS, CSV)
+   - `Polygon files <http://paulbourke.net/dataformats/ply/>`_ (PLY) :sup:`3`
+   - `Point Cloud Library files <https://github.com/PointCloudLibrary/pcl>`_ (PCD) :sup:`3`
+   - `LASer files <https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities>`_ (LAS) :sup:`3`
+   - `Simple ASCII point files <https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O>`_ (ASC, PTS, CSV) :sup:`3`
+
+| :sup:`1` Requires Pillow to read the image sizes from disk. :sup:`2` Requires Pillow for point color computation.
+| :sup:`3` Requires Pyntcloud for parsing.
 
 Compatible with Blender 2.8.0 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the `2.79 branch <https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279>`_.
 
