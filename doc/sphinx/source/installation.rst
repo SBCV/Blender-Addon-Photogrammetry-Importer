@@ -39,8 +39,9 @@ The final structure must look as follows:
 	    photogrammetry_importer /
 	        ext
 	        file_handler
-	        blender_utils.py
 	        ...
+	        __init__.py
+
 
 Install the Addon
 =================
@@ -58,14 +59,24 @@ Install the addon by
 
 Follow the instructions on the :doc:`customize <./customize>` page, to adjust the default options of the addon. 
 
-Optional Dependency for VisualSfM, Multi-View Environment and OpenMVG/Regard3D
-==============================================================================
-This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to compute missing information for VisualSFM NVM files, Multi-View Environment folders and OpenMVG JSON files.
+Install Optional Dependencies
+=============================
 
-- For VisualSFM (NVM files) and Multi-View Environment the addon uses pillow to read the (missing) image sizes from disc.
-- For OpenMVG/Regard3D (JSON files) the addon uses pillow to compute the (missing) colors for the 3D points in the point cloud.
+This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to read the (missing) image sizes from disk - required by the MVE, the Open3D and the VisualSFM importer. Pillow is also used to compute the (missing) point colors for OpenMVG JSON files. Using Pillow instead of Blender's image API significantly improves processing time. Furthermore, this addon uses `Pyntcloud <https://pypi.org/project/pyntcloud/>`_ to import several point cloud formats such as :code:`.ply`, :code:`.pcd`, :code:`.las`, :code:`.asc`, :code:`.pts` and :code:`.csv`.
 
-Using Pillow instead of Blender's image API significantly improves processing time. 
+Option 1: Installation using the GUI (recommended)
+--------------------------------------------------
+
+.. image:: ../../images/install_dependencies_annotations.jpg
+   :scale: 75 %
+   :align: center
+
+Dependending on the location of the Blender installation directory administrator privileges might be required to install the dependencies. 
+
+Option 2: Installation using the command linie
+----------------------------------------------
+
+In case the installation using the GUI does not work, it is possible to install the dependencies with the command line.
 
 If you haven't installed `pip <https://pypi.org/project/pip/>`_ for Blender already, download https://bootstrap.pypa.io/get-pip.py and copy the file to ::
 
@@ -75,10 +86,12 @@ For Linux run: ::
 
 <Blender_Root>/<Version>/python/bin/python3.7m <Blender_Root>/<Version>/python/bin/get-pip.py
 <Blender_Root>/<Version>/python/bin/pip install pillow
+<Blender_Root>/<Version>/python/bin/pip install pyntcloud
 
 For Windows run: ::
 
 <Blender_Root>/<Version>/python/bin/python.exe <Blender_Root>/<Version>/python/bin/get-pip.py
 <Blender_Root>/<Version>/python/Scripts/pip.exe install pillow
+<Blender_Root>/<Version>/python/Scripts/pip.exe install pyntcloud
 
 IMPORTANT: Use the full path to the python and the pip executable. Otherwise the system python installation or the system pip executable may be used.
