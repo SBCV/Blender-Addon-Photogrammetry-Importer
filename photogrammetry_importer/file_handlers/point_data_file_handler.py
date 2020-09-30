@@ -196,8 +196,10 @@ class PointDataFileHandler(object):
         ext = os.path.splitext(ifp)[1].lower()
         if ext in [".asc", ".pts"]:
             sep = " "
-            data_semantics = PointDataFileHandler.get_data_semantics_from_ascii(
-                ifp, sep, has_header=True
+            data_semantics = (
+                PointDataFileHandler.get_data_semantics_from_ascii(
+                    ifp, sep, has_header=True
+                )
             )
             names = PointDataFileHandler.convert_data_semantics_to_list(
                 data_semantics
@@ -208,8 +210,10 @@ class PointDataFileHandler(object):
             pseudo_color = data_semantics.pseudo_color
         elif ext == ".csv":
             sep = ","
-            data_semantics = PointDataFileHandler.get_data_semantics_from_ascii(
-                ifp, sep, has_header=False
+            data_semantics = (
+                PointDataFileHandler.get_data_semantics_from_ascii(
+                    ifp, sep, has_header=False
+                )
             )
             names = PointDataFileHandler.convert_data_semantics_to_list(
                 data_semantics
@@ -228,9 +232,6 @@ class PointDataFileHandler(object):
         if pseudo_color:
             color_arr *= 255
         num_points = xyz_arr.shape[0]
-        log_report("INFO", f"num_points {num_points}", op)
-        log_report("INFO", f"xyz_arr[0] {xyz_arr.dtype}", op)
-        log_report("INFO", f"color_arr[0] {color_arr.dtype}", op)
         points = []
         for idx in range(num_points):
             point = Point(
