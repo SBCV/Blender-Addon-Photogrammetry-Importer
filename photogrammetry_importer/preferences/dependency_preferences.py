@@ -1,6 +1,5 @@
 import subprocess
 import importlib
-import pkg_resources
 from collections import defaultdict
 import bpy
 from photogrammetry_importer.utility.blender_logging_utility import log_report
@@ -113,7 +112,13 @@ def get_module_status_description(dependency):
 
 
 def get_version_string(package_name):
-    return pkg_resources.get_distribution(package_name).version
+    module_spec = importlib.util.find_spec("pkg_resources")
+    if module_spec is not None:
+        import pkg_resources
+        version_str = pkg_resources.get_distribution(package_name).version
+    else:
+        version_str = "Unknown"
+    return version_str
 
 
 class InstallOptionalDependencies(bpy.types.Operator):
