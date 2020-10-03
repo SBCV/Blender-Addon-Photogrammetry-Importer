@@ -226,11 +226,14 @@ class PointDataFileHandler(object):
             pseudo_color = False
             point_cloud = PyntCloud.from_file(ifp)
         xyz_arr = point_cloud.points.loc[:, ["x", "y", "z"]].to_numpy()
-        color_arr = point_cloud.points.loc[
-            :, ["red", "green", "blue"]
-        ].to_numpy()
-        if pseudo_color:
-            color_arr *= 255
+        if set(["red", "green", "blue"]).issubset(point_cloud.points.columns):
+            color_arr = point_cloud.points.loc[
+                :, ["red", "green", "blue"]
+            ].to_numpy()
+            if pseudo_color:
+                color_arr *= 255
+        else:
+            color_arr = np.ones_like(xyz_arr) * 255
         num_points = xyz_arr.shape[0]
         points = []
         for idx in range(num_points):
