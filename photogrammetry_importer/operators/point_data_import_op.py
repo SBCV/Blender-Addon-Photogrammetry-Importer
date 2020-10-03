@@ -44,7 +44,7 @@ class ImportPointDataOperator(
     )
     directory: StringProperty()
     filter_glob: StringProperty(
-        default="*.ply;*.pcd;*.las;*.asc;*.pts;*.csv", options={"HIDDEN"}
+        default="*.ply;*.pcd;*.las;*.laz;*.asc;*.pts;*.csv", options={"HIDDEN"}
     )
 
     def execute(self, context):
