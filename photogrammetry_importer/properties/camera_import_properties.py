@@ -134,6 +134,7 @@ class CameraImportProperties:
         description="Adjust the sparsity of the depth maps. A value of 10 "
         + "means that every 10th depth map value is converted to a 3D point",
         default=10,
+        min=1,
     )
     depth_map_id_or_name_str: StringProperty(
         name="Depth Map IDs or Names to Display",
