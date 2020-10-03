@@ -3,6 +3,7 @@ import bpy
 from bpy.props import (
     BoolProperty,
     EnumProperty,
+    IntProperty,
     FloatProperty,
     FloatVectorProperty,
 )
@@ -17,24 +18,38 @@ from photogrammetry_importer.utility.blender_point_utility import (
 
 
 class PointImportProperties:
-    """ This class encapsulates Blender UI properties that are required to visualize the reconstructed points correctly. """
+    """
+    This class encapsulates Blender UI properties that are required to
+    visualize the reconstructed points correctly.
+    """
 
     import_points: BoolProperty(
         name="Import Points", description="Import Points", default=True
     )
+    point_cloud_display_sparsity: IntProperty(
+        name="Point Cloud Display Sparsity",
+        description="Adjust the sparsity of the point cloud. A value of n "
+        + "means that every n-th point in the point cloud is added.",
+        default=1,
+        min=1,
+    )
     draw_points_with_gpu: BoolProperty(
         name="Draw Points in the 3D View with OpenGL.",
-        description="Draw Points in the 3D View. Allows to visualize point clouds with many elements. These are not visible in eevee/cycles renderings.",
+        description="Draw Points in the 3D View. Allows to visualize point "
+        + "clouds with many elements. These are not visible in eevee/cycles "
+        + "renderings.",
         default=True,
     )
     add_points_to_point_cloud_handle: BoolProperty(
         name="Add point data to the point cloud handle.",
-        description="This allows to draw the point cloud (again) with OpenGL after saving and reloading the blend file.",
+        description="This allows to draw the point cloud (again) with OpenGL "
+        + "after saving and reloading the blend file.",
         default=True,
     )
     add_points_as_particle_system: BoolProperty(
         name="Add Points as Particle System",
-        description="Use a particle system to represent vertex positions with objects. Can be rendered with eevee/cycles.",
+        description="Use a particle system to represent vertex positions with "
+        + "objects. Can be rendered with eevee/cycles.",
         default=False,
     )
     mesh_items = [
@@ -54,7 +69,8 @@ class PointImportProperties:
     )
     add_particle_color_emission: BoolProperty(
         name="Add Particle Color Emission",
-        description="Add particle color emission to increase the visibility of the individual objects of the particle system.",
+        description="Add particle color emission to increase the visibility "
+        + "of the individual objects of the particle system.",
         default=True,
     )
     set_particle_color_flag: BoolProperty(
@@ -73,13 +89,15 @@ class PointImportProperties:
     )
     add_points_as_mesh_oject: BoolProperty(
         name="Add Points as Mesh Object",
-        description="Use a mesh object to represent the point cloud with the vertex positions.",
+        description="Use a mesh object to represent the point cloud with the "
+        + "vertex positions.",
         default=False,
     )
 
     def draw_point_options(self, layout, draw_everything=False):
         point_box = layout.box()
         point_box.prop(self, "import_points")
+        point_box.prop(self, "point_cloud_display_sparsity")
         if self.import_points or draw_everything:
             opengl_box = point_box.box()
             opengl_box.prop(self, "draw_points_with_gpu")
@@ -101,6 +119,8 @@ class PointImportProperties:
         self, points, reconstruction_collection, transformations_sorted=None
     ):
         if self.import_points:
+            if self.point_cloud_display_sparsity > 1:
+                points = points[:: self.point_cloud_display_sparsity]
 
             if self.draw_points_with_gpu:
                 draw_points(
