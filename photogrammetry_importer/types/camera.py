@@ -457,7 +457,7 @@ class Camera(object):
         z_coords_canonical_filtered = z_coords_canonical[non_background_flags]
         depth_values_filtered = depth_values[non_background_flags]
 
-        if depth_map_display_sparsity != 100:
+        if depth_map_display_sparsity > 1:
             x_coords_canonical_filtered = x_coords_canonical_filtered[
                 ::depth_map_display_sparsity
             ]
