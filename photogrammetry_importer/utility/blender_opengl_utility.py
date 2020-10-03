@@ -130,6 +130,7 @@ def render_opengl_image(image_name, cam, point_size):
     with offscreen.bind():
 
         bgl.glPointSize(point_size)
+        bgl.glEnable(bgl.GL_DEPTH_TEST)
         # bgl.glClear(bgl.GL_COLOR_BUFFER_BIT)
         # bgl.glClear(bgl.GL_DEPTH_BUFFER_BIT)
 
