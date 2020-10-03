@@ -90,7 +90,8 @@ class PhotogrammetryImporterPreferences(
                 text=f"{dependency.gui_name}: {status}"
             )
         install_dependency_box.label(
-            text="After uninstalling the dependencies one may restart Blender to clear the references to the module within Blender."
+            text="After uninstalling the dependencies one may restart Blender "
+            + " to clear the references to the module within Blender."
         )
 
         reset_box = layout.box()
