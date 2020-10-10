@@ -123,11 +123,12 @@ def get_version_string(package_name):
 
 class InstallOptionalDependencies(bpy.types.Operator):
     bl_idname = "photogrammetry_importer.install_dependencies"
-    bl_label = "Install Optional Dependencies"
+    bl_label = "Download and Install Optional Dependencies (be patient!)"
     bl_description = (
-        "Download and install the optional dependencies (python packages) of "
-        "this addon. Depending on the installation location Blender may have "
-        "to be started with administrator privileges to install the packages"
+        "Download and install the optional dependencies (python packages) "
+        "Depending on the installation folder, Blender may have to be started "
+        "with administrator privileges to install the packages. "
+        "Start Blender from the console to see the progress."
     )
     bl_options = {"REGISTER"}
 
