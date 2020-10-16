@@ -62,7 +62,7 @@ Follow the instructions on the :doc:`customize <./customize>` page, to adjust th
 Install Optional Dependencies
 =============================
 
-This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to read the (missing) image sizes from disk - required by the MVE, the Open3D and the VisualSFM importer. Pillow is also used to compute the (missing) point colors for OpenMVG JSON files. Using Pillow instead of Blender's image API significantly improves processing time. Furthermore, this addon uses `Pyntcloud <https://pypi.org/project/pyntcloud/>`_ to import several point cloud formats such as :code:`.ply`, :code:`.pcd`, :code:`.las`, :code:`.asc`, :code:`.pts` and :code:`.csv`.
+This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to read the (missing) image sizes from disk - required by the MVE, the Open3D and the VisualSFM importer. Pillow is also used to compute the (missing) point colors for OpenMVG JSON files. Using Pillow instead of Blender's image API significantly improves processing time. Furthermore, this addon uses `Pyntcloud <https://pypi.org/project/pyntcloud/>`_ to import several point cloud formats such as :code:`.ply`, :code:`.pcd`, :code:`.las`, :code:`.laz`, :code:`.asc`, :code:`.pts` and :code:`.csv`. For parsing :code:`.las` and :code:`.laz` files `Pylas <https://pypi.org/project/pylas/>`_, `Lazrs <https://pypi.org/project/lazrs/>`_ and :code:`Pyntcloud 0.1.3` (or newer) is required.
 
 Option 1: Installation using the GUI (recommended)
 --------------------------------------------------
@@ -88,12 +88,17 @@ For Linux run: ::
 
 <Blender_Root>/<Version>/python/bin/python3.7m <Blender_Root>/<Version>/python/bin/get-pip.py
 <Blender_Root>/<Version>/python/bin/pip install pillow
+<Blender_Root>/<Version>/python/bin/pip install lazrs
+<Blender_Root>/<Version>/python/bin/pip install laspy
 <Blender_Root>/<Version>/python/bin/pip install pyntcloud
+
 
 For Windows run: ::
 
 <Blender_Root>/<Version>/python/bin/python.exe <Blender_Root>/<Version>/python/bin/get-pip.py
 <Blender_Root>/<Version>/python/Scripts/pip.exe install pillow
+<Blender_Root>/<Version>/python/Scripts/pip.exe install lazrs
+<Blender_Root>/<Version>/python/Scripts/pip.exe install laspy
 <Blender_Root>/<Version>/python/Scripts/pip.exe install pyntcloud
 
 IMPORTANT: Use the full path to the python and the pip executable. Otherwise the system python installation or the system pip executable may be used.

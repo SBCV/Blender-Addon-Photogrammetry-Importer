@@ -17,6 +17,8 @@ class Dependency:
 
 dependencies = (
     Dependency(gui_name="Pillow", package_name="pillow", import_name="PIL"),
+    Dependency(gui_name="Lazrs", package_name="lazrs", import_name="lazrs"),
+    Dependency(gui_name="Pylas", package_name="pylas", import_name="pylas"),
     Dependency(
         gui_name="Pyntcloud", package_name="pyntcloud", import_name="pyntcloud"
     ),

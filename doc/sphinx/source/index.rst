@@ -40,11 +40,12 @@ In addition, the addon supports some common point cloud data formats:
 
    - `Polygon files <http://paulbourke.net/dataformats/ply/>`_ (PLY) :sup:`3`
    - `Point Cloud Library files <https://github.com/PointCloudLibrary/pcl>`_ (PCD) :sup:`3`
-   - `LASer files <https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities>`_ (LAS) :sup:`3`
+   - `LASer files <https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities>`_ (LAS) :sup:`3, 4`
+   - `LASzip files <https://laszip.org/>`_ (LAZ) :sup:`3, 4, 5`
    - `Simple ASCII point files <https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O>`_ (ASC, PTS, CSV) :sup:`3`
 
-| :sup:`1` Requires Pillow to read the image sizes from disk. :sup:`2` Requires Pillow for point color computation.
-| :sup:`3` Requires Pyntcloud for parsing.
+| :sup:`1` Requires :code:`pillow` to read image sizes from disk. :sup:`2` Requires :code:`pillow` for point color computation.
+| :sup:`3` Requires :code:`pyntcloud` for parsing. :sup:`4` Requires :code:`pylas` for parsing. :sup:`5` Requires :code:`lazrs` for parsing.
 
 Compatible with Blender 2.8.0 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the `2.79 branch <https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279>`_.
 
