@@ -15,13 +15,16 @@ Supported libraries (data formats):
 In addition, the addon supports some common point cloud data formats:
 
 - [x] [Polygon files](http://paulbourke.net/dataformats/ply/) (PLY) <sup>3</sup>
-- [x] [Point Cloud Library files](https://github.com/PointCloudLibrary/pcl) (PCD) <sup>3</sup>
-- [x] [LASer files](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) (LAS) <sup>3</sup>
+- [x] [Point Cloud Library files](https://github.com/PointCloudLibrary/pcl) (PCD) <sup>3,4</sup>
+- [x] [LASer files](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) (LAS) <sup>3,4,5</sup>
+- [x] [LASzip files](https://laszip.org/) (LAS) <sup>3</sup>
 - [x] [Simple ASCII point files](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O) (ASC, PTS, CSV) <sup>3</sup>
 
 <sup>1</sup> Requires [Pillow](https://pypi.org/project/Pillow/) to read image sizes from disk.
-<sup>2</sup> Requires Pillow for point color computation.
+<sup>2</sup> Requires Pillow for point color computation.\
 <sup>3</sup> Requires [Pyntcloud](https://pypi.org/project/pyntcloud/) for parsing.
+<sup>4</sup> Requires [Pylas](https://pypi.org/project/pylas/) for parsing.
+<sup>5</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
 
 Compatible with Blender 2.80 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
 
