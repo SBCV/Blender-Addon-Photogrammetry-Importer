@@ -67,6 +67,7 @@ Getting Started
    alignment
    point_cloud
    python
+   documentation
    contribution
    changelog
 
