@@ -17,7 +17,7 @@ In addition, the addon supports some common point cloud data formats:
 - [x] [Polygon files](http://paulbourke.net/dataformats/ply/) (PLY) <sup>3</sup>
 - [x] [Point Cloud Library files](https://github.com/PointCloudLibrary/pcl) (PCD) <sup>3</sup>
 - [x] [LASer files](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) (LAS) <sup>3,4</sup>
-- [x] [LASzip files](https://laszip.org/) (LAS) <sup>3,4,5</sup>
+- [x] [LASzip files](https://laszip.org/) (LAZ) <sup>3,4,5</sup>
 - [x] [Simple ASCII point files](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O) (ASC, PTS, CSV) <sup>3</sup>
 
 <sup>1</sup> Requires [Pillow](https://pypi.org/project/Pillow/) to read image sizes from disk.
