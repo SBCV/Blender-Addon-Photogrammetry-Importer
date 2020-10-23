@@ -1,21 +1,57 @@
 """
-Copyright (C) 2018 Sebastian Bullinger
-Created by Sebastian Bullinger
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+A Blender addon to import different photogrammetry formats.
+
+Available subpackages
+---------------------
+ext
+    External dependencies.
+file_handlers
+    Classes to read and write different file formats.
+operators
+    Operators to import and export different file formats into Blender.
+panels
+    GUI elements to adjust and leverage the imported objects.
+preferences
+    Persistent addon preferences.
+properties
+    Properties used by the import and export operators.
+registration
+    Registration of the import and export operators.
+types
+    Types used by different subpackages.
+utility
+    General and Blender-specific utility functions.
+
+License
+-------
+
+MIT License
+
+Copyright (c) 2018 Sebastian Bullinger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 """
 
 bl_info = {
     "name": "Photogrammetry Import Export Addon",
-    "description": "Allows to import and export photogrammetry results (cameras, points and meshes).",
+    "description": "Allows to import and export photogrammetry results "
+    + "(cameras, points and meshes).",
     "author": "Sebastian Bullinger",
     "version": (2, 0, 0),
     "blender": (2, 80, 0),
@@ -29,7 +65,7 @@ bl_info = {
 import bpy
 
 # load and reload submodules
-##################################
+############################
 
 import importlib
 from .utility import developer_utility
@@ -61,26 +97,9 @@ from photogrammetry_importer.utility.blender_opengl_utility import (
 
 bpy.app.handlers.load_post.append(redraw_points)
 
-# =========================================================================
-# === Uncomment for fast debugging ===
-# from bpy.app.handlers import persistent
-# @persistent
-# def load_handler(dummy):
-#     from photogrammetry_importer.file_handler.ply_file_handler import PLYFileHandler
-#     from photogrammetry_importer.utils.visualization_utils import draw_points
-#     points = PLYFileHandler.parse_ply_file('path/to/file.ply')
-
-#     class LogOp():
-#         def report(sef, arg1, arg2):
-#             print(arg1, arg2)
-
-#     log_op = LogOp()
-#     draw_points(log_op, points)
-# =========================================================================
-#
-
 
 def register():
+    """ Register importers, exporters and panels. """
     bpy.utils.register_class(PhotogrammetryImporterPreferences)
 
     import_export_prefs = bpy.context.preferences.addons[__name__].preferences
@@ -89,9 +108,6 @@ def register():
 
     bpy.utils.register_class(OpenGLPanel)
 
-    # === Uncomment for fast debugging ===
-    # bpy.app.handlers.load_post.append(load_handler)
-
     log_report(
         "INFO",
         "Registered {} with {} modules".format(bl_info["name"], len(modules)),
@@ -99,6 +115,7 @@ def register():
 
 
 def unregister():
+    """ Unregister importers, exporters and panels. """
     bpy.utils.unregister_class(PhotogrammetryImporterPreferences)
 
     unregister_importers()
