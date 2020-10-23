@@ -13,6 +13,7 @@ This addon relies on `Black <https://github.com/psf/black>`_ for formatting. To 
 
    - Install Black - checkout the `installation instructions <https://github.com/psf/black#installation-and-usage>`_
    - :code:`cd path/to/Blender-Addon-Photogrammetry-Importer`
-   - :code:`black --line-length 79 --exclude  "photogrammetry_importer/ext" photogrammetry_importer`
+   - :code:`black --line-length 79 --exclude photogrammetry_importer/ext photogrammetry_importer`
+   - :code:`black --line-length 79 doc/sphinx/source/conf.py`
 
-... The addon uses `Docstrings <https://www.python.org/dev/peps/pep-0257/>`_ for documentation.
+The addon uses Docstrings for documentation - see `PEP 257 <https://www.python.org/dev/peps/pep-0257/>`_ and `PEP 287 <https://www.python.org/dev/peps/pep-0287/>`_ .

@@ -1,4 +1,5 @@
-.. Blender-Addon-Photgrammetry-Importer documentation master file, created by
+..
+   Blender-Addon-Photgrammetry-Importer documentation master file, created by
    sphinx-quickstart on Sat Jun 20 18:28:02 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -7,7 +8,8 @@
 Blender-Addon-Photgrammetry-Importer 
 ####################################
 
-..  https://documentation-style-guide-sphinx.readthedocs.io/en/latest/style-guide.html
+.. 
+   https://documentation-style-guide-sphinx.readthedocs.io/en/latest/style-guide.html
 		Heading Levels (recommended order)
 			# with overline
 			* with overline
@@ -52,7 +54,17 @@ Compatible with Blender 2.8.0 onwards. There is an older version of the addon av
 Getting Started
 ===============
 
-.. https://www.sphinx-doc.org/en/1.5/markup/toctree.html
+..
+   Note:
+   The API is automatically created with sphinx-autoapi (see conf.py).
+   Add the "toctree" entry "autoapi/index" manually, in order to ensure that:
+   - there will be a toc/navigation overview in the left toolbar.
+   - the generated pages contain forward and backward buttons.
+   This does not work, if the entry is automatically added by sphinx-autoapi.
+
+.. 
+   https://www.sphinx-doc.org/en/1.5/markup/toctree.html
+
 .. toctree::
    :maxdepth: 1
 
@@ -70,13 +82,13 @@ Getting Started
    documentation
    contribution
    changelog
+   autoapi/index
 
 There is a short `tutorial video <https://www.youtube.com/watch?v=BwwaT2scoP0>`_ that shows how to
 
 - install the addon
 - compute a reconstruction with Meshroom
 - import the results into Blender
-
 
 Example Results (Shipped with Addon)
 ====================================
@@ -105,7 +117,6 @@ The addon offers an option to draw big point clouds with OpenGL to reduce comput
 .. image:: ../../images/import_result_opengl.jpg
    :scale: 40 %
    :align: center
-
 
 ..
 	Indices and tables
