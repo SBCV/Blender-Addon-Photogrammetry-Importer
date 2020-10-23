@@ -362,12 +362,14 @@ class Camera(object):
 
     def get_4x4_cam_to_world_mat(self):
         """
-        This matrix can be used to convert points given in camera coordinates
-        into points given in world coordinates.
-        M = [R^T    c]
-            [0      1]
-        :return:
+        Return the camera to world matrix.
+
+        This matrix can be used to convert homogeneous points given in camera
+        coordinates into homogeneous points given in world coordinates.
+        :return: 4x4 matrix
         """
+        # M = [R^T    c]
+        #     [0      1]
         homogeneous_mat = np.identity(4, dtype=float)
         homogeneous_mat[0:3, 0:3] = self.get_rotation_mat().transpose()
         homogeneous_mat[0:3, 3] = self.get_camera_center()
