@@ -151,6 +151,19 @@ class CameraImportProperties:
         + "name",
         default=True,
     )
+    animation_frame_source: EnumProperty(
+        name="Use original frames",
+        items=(
+            ("ORIGINAL", "Original Frames", ""),
+            ("ADJUSTED", "Adjusted Frames", ""),
+        ),
+    )
+    add_animated_camera_background_images: BoolProperty(
+        name="Add Background Images for the Animated Camera",
+        description="The background images are only visible by viewing the "
+        + "scene from the animated camera at the corresponding time step",
+        default=True,
+    )
     number_interpolation_frames: IntProperty(
         name="Number of Frames Between two Reconstructed Cameras",
         description="The poses of the animated camera are interpolated",
@@ -275,13 +288,18 @@ class CameraImportProperties:
                     depth_map_box.prop(self, "depth_map_display_sparsity")
                     depth_map_box.prop(self, "depth_map_id_or_name_str")
 
-        box = camera_box.box()
-        box.prop(self, "add_camera_motion_as_animation")
+        anim_box = camera_box.box()
+        anim_box.prop(self, "add_camera_motion_as_animation")
+        anim_box.row().prop(self, "animation_frame_source", expand=True)
+
         if self.add_camera_motion_as_animation or draw_everything:
-            box.prop(self, "number_interpolation_frames")
-            box.prop(self, "interpolation_type")
-            box.prop(self, "consider_missing_cameras_during_animation")
-            box.prop(self, "remove_rotation_discontinuities")
+            if self.animation_frame_source == "ORIGINAL" or draw_everything:
+                anim_box.prop(self, "add_animated_camera_background_images")
+            if self.animation_frame_source == "ADJUSTED" or draw_everything:
+                anim_box.prop(self, "number_interpolation_frames")
+            anim_box.prop(self, "consider_missing_cameras_during_animation")
+            anim_box.prop(self, "interpolation_type")
+            anim_box.prop(self, "remove_rotation_discontinuities")
 
         camera_box.prop(self, "suppress_distortion_warnings")
         camera_box.prop(self, "adjust_render_settings")
@@ -338,6 +356,8 @@ class CameraImportProperties:
                         self,
                         cameras,
                         parent_collection,
+                        self.animation_frame_source,
+                        self.add_animated_camera_background_images,
                         self.number_interpolation_frames,
                         self.interpolation_type,
                         self.consider_missing_cameras_during_animation,

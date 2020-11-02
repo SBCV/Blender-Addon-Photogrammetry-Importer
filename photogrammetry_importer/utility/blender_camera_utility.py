@@ -29,9 +29,33 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 class DummyCamera(object):
     def __init__(self):
         self._relative_fp = None
+        self._absolute_fp = None
+        self.image_fp_type = None
+        self.image_dp = None
+
+    def get_file_name(self):
+        return os.path.basename(self.get_relative_fp())
 
     def get_relative_fp(self):
         return self._relative_fp
+
+    def get_absolute_fp(self):
+        return self._get_absolute_fp(self._relative_fp, self._absolute_fp)
+
+    def _get_absolute_fp(self, relative_fp, absolute_fp):
+        if self.image_fp_type == Camera.IMAGE_FP_TYPE_NAME:
+            assert self.image_dp is not None
+            assert relative_fp is not None
+            return os.path.join(self.image_dp, os.path.basename(relative_fp))
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE:
+            assert self.image_dp is not None
+            assert relative_fp is not None
+            return os.path.join(self.image_dp, relative_fp)
+        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
+            assert absolute_fp is not None
+            return absolute_fp
+        else:
+            assert False
 
 
 CameraIntrinsics = namedtuple(
@@ -116,6 +140,10 @@ def enhance_cameras_with_dummy_cameras(op, cameras, image_dp, image_fp_type):
     for non_rec_image_path in non_rec_image_relative_paths:
         cam = DummyCamera()
         cam._relative_fp = non_rec_image_path
+        cam._absolute_fp = os.path.join(image_dp, cam._relative_fp)
+        cam.image_fp_type = image_fp_type
+        cam.image_dp = image_dp
+
         cameras.append(cam)
 
     return cameras
@@ -125,6 +153,8 @@ def add_camera_animation(
     op,
     cameras,
     parent_collection,
+    animation_frame_source,
+    add_background_images,
     number_interpolation_frames,
     interpolation_type,
     consider_missing_cameras_during_animation,
@@ -137,13 +167,21 @@ def add_camera_animation(
     if len(cameras) == 0:
         return
 
+    if animation_frame_source == "ORIGINAL":
+        number_interpolation_frames = 0
+    elif animation_frame_source == "ADJUSTED":
+        add_background_images = False
+    else:
+        assert False
+
     if consider_missing_cameras_during_animation:
         cameras = enhance_cameras_with_dummy_cameras(
             op, cameras, image_dp, image_fp_type
         )
 
-    # Using the first reconstructed camera as template for the animated camera. The values
-    # are adjusted with add_transformation_animation() and add_camera_intrinsics_animation().
+    # Using the first reconstructed camera as template for the animated camera.
+    # The values are adjusted with add_transformation_animation() and
+    # add_camera_intrinsics_animation().
     some_cam = cameras[0]
     bcamera = add_single_camera(op, "Animated Camera", some_cam)
     cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)
@@ -185,6 +223,36 @@ def add_camera_animation(
         number_interpolation_frames=number_interpolation_frames,
     )
 
+    if add_background_images:
+        # https://docs.blender.org/api/current/bpy.types.CameraBackgroundImage.html
+        camera_data = bpy.data.objects[cam_obj.name].data
+        camera_data.show_background_images = True
+        bg_img = camera_data.background_images.new()
+        dp = os.path.dirname(cameras_sorted[0].get_absolute_fp())
+        # The first entry (ALL OTHERS ARE IGNORED) in the "files" parameter
+        # in bpy.ops.clip.open() is used to determine the image in the image
+        # sequence. All images with higher sequence numbers are added to the
+        # movie clip.
+        first_sequence_fn = [{"name": cameras_sorted[0].get_file_name()}]
+
+        # Remove previously created movie clips
+        movie_clip_name = os.path.basename(first_sequence_fn[0]["name"])
+        if movie_clip_name in bpy.data.movieclips:
+            bpy.data.movieclips.remove(bpy.data.movieclips[movie_clip_name])
+
+        # https://docs.blender.org/api/current/bpy.types.MovieClip.html
+        # https://docs.blender.org/api/current/bpy.types.Sequences.html
+        # Using a video clip instead of an image sequence has the advantage that
+        # Blender automatically adjusts the start offset of the image sequence.
+        # (e.g. if the first image of the sequence is 100_7110.JPG, then one
+        # would have to set the offset to 7109)
+        bpy.ops.clip.open(directory=dp, files=first_sequence_fn)
+        bg_img.source = "MOVIE_CLIP"
+
+        # The clip created with bpy.ops.clip.open() has the same name than the
+        # first image name of the image sequence.
+        bg_img.clip = bpy.data.movieclips[movie_clip_name]
+
 
 def color_from_value(val, min_val, max_val):
     # source: http://stackoverflow.com/questions/10901085/range-values-to-pseudocolor
@@ -194,7 +262,8 @@ def color_from_value(val, min_val, max_val):
 
     h = (float(val - min_val) / (max_val - min_val)) * 120
     # convert hsv color (h, 1, 1) to its rgb equivalent
-    # note: the hsv_to_rgb() function expects h to be in the range 0..1 not 0..360
+    # note: the hsv_to_rgb() function expects h to be in the range 0..1 and not
+    # in 0..360
     r, g, b = colorsys.hsv_to_rgb(h / 360, 1.0, 1.0)
     return r, g, b, 1
 

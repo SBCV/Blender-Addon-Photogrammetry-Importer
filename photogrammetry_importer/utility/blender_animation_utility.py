@@ -77,17 +77,17 @@ def add_transformation_animation(
 ):
     log_report("INFO", "Adding transformation animation: ...", op)
 
-    scn = bpy.context.scene
-    scn.frame_start = 0
+    scene = bpy.context.scene
+    scene.frame_start = 0
     step_size = number_interpolation_frames + 1
-    scn.frame_end = step_size * len(transformations_sorted)
+    scene.frame_end = step_size * len(transformations_sorted)
     animated_obj = bpy.data.objects[animated_obj_name]
 
     for index, transformation in enumerate(transformations_sorted):
         # log_report('INFO', 'index: ' + str(index), op)
         # log_report('INFO', 'transformation: ' + str(transformation), op)
 
-        current_keyframe_index = index * step_size
+        current_keyframe_index = (index + 1) * step_size
 
         if transformation is None:
             continue
@@ -131,7 +131,7 @@ def add_camera_intrinsics_animation(
     animated_obj = bpy.data.objects[animated_obj_name]
 
     for index, intrinsics in enumerate(intrinsics_sorted):
-        current_keyframe_index = index * step_size
+        current_keyframe_index = (index + 1) * step_size
 
         if intrinsics is None:
             continue
