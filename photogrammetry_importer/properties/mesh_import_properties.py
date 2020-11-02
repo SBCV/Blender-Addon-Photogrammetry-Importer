@@ -23,7 +23,7 @@ class MeshImportProperties:
     add_mesh_color_emission: BoolProperty(
         name="Add Color Emission of Mesh",
         description="Enabling color emission improves the visibility of the"
-        + "mesh colors",
+        + " mesh colors",
         default=True,
     )
 

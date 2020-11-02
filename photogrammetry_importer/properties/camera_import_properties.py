@@ -290,9 +290,9 @@ class CameraImportProperties:
 
         anim_box = camera_box.box()
         anim_box.prop(self, "add_camera_motion_as_animation")
-        anim_box.row().prop(self, "animation_frame_source", expand=True)
 
         if self.add_camera_motion_as_animation or draw_everything:
+            anim_box.row().prop(self, "animation_frame_source", expand=True)
             if self.animation_frame_source == "ORIGINAL" or draw_everything:
                 anim_box.prop(self, "add_animated_camera_background_images")
             if self.animation_frame_source == "ADJUSTED" or draw_everything:
