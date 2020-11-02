@@ -21,6 +21,7 @@ def get_element(data_list, id_string, query_id, op):
 
 
 class MeshroomFileHandler:
+    """ Class to read and write Meshroom files and workspaces. """
 
     # Note: *.SfM files are actually just *.JSON files.
 

@@ -100,6 +100,7 @@ def bl_idname_to_bpy_types_name(bl_idname, bpy_types_prefix):
 
 
 def is_registered(import_or_export_operator, operator_type):
+    """ Determine if an importer/exporter is already registered. """
     assert operator_type in ["IMPORT", "EXPORT"]
     return hasattr(
         bpy.types,
@@ -110,6 +111,7 @@ def is_registered(import_or_export_operator, operator_type):
 
 
 def register_importer(condition, importer, append_function):
+    """ Register a single importer. """
     # https://blenderartists.org/t/find-out-if-a-class-is-registered/602335
     if condition:
         if not is_registered(importer, operator_type="IMPORT"):
@@ -118,12 +120,14 @@ def register_importer(condition, importer, append_function):
 
 
 def unregister_importer(importer, append_function):
+    """ Unregister a single importer. """
     if is_registered(importer, operator_type="IMPORT"):
         bpy.utils.unregister_class(importer)
         bpy.types.TOPBAR_MT_file_import.remove(append_function)
 
 
 def register_exporter(condition, exporter, append_function):
+    """ Register a single exporter. """
     # https://blenderartists.org/t/find-out-if-a-class-is-registered/602335
     if condition:
         if not is_registered(exporter, operator_type="EXPORT"):
@@ -132,12 +136,14 @@ def register_exporter(condition, exporter, append_function):
 
 
 def unregister_exporter(exporter, append_function):
+    """ Unregister a single exporter. """
     if is_registered(exporter, operator_type="EXPORT"):
         bpy.utils.unregister_class(exporter)
         bpy.types.TOPBAR_MT_file_export.remove(append_function)
 
 
 def register_importers(import_prefs):
+    """ Register importers selected by the user. """
     register_importer(
         import_prefs.colmap_importer_bool,
         ImportColmapOperator,
@@ -181,6 +187,7 @@ def register_importers(import_prefs):
 
 
 def unregister_importers():
+    """ Unregister importers. """
     unregister_importer(ImportColmapOperator, colmap_import_operator_function)
     unregister_importer(
         ImportMeshroomOperator, meshroom_import_operator_function
@@ -200,6 +207,7 @@ def unregister_importers():
 
 
 def register_exporters(export_prefs):
+    """ Register exporters selected by the user. """
     register_exporter(
         export_prefs.colmap_exporter_bool,
         ExportColmapOperator,
@@ -213,5 +221,6 @@ def register_exporters(export_prefs):
 
 
 def unregister_exporters():
+    """ Unregister exporters. """
     unregister_exporter(ExportColmapOperator, colmap_export_operator_function)
     unregister_exporter(ExportNVMOperator, visualsfm_export_operator_function)

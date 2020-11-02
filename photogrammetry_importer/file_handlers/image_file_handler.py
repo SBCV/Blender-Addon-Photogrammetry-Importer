@@ -7,7 +7,9 @@ except ImportError:
     PILImage = None
 
 
-class ImageFileHandler(object):
+class ImageFileHandler:
+    """ Class to read and write images using PIL. """
+
     @staticmethod
     def parse_camera_image_file(image_path, default_width, default_height, op):
         if PILImage is not None and os.path.isfile(image_path):

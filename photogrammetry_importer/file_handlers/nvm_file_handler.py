@@ -32,10 +32,9 @@ class NVMFileHandler(object):
         VisualSFM CAMERA coordinate system is the standard CAMERA
         coordinate system in computer vision (not the same as
         in computer graphics like in bundler, blender, etc.)
-        That means
-            the y axis in the image is pointing downwards (not upwards)
-            the camera is looking along the positive z axis (points in
-                front of the camera show a positive z value)
+        That means the y axis in the image is pointing downwards (not upwards)
+        and the camera is looking along the positive z axis (points in front
+        of the camera show a positive z value)
 
         The camera coordinate system in computer vision VISUALSFM uses camera
         matrices, which are rotated around the x axis by 180 degree

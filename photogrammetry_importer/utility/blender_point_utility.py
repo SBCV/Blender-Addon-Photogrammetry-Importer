@@ -12,6 +12,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 def copy_values_to_image(value_tripplets, image_name):
+    """ Copy values to image pixels. """
     image = bpy.data.images[image_name]
     # working on a copy of the pixels results in a MASSIVE performance speed
     local_pixels = list(image.pixels[:])

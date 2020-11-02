@@ -28,7 +28,7 @@ class Camera(object):
         self.normal = np.array([0, 0, 0], dtype=float)
         self.color = np.array([255, 255, 255], dtype=int)
 
-        # use for these attributes the getter and setter methods
+        # Use these attributes ONLY with getter and setter methods
         self._quaternion = np.array([0, 0, 0, 0], dtype=float)
         self._rotation_mat = np.zeros((3, 3), dtype=float)
 
@@ -36,10 +36,12 @@ class Camera(object):
 
         self.image_fp_type = None
         self.image_dp = None
+        # Use these attributes ONLY with the corresponding methods
         self._relative_fp = None
         self._absolute_fp = None
         self._undistorted_relative_fp = None
         self._undistorted_absolute_fp = None
+
         self.width = None
         self.height = None
         self.panoramic_type = None
@@ -49,7 +51,7 @@ class Camera(object):
         self.depth_map_semantic = None
         self.shift_depth_map_to_pixel_center = None
 
-        self.id = None  # an unique identifier (natural number)
+        self.id = None  # A unique identifier (natural number)
 
     def __repr__(self):
         return self.__str__()
