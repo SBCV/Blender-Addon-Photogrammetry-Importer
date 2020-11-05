@@ -27,8 +27,8 @@ utility
 
 bl_info = {
     "name": "Photogrammetry Import Export Addon",
-    "description": "Allows to import and export photogrammetry results "
-    + "(cameras, points and meshes).",
+    # Do not break this line, otherwise the addon can not be activated!
+    "description": "Allows to import and export photogrammetry results (cameras, points and meshes).",
     "author": "Sebastian Bullinger",
     "version": (2, 0, 0),
     "blender": (2, 80, 0),
