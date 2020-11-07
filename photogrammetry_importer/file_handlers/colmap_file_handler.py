@@ -46,54 +46,54 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 #   THIN_PRISM_FISHEYE: fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, sx1, sy1
 
 
-def parse_camera_param_list(cam):
-    name = cam.model
-    params = cam.params
-    fx, fy, cx, cy, skew, r = None, None, None, None, None, None
-    if name == "SIMPLE_PINHOLE":
-        fx, cx, cy = params
-    elif name == "PINHOLE":
-        fx, fy, cx, cy = params
-    elif name == "SIMPLE_RADIAL":
-        fx, cx, cy, r = params
-    elif name == "RADIAL":
-        fx, cx, cy, k1, k2 = params
-        r = [k1, k2]
-    elif name == "OPENCV":
-        fx, fy, cx, cy, k1, k2, p1, p2 = params
-        r = [k1, k2, p1, p2]
-    elif name == "OPENCV_FISHEYE":
-        fx, fy, cx, cy, k1, k2, k3, k4 = params
-        r = [k1, k2, k3, k4]
-    elif name == "FULL_OPENCV":
-        fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, k5, k6 = params
-        r = [k1, k2, p1, p2, k3, k4, k5, k6]
-    elif name == "FOV":
-        fx, fy, cx, cy, r = params
-    elif name == "SIMPLE_RADIAL_FISHEYE":
-        fx, cx, cy, r = params
-    elif name == "RADIAL_FISHEYE":
-        fx, cx, cy, k1, k2 = params
-        r = [k1, k2]
-    elif name == "THIN_PRISM_FISHEYE":
-        fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, sx1, sy1 = params
-        r = [k1, k2, p1, p2, k3, k4, sx1, sy1]
-    # PERSPECTIVE is defined in this Colmap fork
-    #  https://github.com/Kai-46/VisSatSatelliteStereo
-    elif name == "PERSPECTIVE":
-        fx, fy, cx, cy, skew = params
-    if fy is None:
-        fy = fx
-    if skew is None:
-        skew = 0.0
-    return fx, fy, cx, cy, skew, r
-
-
 class ColmapFileHandler:
     """ Class to read and write Colmap models and workspaces. """
 
     @staticmethod
-    def convert_cameras(
+    def _parse_camera_param_list(cam):
+        name = cam.model
+        params = cam.params
+        fx, fy, cx, cy, skew, r = None, None, None, None, None, None
+        if name == "SIMPLE_PINHOLE":
+            fx, cx, cy = params
+        elif name == "PINHOLE":
+            fx, fy, cx, cy = params
+        elif name == "SIMPLE_RADIAL":
+            fx, cx, cy, r = params
+        elif name == "RADIAL":
+            fx, cx, cy, k1, k2 = params
+            r = [k1, k2]
+        elif name == "OPENCV":
+            fx, fy, cx, cy, k1, k2, p1, p2 = params
+            r = [k1, k2, p1, p2]
+        elif name == "OPENCV_FISHEYE":
+            fx, fy, cx, cy, k1, k2, k3, k4 = params
+            r = [k1, k2, k3, k4]
+        elif name == "FULL_OPENCV":
+            fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, k5, k6 = params
+            r = [k1, k2, p1, p2, k3, k4, k5, k6]
+        elif name == "FOV":
+            fx, fy, cx, cy, r = params
+        elif name == "SIMPLE_RADIAL_FISHEYE":
+            fx, cx, cy, r = params
+        elif name == "RADIAL_FISHEYE":
+            fx, cx, cy, k1, k2 = params
+            r = [k1, k2]
+        elif name == "THIN_PRISM_FISHEYE":
+            fx, fy, cx, cy, k1, k2, p1, p2, k3, k4, sx1, sy1 = params
+            r = [k1, k2, p1, p2, k3, k4, sx1, sy1]
+        # PERSPECTIVE is defined in this Colmap fork
+        #  https://github.com/Kai-46/VisSatSatelliteStereo
+        elif name == "PERSPECTIVE":
+            fx, fy, cx, cy, skew = params
+        if fy is None:
+            fy = fx
+        if skew is None:
+            skew = 0.0
+        return fx, fy, cx, cy, skew, r
+
+    @staticmethod
+    def _convert_cameras(
         id_to_col_cameras,
         id_to_col_images,
         image_dp,
@@ -135,7 +135,16 @@ class ColmapFileHandler:
             current_camera.width = camera_model.width
             current_camera.height = camera_model.height
 
-            fx, fy, cx, cy, skew, r = parse_camera_param_list(camera_model)
+            (
+                fx,
+                fy,
+                cx,
+                cy,
+                skew,
+                r,
+            ) = ColmapFileHandler._parse_camera_param_list(
+                camera_model,
+            )
             if not suppress_distortion_warnings:
                 check_radial_distortion(r, current_camera._relative_fp, op)
 
@@ -169,7 +178,7 @@ class ColmapFileHandler:
         return cameras
 
     @staticmethod
-    def convert_points(id_to_col_points3D):
+    def _convert_points(id_to_col_points3D):
         # From photogrammetry_importer\ext\read_write_model.py
         #   Point3D = collections.namedtuple(
         #       "Point3D", ["id", "xyz", "rgb", "error", "image_ids", "point2D_idxs"])
@@ -188,7 +197,7 @@ class ColmapFileHandler:
         return points3D
 
     @staticmethod
-    def get_model_folder_ext(idp):
+    def _get_model_folder_ext(idp):
         ifp_s = os.listdir(idp)
         txt_list = ["cameras.txt", "images.txt", "points3D.txt"]
         bin_list = ["cameras.bin", "images.bin", "points3D.bin"]
@@ -201,16 +210,16 @@ class ColmapFileHandler:
         return ext
 
     @staticmethod
-    def is_valid_model_folder(idp):
-        ext = ColmapFileHandler.get_model_folder_ext(idp)
+    def _is_valid_model_folder(idp):
+        ext = ColmapFileHandler._get_model_folder_ext(idp)
         return ext is not None
 
     @staticmethod
-    def is_valid_workspace_folder(idp):
+    def _is_valid_workspace_folder(idp):
         elements = os.listdir(idp)
         valid = True
         if "sparse" in elements:
-            valid = ColmapFileHandler.is_valid_model_folder(
+            valid = ColmapFileHandler._is_valid_model_folder(
                 os.path.join(idp, "sparse")
             )
         else:
@@ -229,8 +238,8 @@ class ColmapFileHandler:
         """ Parse a Colmap model. """
         log_report("INFO", "Parse Colmap model folder: " + model_idp, op)
 
-        assert ColmapFileHandler.is_valid_model_folder(model_idp)
-        ext = ColmapFileHandler.get_model_folder_ext(model_idp)
+        assert ColmapFileHandler._is_valid_model_folder(model_idp)
+        ext = ColmapFileHandler._get_model_folder_ext(model_idp)
 
         # cameras represent information about the camera model
         # images contain pose information
@@ -238,7 +247,7 @@ class ColmapFileHandler:
             model_idp, ext=ext
         )
 
-        cameras = ColmapFileHandler.convert_cameras(
+        cameras = ColmapFileHandler._convert_cameras(
             id_to_col_cameras,
             id_to_col_images,
             image_dp,
@@ -248,14 +257,14 @@ class ColmapFileHandler:
             op,
         )
 
-        points3D = ColmapFileHandler.convert_points(id_to_col_points3D)
+        points3D = ColmapFileHandler._convert_points(id_to_col_points3D)
 
         return cameras, points3D
 
     @staticmethod
-    def parse_colmap_workspace_folder(workspace_idp):
+    def _disassemble_colmap_workspace_folder(workspace_idp):
         """ Parse a Colmap workspace. """
-        assert ColmapFileHandler.is_valid_workspace_folder(workspace_idp)
+        assert ColmapFileHandler._is_valid_workspace_folder(workspace_idp)
 
         model_idp = os.path.join(workspace_idp, "sparse")
         image_idp = os.path.join(workspace_idp, "images")
@@ -278,17 +287,17 @@ class ColmapFileHandler:
         """ Parse a Colmap model or a Colmap workspace. """
         log_report("INFO", "idp: " + str(idp), op)
 
-        if ColmapFileHandler.is_valid_model_folder(idp):
+        if ColmapFileHandler._is_valid_model_folder(idp):
             model_idp = idp
             mesh_ifp = None
             depth_map_idp = None
-        elif ColmapFileHandler.is_valid_workspace_folder(idp):
+        elif ColmapFileHandler._is_valid_workspace_folder(idp):
             (
                 model_idp,
                 image_idp_workspace,
                 depth_map_idp,
                 mesh_ifp,
-            ) = ColmapFileHandler.parse_colmap_workspace_folder(idp)
+            ) = ColmapFileHandler._disassemble_colmap_workspace_folder(idp)
             if os.path.isdir(image_idp_workspace):
                 image_dp = image_idp_workspace
                 log_report("INFO", "Using image directory in workspace.", op)
@@ -361,7 +370,8 @@ class ColmapFileHandler:
                 xyz=point.coord,
                 rgb=point.color,
                 error=0,
-                # The default settings in Colmap show only points with 3+ observations
+                # The default settings in Colmap show only points with more than
+                # 3 observations
                 image_ids=[0, 1, 2],
                 point2D_idxs=[0, 1, 2],
             )
