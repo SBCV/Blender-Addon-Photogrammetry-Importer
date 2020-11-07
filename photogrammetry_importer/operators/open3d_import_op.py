@@ -14,14 +14,13 @@ from photogrammetry_importer.properties.point_import_properties import (
 from photogrammetry_importer.properties.general_import_properties import (
     GeneralImportProperties,
 )
-
-from photogrammetry_importer.file_handlers.image_file_handler import (
-    ImageFileHandler,
-)
 from photogrammetry_importer.file_handlers.open3D_file_handler import (
     Open3DFileHandler,
 )
 from photogrammetry_importer.utility.blender_utility import add_collection
+from photogrammetry_importer.utility.camera_utility import (
+    set_image_size_for_cameras,
+)
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 from photogrammetry_importer.types.camera import Camera
@@ -115,7 +114,7 @@ class ImportOpen3DOperator(
 
         if not self.image_size_initialized(cameras):
             # Overwrites CameraImportProperties.enhance_camera_with_images()
-            cameras, success = ImageFileHandler.parse_camera_image_files(
+            success = set_image_size_for_cameras(
                 cameras, self.default_width, self.default_height, self
             )
         else:

@@ -172,7 +172,7 @@ class MVEFileHandler(object):
             # folder_name = view_0000.mve
             camera_name = folder_name.split("_")[1].split(".")[0]
             undistorted_img_ifp = os.path.join(subdir, "undistorted.png")
-            success, width, height = ImageFileHandler.parse_camera_image_file(
+            success, width, height = ImageFileHandler.read_image_size(
                 undistorted_img_ifp,
                 default_width=default_width,
                 default_height=default_height,

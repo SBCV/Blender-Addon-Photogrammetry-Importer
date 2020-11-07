@@ -11,10 +11,12 @@ class ImageFileHandler:
     """ Class to read and write images using PIL. """
 
     @staticmethod
-    def parse_camera_image_file(image_path, default_width, default_height, op):
-        if PILImage is not None and os.path.isfile(image_path):
-            # this does NOT load the data into memory -> should be fast!
-            image = PILImage.open(image_path)
+    def read_image_size(image_ifp, default_width, default_height, op):
+        """ Read image size from disk. """
+
+        if PILImage is not None and os.path.isfile(image_ifp):
+            # This does NOT load the data into memory -> should be fast!
+            image = PILImage.open(image_ifp)
             width, height = image.size
             success = True
         elif default_width > 0 and default_height > 0:
@@ -34,13 +36,14 @@ class ImageFileHandler:
             if PILImage is None:
                 log_report(
                     "ERROR",
-                    "PIL/PILLOW is not installed. Can not read image from disc to get image size.",
+                    "PIL/PILLOW is not installed. Can not read image from disc" 
+                    + " to get image size.",
                     op,
                 )
             else:
                 log_report(
                     "ERROR",
-                    "Corresponding image not found at: " + image_path,
+                    "Corresponding image not found at: " + image_ifp,
                     op,
                 )
             log_report(
@@ -55,32 +58,18 @@ class ImageFileHandler:
             if PILImage is None:
                 log_report(
                     "ERROR",
-                    "Adjust the default width/height values to import the NVM / LOG / MVE file.",
+                    "Adjust the default width/height values to import the"
+                    + " NVM / LOG / MVE file.",
                     op,
                 )
             else:
                 log_report(
                     "ERROR",
-                    "Adjust the image path or the default width/height values to import the NVM / LOG file.",
+                    "Adjust the image path or the default width/height values"
+                    + " to import the NVM / LOG file.",
                     op,
                 )
             width = None
             height = None
             success = False
         return success, width, height
-
-    @staticmethod
-    def parse_camera_image_files(cameras, default_width, default_height, op):
-        log_report("INFO", "parse_camera_image_files: ", op)
-        success = True
-        for camera in cameras:
-            image_path = camera.get_absolute_fp()
-            success, width, height = ImageFileHandler.parse_camera_image_file(
-                image_path, default_width, default_height, op
-            )
-            camera.width = width
-            camera.height = height
-            if not success:
-                break
-        log_report("INFO", "parse_camera_image_files: Done", op)
-        return cameras, success
