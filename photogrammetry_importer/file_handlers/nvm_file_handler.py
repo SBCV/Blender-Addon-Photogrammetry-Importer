@@ -89,10 +89,6 @@ class NVMFileHandler(object):
             current_camera.set_quaternion(quaternion)
 
             # Set the camera center after rotation
-            # COMMENT FROM PBA CODE:
-            #   older format for compability
-            #   camera_data[i].SetQuaternionRotation(q); // quaternion from the file
-            #   camera_data[i].SetCameraCenterAfterRotation(c); // camera center from the file
             current_camera._center = center_vec
 
             # set the camera view direction as normal w.r.t world coordinates
@@ -105,7 +101,7 @@ class NVMFileHandler(object):
             )
             current_camera.normal = cam_view_vec_world_coord
 
-            translation_vec = NVMFileHandler.compute_camera_coordinate_system_translation_vector(
+            translation_vec = NVMFileHandler._compute_translation_vector(
                 center_vec, current_camera.get_rotation_mat()
             )
             current_camera._translation_vec = translation_vec
@@ -143,7 +139,7 @@ class NVMFileHandler(object):
         return points
 
     @staticmethod
-    def parse_fixed_calibration(line, op):
+    def _parse_fixed_calibration(line, op):
 
         line_elements = line.split()
         if len(line_elements) == 1:
@@ -188,7 +184,7 @@ class NVMFileHandler(object):
 
         # Read the first two lines (fixed)
         current_line = (input_file.readline()).rstrip()
-        calibration_matrix = NVMFileHandler.parse_fixed_calibration(
+        calibration_matrix = NVMFileHandler._parse_fixed_calibration(
             current_line, op
         )
         current_line = (input_file.readline()).rstrip()
@@ -231,7 +227,7 @@ class NVMFileHandler(object):
         return cameras, points
 
     @staticmethod
-    def create_nvm_first_line(cameras, op):
+    def _create_nvm_first_line(cameras, op):
 
         log_report("INFO", "create_nvm_first_line: ...", op)
         # The first line can be either
@@ -270,7 +266,7 @@ class NVMFileHandler(object):
         return fl
 
     @staticmethod
-    def nvm_line(content):
+    def _nvm_line(content):
         return content + " " + os.linesep
 
     @staticmethod
@@ -280,13 +276,13 @@ class NVMFileHandler(object):
 
         nvm_content = []
         nvm_content.append(
-            NVMFileHandler.nvm_line(
-                NVMFileHandler.create_nvm_first_line(cameras, op)
+            NVMFileHandler._nvm_line(
+                NVMFileHandler._create_nvm_first_line(cameras, op)
             )
         )
-        nvm_content.append(NVMFileHandler.nvm_line(""))
+        nvm_content.append(NVMFileHandler._nvm_line(""))
         amount_cameras = len(cameras)
-        nvm_content.append(NVMFileHandler.nvm_line(str(amount_cameras)))
+        nvm_content.append(NVMFileHandler._nvm_line(str(amount_cameras)))
         log_report(
             "INFO",
             "Amount Cameras (Images in NVM file):" + str(amount_cameras),
@@ -298,8 +294,6 @@ class NVMFileHandler(object):
         # <Camera> = <File name> <focal length> <quaternion WXYZ> <camera center> <radial distortion> 0
 
         for camera in cameras:
-
-            # quaternion = TransformationFunctions.rotation_matrix_to_quaternion(camera.rotation_mat)
             quaternion = camera.get_quaternion()
 
             current_line = camera.get_relative_fp()
@@ -373,7 +367,7 @@ class NVMFileHandler(object):
         log_report("INFO", "Write NVM file: Done", op)
 
     @staticmethod
-    def compute_camera_coordinate_system_translation_vector(c, R):
+    def _compute_translation_vector(c, R):
 
         """
         x_cam = R (X - C) = RX - RC == RX + t
