@@ -17,34 +17,38 @@ from photogrammetry_importer.types.point import Point
 
 
 class MVEFileHandler(object):
-    def str_to_arr(some_str, target_type):
-        return [target_type(x) for x in some_str.split()]
-
-    def readline_as_numbers(input_file, target_type):
-        line_str = input_file.readline().rstrip()
-        return MVEFileHandler.str_to_arr(line_str, target_type)
 
     @staticmethod
-    def parse_rotation_matrix(input_file):
-        row_1 = MVEFileHandler.readline_as_numbers(
+    def _str_to_arr(some_str, target_type):
+        return [target_type(x) for x in some_str.split()]
+
+    @staticmethod
+    def _readline_as_numbers(input_file, target_type):
+        line_str = input_file.readline().rstrip()
+        return MVEFileHandler._str_to_arr(line_str, target_type)
+
+    @staticmethod
+    def _parse_rotation_matrix(input_file):
+        row_1 = MVEFileHandler._readline_as_numbers(
             input_file, target_type=float
         )
-        row_2 = MVEFileHandler.readline_as_numbers(
+        row_2 = MVEFileHandler._readline_as_numbers(
             input_file, target_type=float
         )
-        row_3 = MVEFileHandler.readline_as_numbers(
+        row_3 = MVEFileHandler._readline_as_numbers(
             input_file, target_type=float
         )
         return np.asarray([row_1, row_2, row_3], dtype=float)
 
     @staticmethod
     def parse_synth_out(synth_out_ifp):
+        """ Parse the :code:`synth_0.out` file in the MVE workspace. """
         points3D = []
 
         with open(synth_out_ifp, "r") as input_file:
             meta_data_line = input_file.readline()
 
-            num_cameras, num_points = MVEFileHandler.readline_as_numbers(
+            num_cameras, num_points = MVEFileHandler._readline_as_numbers(
                 input_file, target_type=int
             )
 
@@ -53,24 +57,24 @@ class MVEFileHandler(object):
 
             # Consume the lines corresponding to the (incomplete) camera information
             for cam_idx in range(num_cameras):
-                intrinsic_line = MVEFileHandler.readline_as_numbers(
+                intrinsic_line = MVEFileHandler._readline_as_numbers(
                     input_file, target_type=float
                 )
-                rotation_mat = MVEFileHandler.parse_rotation_matrix(input_file)
+                rotation_mat = MVEFileHandler._parse_rotation_matrix(input_file)
                 camera_translation = np.asarray(
-                    MVEFileHandler.readline_as_numbers(
+                    MVEFileHandler._readline_as_numbers(
                         input_file, target_type=float
                     )
                 )
 
             for point_idx in range(num_points):
-                coord = MVEFileHandler.readline_as_numbers(
+                coord = MVEFileHandler._readline_as_numbers(
                     input_file, target_type=float
                 )
-                color = MVEFileHandler.readline_as_numbers(
+                color = MVEFileHandler._readline_as_numbers(
                     input_file, target_type=int
                 )
-                measurement_line = MVEFileHandler.readline_as_numbers(
+                measurement_line = MVEFileHandler._readline_as_numbers(
                     input_file, target_type=int
                 )
                 point = Point(
@@ -82,7 +86,7 @@ class MVEFileHandler(object):
 
     @staticmethod
     def parse_meta(meta_ifp, width, height, camera_name, op):
-
+        """Parse a :code:`meta.ini` file in the MVE workspace. """
         view_specific_dir = os.path.dirname(meta_ifp)
         relative_image_fp = os.path.join(view_specific_dir, "undistorted.png")
         image_dp = os.path.dirname(view_specific_dir)
@@ -121,7 +125,7 @@ class MVEFileHandler(object):
         principal_point_str = ini_config.get(
             section="camera", option="principal_point"
         )
-        principal_point_list = MVEFileHandler.str_to_arr(
+        principal_point_list = MVEFileHandler._str_to_arr(
             principal_point_str, target_type=float
         )
         cx_normalized = principal_point_list[0]
@@ -136,20 +140,20 @@ class MVEFileHandler(object):
             section="camera", option="radial_distortion"
         )
         radial_distortion_vec = np.asarray(
-            MVEFileHandler.str_to_arr(radial_distortion_str, target_type=float)
+            MVEFileHandler._str_to_arr(radial_distortion_str, target_type=float)
         )
         check_radial_distortion(radial_distortion_vec, relative_image_fp, op)
 
         rotation_str = ini_config.get(section="camera", option="rotation")
         rotation_mat = np.asarray(
-            MVEFileHandler.str_to_arr(rotation_str, target_type=float)
+            MVEFileHandler._str_to_arr(rotation_str, target_type=float)
         ).reshape((3, 3))
 
         translation_str = ini_config.get(
             section="camera", option="translation"
         )
         translation_vec = np.asarray(
-            MVEFileHandler.str_to_arr(translation_str, target_type=float)
+            MVEFileHandler._str_to_arr(translation_str, target_type=float)
         )
 
         camera.set_rotation_mat(rotation_mat)
@@ -164,7 +168,7 @@ class MVEFileHandler(object):
         add_depth_maps_as_point_cloud,
         op,
     ):
-
+        """Parse the :code:`views` directory in the MVE workspace. """
         cameras = []
         subdirs = get_subdirs(views_idp)
         for subdir in subdirs:
@@ -215,7 +219,7 @@ class MVEFileHandler(object):
         suppress_distortion_warnings,
         op,
     ):
-
+        """Parse a :code:`MVE` workspace. """
         log_report("INFO", "Parse MVE workspace: ...", op)
         log_report("INFO", workspace_idp, op)
         views_idp = os.path.join(workspace_idp, "views")
@@ -232,13 +236,12 @@ class MVEFileHandler(object):
         return cameras, points3D
 
     @staticmethod
-    def read_next_bytes(
+    def _read_next_bytes(
         fid, num_bytes, format_char_sequence, endian_character="<"
     ):
         """Read and unpack the next bytes from a binary file.
-        :param fid:
-        :param num_bytes: Sum of combination of {2, 4, 8}, e.g. 2, 6, 16, 30, etc.
-        :param format_char_sequence: List of {c, e, f, d, h, H, i, I, l, L, q, Q}.
+        :param num_bytes: Sum of combination of {2, 4, 8}, e.g. 2, 6, 16, etc.
+        :param format_char_sequence: List of {c, e, f, d, h, H, i, I, ...}.
         :param endian_character: Any of {@, =, <, >, !}
         :return: Tuple of read and unpacked values.
         """
@@ -247,24 +250,24 @@ class MVEFileHandler(object):
 
     @staticmethod
     def read_depth_map(depth_map_ifp):
-
+        """Read a depth map. """
         # See:
         # https://github.com/simonfuhrmann/mve/wiki/MVE-File-Format#the-mvei-image-format
         # https://github.com/simonfuhrmann/mve/blob/master/libs/mve/image_io.cc
 
         with open(depth_map_ifp, "rb") as fid:
-            mvei_file_signature = MVEFileHandler.read_next_bytes(
+            mvei_file_signature = MVEFileHandler._read_next_bytes(
                 fid, 11, "ccccccccccc"
             )
-            width = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
-            height = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
-            channels = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
+            width = MVEFileHandler._read_next_bytes(fid, 4, "i")[0]
+            height = MVEFileHandler._read_next_bytes(fid, 4, "i")[0]
+            channels = MVEFileHandler._read_next_bytes(fid, 4, "i")[0]
             assert channels == 1
-            raw_type = MVEFileHandler.read_next_bytes(fid, 4, "i")[0]
+            raw_type = MVEFileHandler._read_next_bytes(fid, 4, "i")[0]
             assert raw_type == 9  # IMAGE_TYPE_FLOAT
             num_elements = width * height * channels
             data = np.asarray(
-                MVEFileHandler.read_next_bytes(
+                MVEFileHandler._read_next_bytes(
                     fid, num_elements * 4, "f" * num_elements
                 )
             )
