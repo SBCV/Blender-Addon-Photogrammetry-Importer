@@ -162,7 +162,7 @@ class MeshroomFileHandler:
     def parse_sfm_file(
         sfm_ifp, image_idp, image_fp_type, suppress_distortion_warnings, op
     ):
-        """ Parse Meshroom's Structure from Motion files (.sfm and .json).
+        """Parse Meshroom's Structure from Motion files (.sfm and .json).
 
         Parse different file formats created with the
         StructureFromMotion / ConvertSfMFormat node in Meshroom.

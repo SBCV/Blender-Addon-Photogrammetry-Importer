@@ -17,7 +17,6 @@ from photogrammetry_importer.types.point import Point
 
 
 class MVEFileHandler(object):
-
     @staticmethod
     def _str_to_arr(some_str, target_type):
         return [target_type(x) for x in some_str.split()]
@@ -60,7 +59,9 @@ class MVEFileHandler(object):
                 intrinsic_line = MVEFileHandler._readline_as_numbers(
                     input_file, target_type=float
                 )
-                rotation_mat = MVEFileHandler._parse_rotation_matrix(input_file)
+                rotation_mat = MVEFileHandler._parse_rotation_matrix(
+                    input_file
+                )
                 camera_translation = np.asarray(
                     MVEFileHandler._readline_as_numbers(
                         input_file, target_type=float
@@ -140,7 +141,9 @@ class MVEFileHandler(object):
             section="camera", option="radial_distortion"
         )
         radial_distortion_vec = np.asarray(
-            MVEFileHandler._str_to_arr(radial_distortion_str, target_type=float)
+            MVEFileHandler._str_to_arr(
+                radial_distortion_str, target_type=float
+            )
         )
         check_radial_distortion(radial_distortion_vec, relative_image_fp, op)
 
