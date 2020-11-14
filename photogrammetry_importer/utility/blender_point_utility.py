@@ -222,7 +222,7 @@ def add_points_as_particle_system(
     point_extent,
     add_particle_color_emission,
     reconstruction_collection,
-    set_particle_color_flag,
+    set_particle_color_flag=False,
     particle_overwrite_color=None,
 ):
     log_report("INFO", "Adding Points as Particle System: ...", op)
@@ -230,7 +230,7 @@ def add_points_as_particle_system(
 
     # The particle systems in Blender do not work for large particle numbers
     # (see https://developer.blender.org/T81103). Thus, we represent large
-    # point clouds with multiple smaller particle systems
+    # point clouds with multiple smaller particle systems.
     max_number_particles = 10000
 
     particle_system_collection = add_collection(
