@@ -39,11 +39,10 @@ def compute_particle_color_texture(colors, name="ParticleColor"):
 
 
 def create_particle_color_nodes(
-    node_tree, colors, set_particle_color_flag, particle_overwrite_color=None
+    node_tree, colors, particle_overwrite_color=None
 ):
 
-    if set_particle_color_flag:
-        assert particle_overwrite_color is not None
+    if particle_overwrite_color is not None:
         if "RGB" in node_tree.nodes:
             particle_color_node = node_tree.nodes["RGB"]
         else:
@@ -102,7 +101,6 @@ def add_particle(
     colors,
     particle_obj_name,
     particle_material_name,
-    set_particle_color_flag,
     particle_overwrite_color,
     add_particle_color_emission,
     mesh_type,
@@ -131,7 +129,6 @@ def add_particle(
         colors,
         particle_obj,
         particle_material_name,
-        set_particle_color_flag,
         particle_overwrite_color,
         add_particle_color_emission,
     )
@@ -143,7 +140,6 @@ def add_particle_material(
     colors,
     particle_obj,
     particle_material_name,
-    set_particle_color_flag,
     particle_overwrite_color,
     add_particle_color_emission,
 ):
@@ -173,7 +169,7 @@ def add_particle_material(
     )
 
     particle_color_node = create_particle_color_nodes(
-        node_tree, colors, set_particle_color_flag, particle_overwrite_color
+        node_tree, colors, particle_overwrite_color
     )
 
     # Add links for base color and emission to improve color visibility
@@ -222,7 +218,6 @@ def add_points_as_particle_system(
     point_extent,
     add_particle_color_emission,
     reconstruction_collection,
-    set_particle_color_flag=False,
     particle_overwrite_color=None,
 ):
     log_report("INFO", "Adding Points as Particle System: ...", op)
@@ -250,7 +245,6 @@ def add_points_as_particle_system(
             colors,
             particle_obj_name,
             particle_material_name,
-            set_particle_color_flag,
             particle_overwrite_color,
             add_particle_color_emission,
             mesh_type,

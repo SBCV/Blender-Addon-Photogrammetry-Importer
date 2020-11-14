@@ -131,6 +131,11 @@ class PointImportProperties:
                 )
 
             if self.add_points_as_particle_system:
+                if self.set_particle_color_flag:
+                    particle_overwrite_color = self.particle_overwrite_color
+                else:
+                    particle_overwrite_color = None
+
                 particle_point_cloud_obj_name = add_points_as_particle_system(
                     self,
                     points,
@@ -138,8 +143,7 @@ class PointImportProperties:
                     self.point_extent,
                     self.add_particle_color_emission,
                     reconstruction_collection,
-                    self.set_particle_color_flag,
-                    self.particle_overwrite_color,
+                    particle_overwrite_color,
                 )
 
             if self.add_points_as_mesh_oject:
