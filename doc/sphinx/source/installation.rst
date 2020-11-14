@@ -75,8 +75,8 @@ Requires Blender 2.83.5 or newer.
 
 Dependending on the location of the Blender installation directory administrator privileges might be required to install the dependencies. 
 
-Option 2: Installation using the command linie
-----------------------------------------------
+Option 2: Installation using the command line
+---------------------------------------------
 
 In case the installation using the GUI does not work, it is possible to install the dependencies with the command line.
 
