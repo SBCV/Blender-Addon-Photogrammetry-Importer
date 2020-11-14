@@ -16,7 +16,7 @@ class MeshroomFileHandler:
     # Note: *.SfM files are actually just *.JSON files.
 
     @staticmethod
-    def _get_element(data_list, id_string, query_id, op):
+    def _get_element(data_list, id_string, query_id):
         result = None
         for ele in data_list:
             if int(ele[id_string]) == query_id:
@@ -64,7 +64,7 @@ class MeshroomFileHandler:
             image_index_to_camera_index[view_index] = rec_index
 
             corresponding_view = MeshroomFileHandler._get_element(
-                views, "poseId", view_index, op
+                views, "poseId", view_index
             )
 
             camera.image_fp_type = image_fp_type
@@ -86,7 +86,7 @@ class MeshroomFileHandler:
             id_intrinsic = int(corresponding_view["intrinsicId"])
 
             intrinsic_params = MeshroomFileHandler._get_element(
-                intrinsics, "intrinsicId", id_intrinsic, op
+                intrinsics, "intrinsicId", id_intrinsic
             )
 
             focal_length = float(intrinsic_params["pxFocalLength"])
@@ -160,7 +160,7 @@ class MeshroomFileHandler:
 
     @staticmethod
     def parse_sfm_file(
-        sfm_ifp, image_idp, image_fp_type, suppress_distortion_warnings, op
+        sfm_ifp, image_idp, image_fp_type, suppress_distortion_warnings, op=None
     ):
         """Parse Meshroom's Structure from Motion files (.sfm and .json).
 
