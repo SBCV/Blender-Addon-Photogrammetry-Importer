@@ -124,10 +124,10 @@ class PointImportProperties:
 
             if self.draw_points_with_gpu:
                 draw_points(
-                    self,
                     points,
                     self.add_points_to_point_cloud_handle,
                     reconstruction_collection,
+                    op=self,
                 )
 
             if self.add_points_as_particle_system:
@@ -137,25 +137,28 @@ class PointImportProperties:
                     particle_overwrite_color = None
 
                 particle_point_cloud_obj_name = add_points_as_particle_system(
-                    self,
                     points,
                     self.mesh_type,
                     self.point_extent,
                     self.add_particle_color_emission,
                     reconstruction_collection,
                     particle_overwrite_color,
+                    op=self,
                 )
 
             if self.add_points_as_mesh_oject:
                 point_cloud_obj_name = add_points_as_mesh(
-                    self, points, reconstruction_collection
+                    points,
+                    reconstruction_collection,
+                    op=self,
                 )
 
             # if transformations_sorted is not None:
-            #     add_transformation_animation(
-            #         self,
-            #         point_cloud_obj_name,
-            #         transformations_sorted,
-            #         number_interpolation_frames=1,
-            #         interpolation_type=None,
-            #         remove_rotation_discontinuities=False)
+            # add_transformation_animation(
+            #     point_cloud_obj_name,
+            #     transformations_sorted,
+            #     number_interpolation_frames=1,
+            #     interpolation_type=None,
+            #     remove_rotation_discontinuities=False,
+            #     op=self,
+            # )

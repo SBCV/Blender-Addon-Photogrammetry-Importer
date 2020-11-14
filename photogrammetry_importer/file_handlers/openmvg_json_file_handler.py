@@ -145,7 +145,7 @@ class OpenMVGJSONFileHandler:
         return cams
 
     @staticmethod
-    def parse_points(json_data, op, view_index_to_absolute_fp=None):
+    def parse_points(json_data, view_index_to_absolute_fp=None, op=None):
 
         compute_color = True
         try:
@@ -277,7 +277,7 @@ class OpenMVGJSONFileHandler:
             cam.view_index: cam.get_absolute_fp() for cam in cams
         }
         points = OpenMVGJSONFileHandler.parse_points(
-            json_data, op, view_index_to_absolute_fp
+            json_data, view_index_to_absolute_fp, op
         )
         log_report("INFO", "parse_openmvg_file: Done", op)
         return cams, points

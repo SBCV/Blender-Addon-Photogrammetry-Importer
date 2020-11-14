@@ -15,12 +15,12 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 def draw_coords_with_color(
-    op,
     coords,
     colors,
     add_points_to_point_cloud_handle,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Point Cloud",
+    op=None,
 ):
 
     object_anchor_handle = add_empty(
@@ -39,46 +39,46 @@ def draw_coords_with_color(
 
 
 def draw_points(
-    op,
     points,
     add_points_to_point_cloud_handle,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Point Cloud",
+    op=None,
 ):
 
     log_report("INFO", "Add particle draw handlers", op)
 
     coords, colors = Point.split_points(points)
     object_anchor_handle = draw_coords_with_color(
-        op,
         coords,
         colors,
         add_points_to_point_cloud_handle,
         reconstruction_collection,
         object_anchor_handle_name,
+        op=op,
     )
     return object_anchor_handle
 
 
 def draw_coords(
-    op,
     coords,
     add_points_to_point_cloud_handle,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Coord Point Cloud",
     color=(0, 0, 255, 1.0),
+    op=None,
 ):
     if len(color) == 3:
         color = (color[0], color[1], color[2], 1)
     assert len(color) == 4
     colors = [color for coord in coords]
     object_anchor_handle = draw_coords_with_color(
-        op,
         coords,
         colors,
         add_points_to_point_cloud_handle,
         reconstruction_collection,
         object_anchor_handle_name,
+        op=op,
     )
     return object_anchor_handle
 

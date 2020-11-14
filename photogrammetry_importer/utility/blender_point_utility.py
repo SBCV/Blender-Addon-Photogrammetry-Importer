@@ -212,13 +212,13 @@ def add_particle_system(
 
 
 def add_points_as_particle_system(
-    op,
     points,
     mesh_type,
     point_extent,
     add_particle_color_emission,
     reconstruction_collection,
     particle_overwrite_color=None,
+    op=None,
 ):
     log_report("INFO", "Adding Points as Particle System: ...", op)
     stop_watch = StopWatch()
@@ -265,7 +265,7 @@ def add_points_as_particle_system(
     return point_cloud_obj.name
 
 
-def add_points_as_mesh(op, points, reconstruction_collection):
+def add_points_as_mesh(points, reconstruction_collection, op=None):
     log_report("INFO", "Adding Points as Mesh: ...", op)
     stop_watch = StopWatch()
     point_cloud_obj_name = "Mesh Point Cloud"

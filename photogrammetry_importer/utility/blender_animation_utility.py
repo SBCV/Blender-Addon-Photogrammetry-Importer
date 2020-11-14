@@ -68,12 +68,12 @@ def set_fcurve_interpolation(some_obj, interpolation_type="LINEAR"):
 
 
 def add_transformation_animation(
-    op,
     animated_obj_name,
     transformations_sorted,
     number_interpolation_frames,
     interpolation_type=None,
     remove_rotation_discontinuities=True,
+    op=None,
 ):
     log_report("INFO", "Adding transformation animation: ...", op)
 
@@ -122,7 +122,7 @@ def add_transformation_animation(
 
 
 def add_camera_intrinsics_animation(
-    op, animated_obj_name, intrinsics_sorted, number_interpolation_frames
+    animated_obj_name, intrinsics_sorted, number_interpolation_frames, op=None
 ):
 
     log_report("INFO", "Adding camera intrinsic parameter animation: ...", op)

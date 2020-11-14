@@ -91,7 +91,7 @@ def compute_shift(camera, relativ_to_largest_extend):
     return shift_x, shift_y
 
 
-def add_single_camera(op, camera_name, camera):
+def add_single_camera(camera_name, camera, op=None):
     # Add camera:
     bcamera = bpy.data.cameras.new(camera_name)
 
@@ -119,7 +119,9 @@ def add_single_camera(op, camera_name, camera):
     return bcamera
 
 
-def enhance_cameras_with_dummy_cameras(op, cameras, image_dp, image_fp_type):
+def enhance_cameras_with_dummy_cameras(
+    cameras, image_dp, image_fp_type, op=None
+):
 
     rec_image_relative_fp = [camera.get_relative_fp() for camera in cameras]
 
@@ -150,7 +152,6 @@ def enhance_cameras_with_dummy_cameras(op, cameras, image_dp, image_fp_type):
 
 
 def add_camera_animation(
-    op,
     cameras,
     parent_collection,
     animation_frame_source,
@@ -161,6 +162,7 @@ def add_camera_animation(
     remove_rotation_discontinuities,
     image_dp,
     image_fp_type,
+    op=None,
 ):
     log_report("INFO", "Adding Camera Animation: ...")
 
@@ -176,14 +178,14 @@ def add_camera_animation(
 
     if consider_missing_cameras_during_animation:
         cameras = enhance_cameras_with_dummy_cameras(
-            op, cameras, image_dp, image_fp_type
+            cameras, image_dp, image_fp_type, op
         )
 
     # Using the first reconstructed camera as template for the animated camera.
     # The values are adjusted with add_transformation_animation() and
     # add_camera_intrinsics_animation().
     some_cam = cameras[0]
-    bcamera = add_single_camera(op, "Animated Camera", some_cam)
+    bcamera = add_single_camera("Animated Camera", some_cam, op)
     cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)
     cameras_sorted = sorted(
         cameras, key=lambda camera: camera.get_relative_fp()
@@ -208,19 +210,19 @@ def add_camera_animation(
         camera_intrinsics_sorted.append(camera_intrinsics)
 
     add_transformation_animation(
-        op=op,
         animated_obj_name=cam_obj.name,
         transformations_sorted=transformations_sorted,
         number_interpolation_frames=number_interpolation_frames,
         interpolation_type=interpolation_type,
         remove_rotation_discontinuities=remove_rotation_discontinuities,
+        op=op,
     )
 
     add_camera_intrinsics_animation(
-        op=op,
         animated_obj_name=cam_obj.name,
         intrinsics_sorted=camera_intrinsics_sorted,
         number_interpolation_frames=number_interpolation_frames,
+        op=op,
     )
 
     if add_background_images:
@@ -269,7 +271,6 @@ def color_from_value(val, min_val, max_val):
 
 
 def add_cameras(
-    op,
     cameras,
     parent_collection,
     image_dp=None,
@@ -287,6 +288,7 @@ def add_cameras(
     depth_map_default_color=(1.0, 0.0, 0.0),
     depth_map_display_sparsity=10,
     depth_map_id_or_name_str="",
+    op=None,
 ):
 
     """
@@ -361,7 +363,7 @@ def add_cameras(
         # Replace the camera name so it matches the image name (without extension)
         blender_image_name_stem = camera.get_blender_obj_gui_str()
         camera_name = blender_image_name_stem + "_cam"
-        bcamera = add_single_camera(op, camera_name, camera)
+        bcamera = add_single_camera(camera_name, camera, op)
         camera_object = add_obj(bcamera, camera_name, camera_collection)
         matrix_world = compute_camera_matrix_world(camera)
         camera_object.matrix_world = matrix_world
@@ -446,7 +448,6 @@ def add_cameras(
             )
 
         depth_map_anchor_handle = draw_coords(
-            op,
             depth_map_world_coords,
             # TODO Setting this to true causes an error message
             add_points_to_point_cloud_handle=False,
@@ -454,6 +455,7 @@ def add_cameras(
             object_anchor_handle_name=camera.get_blender_obj_gui_str()
             + "_depth_point_cloud",
             color=color,
+            op=op,
         )
 
         camera_depth_map_pair_collection_current.objects.link(camera_object)
@@ -473,7 +475,7 @@ def add_camera_image_plane(
     transparency,
     add_image_plane_emission,
     image_planes_collection,
-    op,
+    op=None,
 ):
     """
     Create mesh for image plane
@@ -554,7 +556,9 @@ def add_camera_image_plane(
     return mesh_obj
 
 
-def set_principal_point_for_cameras(cameras, default_pp_x, default_pp_y, op):
+def set_principal_point_for_cameras(
+    cameras, default_pp_x, default_pp_y, op=None
+):
 
     if not math.isnan(default_pp_x) and not math.isnan(default_pp_y):
         log_report("WARNING", "Setting principal points to default values!")
@@ -589,7 +593,7 @@ def get_selected_camera():
         return None
 
 
-def check_radial_distortion(radial_distortion, camera_name, op):
+def check_radial_distortion(radial_distortion, camera_name, op=None):
     # TODO
     # Integrate lens distortion nodes
     # https://docs.blender.org/manual/en/latest/compositing/types/distort/lens_distortion.html

@@ -39,6 +39,6 @@ class ExportNVMOperator(ExportOperator, ExportHelper):
         for cam in cameras:
             assert cam.get_calibration_mat() is not None
 
-        NVMFileHandler.write_nvm_file(self, ofp, cameras, points)
+        NVMFileHandler.write_nvm_file(ofp, cameras, points, op=self)
 
         return {"FINISHED"}

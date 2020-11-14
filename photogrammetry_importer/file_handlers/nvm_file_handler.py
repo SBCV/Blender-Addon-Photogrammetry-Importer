@@ -243,12 +243,13 @@ class NVMFileHandler(object):
 
         fixed_calibration = True
         for cam in cameras:
-            op.report(
-                {"INFO"},
+            log_report(
+                "INFO",
                 "cam.get_calibration_mat(): " + str(cam.get_calibration_mat()),
+                op,
             )
             if not np.allclose(cam.get_calibration_mat(), calib_mat):
-                op.report({"INFO"}, "calib_mat: " + str(calib_mat))
+                log_report("INFO", "calib_mat: " + str(calib_mat), op)
                 fixed_calibration = False
                 break
         log_report("INFO", "fixed_calibration: " + str(fixed_calibration), op)
@@ -270,7 +271,7 @@ class NVMFileHandler(object):
         return content + " " + os.linesep
 
     @staticmethod
-    def write_nvm_file(op, output_nvm_file_name, cameras, points):
+    def write_nvm_file(output_nvm_file_name, cameras, points, op=None):
 
         log_report("INFO", "Write NVM file: " + output_nvm_file_name, op)
 

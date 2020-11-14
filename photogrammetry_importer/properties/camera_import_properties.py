@@ -331,11 +331,10 @@ class CameraImportProperties:
                     )
 
                 if self.adjust_render_settings:
-                    adjust_render_settings_if_possible(self, cameras)
+                    adjust_render_settings_if_possible(cameras, op=self)
 
                 if self.import_cameras:
                     add_cameras(
-                        self,
                         cameras,
                         parent_collection,
                         image_dp=self.image_dp,
@@ -349,11 +348,11 @@ class CameraImportProperties:
                         depth_map_default_color=self.depth_map_default_color,
                         depth_map_display_sparsity=self.depth_map_display_sparsity,
                         depth_map_id_or_name_str=self.depth_map_id_or_name_str,
+                        op=self,
                     )
 
                 if self.add_camera_motion_as_animation:
                     add_camera_animation(
-                        self,
                         cameras,
                         parent_collection,
                         self.animation_frame_source,
@@ -364,6 +363,7 @@ class CameraImportProperties:
                         self.remove_rotation_discontinuities,
                         self.image_dp,
                         self.image_fp_type,
+                        op=self,
                     )
             else:
                 return {"FINISHED"}
