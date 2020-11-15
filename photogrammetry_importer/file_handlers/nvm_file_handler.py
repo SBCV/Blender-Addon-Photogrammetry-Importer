@@ -25,7 +25,7 @@ class NVMFileHandler(object):
         image_dp,
         image_fp_type,
         suppress_distortion_warnings,
-        op,
+        op=None,
     ):
 
         """

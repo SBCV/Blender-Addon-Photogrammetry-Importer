@@ -282,7 +282,7 @@ class ColmapFileHandler:
 
     @staticmethod
     def parse_colmap_folder(
-        idp, image_dp, image_fp_type, suppress_distortion_warnings, op
+        idp, image_dp, image_fp_type, suppress_distortion_warnings, op=None
     ):
         """ Parse a Colmap model or a Colmap workspace. """
         log_report("INFO", "idp: " + str(idp), op)
