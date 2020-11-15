@@ -14,11 +14,31 @@ According to the `documentation <https://docs.blender.org/api/blender_python_api
 
         `The only difference between addons and built-in Python modules is that addons must contain a bl_info variable`
 
-Therefore, after installation and activation one can import different classes etc. using Pythons standard import syntax.
-For example: ::
+Therefore, after installation and activation one can use Python's standard import syntax to import different classes and functions such as: ::
 
         from photogrammetry_importer.camera import Camera
         from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
+        from photogrammetry_importer.utility.blender_point_utility import add_points_as_particle_system
+
+The following example shows how to add points contained in a :code:`ply` file as a particle system. ::
+
+        from photogrammetry_importer.file_handlers.point_data_file_handler import PointDataFileHandler
+        from photogrammetry_importer.utility.blender_utility import add_collection
+        from photogrammetry_importer.utility.blender_point_utility import add_points_as_particle_system
+
+        ifp = r'path\to\Blender-Addon-Photogrammetry-Importer\examples\Example.ply'
+        points = PointDataFileHandler.parse_point_data_file(ifp)
+        mesh_type = "CUBE"
+        point_extent = 0.01
+        add_particle_color_emission = True
+        reconstruction_collection = add_collection("Reconstruction Collection")
+        add_points_as_particle_system(
+                points,
+                mesh_type,
+                point_extent,
+                add_particle_color_emission,
+                reconstruction_collection
+        )
 
 
 Option 2: Call the appropriate operator registered in bpy.ops.import_scene
