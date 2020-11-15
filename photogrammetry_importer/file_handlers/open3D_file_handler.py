@@ -18,7 +18,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class Open3DFileHandler:
     @staticmethod
-    def parse_open3d_file(open3d_ifp, image_dp, image_fp_type, op):
+    def parse_open3d_file(open3d_ifp, image_dp, image_fp_type, op=None):
         """
         http://www.open3d.org/docs/release/python_api/open3d.camera.PinholeCameraTrajectory.html
         Open3D supports different file formats:

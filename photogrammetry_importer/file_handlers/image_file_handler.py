@@ -11,7 +11,7 @@ class ImageFileHandler:
     """ Class to read and write images using PIL. """
 
     @staticmethod
-    def read_image_size(image_ifp, default_width, default_height, op):
+    def read_image_size(image_ifp, default_width, default_height, op=None):
         """ Read image size from disk. """
 
         if _PILImage is not None and os.path.isfile(image_ifp):

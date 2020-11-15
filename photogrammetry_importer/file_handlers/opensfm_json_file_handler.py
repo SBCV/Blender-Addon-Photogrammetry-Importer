@@ -171,7 +171,7 @@ class OpenSfMJSONFileHandler:
         image_fp_type,
         suppress_distortion_warnings,
         reconstruction_idx,
-        op,
+        op=None,
     ):
 
         log_report("INFO", "parse_opensfm_file: ...", op)

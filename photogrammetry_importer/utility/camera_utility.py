@@ -4,7 +4,9 @@ from photogrammetry_importer.file_handlers.image_file_handler import (
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-def set_image_size_for_cameras(cameras, default_width, default_height, op):
+def set_image_size_for_cameras(
+    cameras, default_width, default_height, op=None
+):
     """ Set image sizes for cameras and return a boolean. """
 
     log_report("INFO", "set_image_size_for_cameras: ", op)

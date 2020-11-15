@@ -25,7 +25,11 @@ class OpenMVGJSONFileHandler:
 
     @staticmethod
     def parse_cameras(
-        json_data, image_dp, image_fp_type, suppress_distortion_warnings, op
+        json_data,
+        image_dp,
+        image_fp_type,
+        suppress_distortion_warnings,
+        op=None,
     ):
 
         views = {item["key"]: item for item in json_data["views"]}
@@ -251,7 +255,7 @@ class OpenMVGJSONFileHandler:
         image_dp,
         image_fp_type,
         suppress_distortion_warnings,
-        op,
+        op=None,
     ):
         """
         The path_to_input_files parameter is optional, if provided the returned points carry also color information

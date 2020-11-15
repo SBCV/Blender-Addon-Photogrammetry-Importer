@@ -92,7 +92,7 @@ def add_collection(collection_name, parent_collection=None):
     return new_collection
 
 
-def adjust_render_settings_if_possible(cameras, op):
+def adjust_render_settings_if_possible(cameras, op=None):
 
     if len(cameras) == 0:
         return

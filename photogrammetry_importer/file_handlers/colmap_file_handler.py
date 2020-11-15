@@ -100,7 +100,7 @@ class ColmapFileHandler:
         image_fp_type,
         depth_map_idp,
         suppress_distortion_warnings,
-        op,
+        op=None,
     ):
         # From photogrammetry_importer\ext\read_write_model.py
         #   CameraModel = collections.namedtuple(
@@ -233,7 +233,7 @@ class ColmapFileHandler:
         image_fp_type,
         depth_map_idp,
         suppress_distortion_warnings,
-        op,
+        op=None,
     ):
         """ Parse a Colmap model. """
         log_report("INFO", "Parse Colmap model folder: " + model_idp, op)
@@ -318,7 +318,7 @@ class ColmapFileHandler:
         return cameras, points, mesh_ifp
 
     @staticmethod
-    def write_colmap_model(odp, cameras, points, op):
+    def write_colmap_model(odp, cameras, points, op=None):
         """ Write cameras and points as Colmap model. """
         log_report("INFO", "Write Colmap model folder: " + odp, op)
 

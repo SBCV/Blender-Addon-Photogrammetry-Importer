@@ -169,7 +169,7 @@ class MVEFileHandler(object):
         default_width,
         default_height,
         add_depth_maps_as_point_cloud,
-        op,
+        op=None,
     ):
         """Parse the :code:`views` directory in the MVE workspace. """
         cameras = []
@@ -220,7 +220,7 @@ class MVEFileHandler(object):
         default_height,
         add_depth_maps_as_point_cloud,
         suppress_distortion_warnings,
-        op,
+        op=None,
     ):
         """Parse a :code:`MVE` workspace. """
         log_report("INFO", "Parse MVE workspace: ...", op)

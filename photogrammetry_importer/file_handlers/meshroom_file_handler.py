@@ -160,7 +160,11 @@ class MeshroomFileHandler:
 
     @staticmethod
     def parse_sfm_file(
-        sfm_ifp, image_idp, image_fp_type, suppress_distortion_warnings, op=None
+        sfm_ifp,
+        image_idp,
+        image_fp_type,
+        suppress_distortion_warnings,
+        op=None,
     ):
         """Parse Meshroom's Structure from Motion files (.sfm and .json).
 
@@ -258,7 +262,7 @@ class MeshroomFileHandler:
         sfm_node_number,
         mesh_node_type,
         mesh_node_number,
-        op,
+        op=None,
     ):
         """ Parse Meshroom's project files (.mg). """
 
@@ -394,7 +398,7 @@ class MeshroomFileHandler:
         sfm_node_number,
         mesh_node_type,
         mesh_node_number,
-        op,
+        op=None,
     ):
         """ Parse Meshroom's .mg, .sfm and .json files. """
         log_report("INFO", "parse_meshroom_file: ...", op)
