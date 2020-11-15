@@ -5,7 +5,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class TransformationFileHandler:
     @staticmethod
-    def parse_transformation_folder(t_idp, op):
+    def parse_transformation_folder(t_idp, op=None):
 
         if not os.path.isdir(t_idp):
             return []

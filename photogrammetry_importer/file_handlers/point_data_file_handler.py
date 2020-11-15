@@ -178,7 +178,7 @@ class PointDataFileHandler(object):
         return named_list
 
     @staticmethod
-    def parse_point_data_file(ifp, op):
+    def parse_point_data_file(ifp, op=None):
         log_report("INFO", "Parse Point Data File: ...")
         # https://pyntcloud.readthedocs.io/en/latest/io.html
         # https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O
