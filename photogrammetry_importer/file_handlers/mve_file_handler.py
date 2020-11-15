@@ -41,7 +41,7 @@ class MVEFileHandler(object):
 
     @staticmethod
     def parse_synth_out(synth_out_ifp):
-        """ Parse the :code:`synth_0.out` file in the MVE workspace. """
+        """Parse the :code:`synth_0.out` file in the :code:`MVE` workspace."""
         points3D = []
 
         with open(synth_out_ifp, "r") as input_file:
@@ -87,7 +87,7 @@ class MVEFileHandler(object):
 
     @staticmethod
     def parse_meta(meta_ifp, width, height, camera_name, op):
-        """Parse a :code:`meta.ini` file in the MVE workspace. """
+        """Parse a :code:`meta.ini` file in the :code:`MVE` workspace."""
         view_specific_dir = os.path.dirname(meta_ifp)
         relative_image_fp = os.path.join(view_specific_dir, "undistorted.png")
         image_dp = os.path.dirname(view_specific_dir)
@@ -171,7 +171,7 @@ class MVEFileHandler(object):
         add_depth_maps_as_point_cloud,
         op=None,
     ):
-        """Parse the :code:`views` directory in the MVE workspace. """
+        """Parse the :code:`views` directory in the :code:`MVE` workspace."""
         cameras = []
         subdirs = get_subdirs(views_idp)
         for subdir in subdirs:

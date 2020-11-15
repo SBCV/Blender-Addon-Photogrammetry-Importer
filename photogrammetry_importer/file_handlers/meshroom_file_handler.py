@@ -11,7 +11,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class MeshroomFileHandler:
-    """ Class to read and write Meshroom files and workspaces. """
+    """Class to read and write :code:`Meshroom` files and workspaces."""
 
     # Note: *.SfM files are actually just *.JSON files.
 
@@ -166,10 +166,11 @@ class MeshroomFileHandler:
         suppress_distortion_warnings,
         op=None,
     ):
-        """Parse Meshroom's Structure from Motion files (.sfm and .json).
+        """Parse a :code:`Meshroom` (:code:`.sfm` or :code:`.json`) file.
 
         Parse different file formats created with the
-        StructureFromMotion / ConvertSfMFormat node in Meshroom.
+        :code:`StructureFromMotion` / :code:`ConvertSfMFormat` node in
+        :code:`Meshroom`.
         """
         log_report("INFO", "parse_sfm_file: ...", op)
         log_report("INFO", "sfm_ifp: " + sfm_ifp, op)
@@ -264,7 +265,7 @@ class MeshroomFileHandler:
         mesh_node_number,
         op=None,
     ):
-        """ Parse Meshroom's project files (.mg). """
+        """Parse a :code:`Meshroom` project file (:code:`.mg`)."""
 
         cache_dp = os.path.join(os.path.dirname(mg_fp), "MeshroomCache")
         json_data = json.load(open(mg_fp, "r"))
@@ -400,7 +401,10 @@ class MeshroomFileHandler:
         mesh_node_number,
         op=None,
     ):
-        """ Parse Meshroom's .mg, .sfm and .json files. """
+        """Parse a :code:`Meshroom` file.
+
+        Supported file formats are :code:`.mg`, :code:`.sfm` or :code:`.json`.
+        """
         log_report("INFO", "parse_meshroom_file: ...", op)
         log_report("INFO", "meshroom_ifp: " + meshroom_ifp, op)
 

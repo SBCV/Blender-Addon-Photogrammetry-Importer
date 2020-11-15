@@ -47,7 +47,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class ColmapFileHandler:
-    """ Class to read and write Colmap models and workspaces. """
+    """Class to read and write :code:`Colmap` models and workspaces."""
 
     @staticmethod
     def _parse_camera_param_list(cam):
@@ -235,7 +235,7 @@ class ColmapFileHandler:
         suppress_distortion_warnings,
         op=None,
     ):
-        """ Parse a Colmap model. """
+        """Parse a :code:`Colmap` model."""
         log_report("INFO", "Parse Colmap model folder: " + model_idp, op)
 
         assert ColmapFileHandler._is_valid_model_folder(model_idp)
@@ -263,7 +263,7 @@ class ColmapFileHandler:
 
     @staticmethod
     def _disassemble_colmap_workspace_folder(workspace_idp):
-        """ Parse a Colmap workspace. """
+        """Parse a :code:`Colmap` workspace."""
         assert ColmapFileHandler._is_valid_workspace_folder(workspace_idp)
 
         model_idp = os.path.join(workspace_idp, "sparse")
@@ -284,7 +284,7 @@ class ColmapFileHandler:
     def parse_colmap_folder(
         idp, image_dp, image_fp_type, suppress_distortion_warnings, op=None
     ):
-        """ Parse a Colmap model or a Colmap workspace. """
+        """Parse a :code:`Colmap` model or a :code:`Colmap` workspace."""
         log_report("INFO", "idp: " + str(idp), op)
 
         if ColmapFileHandler._is_valid_model_folder(idp):
@@ -319,7 +319,7 @@ class ColmapFileHandler:
 
     @staticmethod
     def write_colmap_model(odp, cameras, points, op=None):
-        """ Write cameras and points as Colmap model. """
+        """Write cameras and points as :code:`Colmap` model."""
         log_report("INFO", "Write Colmap model folder: " + odp, op)
 
         if not os.path.isdir(odp):

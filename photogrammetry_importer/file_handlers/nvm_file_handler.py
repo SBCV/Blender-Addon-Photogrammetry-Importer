@@ -170,7 +170,7 @@ class NVMFileHandler(object):
         suppress_distortion_warnings,
         op=None,
     ):
-
+        """Parse a :code:`VisualSfM` (:code:`.nvm`) file."""
         log_report("INFO", "Parse NVM file: " + input_visual_fsm_file_name, op)
         input_file = open(input_visual_fsm_file_name, "r")
         # Documentation of *.NVM data format
@@ -272,6 +272,7 @@ class NVMFileHandler(object):
 
     @staticmethod
     def write_nvm_file(output_nvm_file_name, cameras, points, op=None):
+        """Write cameras and points as :code:`.nvm` file."""
 
         log_report("INFO", "Write NVM file: " + output_nvm_file_name, op)
 
