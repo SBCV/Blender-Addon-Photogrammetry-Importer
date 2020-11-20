@@ -2,11 +2,6 @@ import json
 import numpy as np
 import os
 
-try:
-    from PIL import Image as PILImage
-except ImportError:
-    PILImage = None
-
 from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.utility.os_utility import (
@@ -18,14 +13,13 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class Open3DFileHandler:
     @staticmethod
-    def parse_open3d_file(open3d_ifp, image_dp, image_fp_type, op=None):
-        """
-        http://www.open3d.org/docs/release/python_api/open3d.camera.PinholeCameraTrajectory.html
-        Open3D supports different file formats:
-        - .json (Intrinsics and Extrinsics)
-        - .log (Only extrinsics, Redwood format (http://redwood-data.org/indoor/fileformat.html))
-        - .txt (Only extrinsics, TUM format (https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats))
-        :return: cameras
+    def parse_open3d_file(open3d_ifp, image_dp, image_fp_type, op):
+        """Parse an :code:`Open3D` (:code:`.json` or :code:`.log`) file.
+
+        The :code:`.json` format supports intrinsics as well as
+        extrinsic parameters, whereas the :code:`.log` (`Redwood
+        <http://redwood-data.org/indoor/fileformat.html>`_) format contains
+        only extrinsic parameters.
         """
         log_report("INFO", "parse_open3d_file: ...", op)
         log_report("INFO", "open3d_ifp: " + open3d_ifp, op)
