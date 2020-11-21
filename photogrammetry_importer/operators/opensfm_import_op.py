@@ -60,8 +60,8 @@ class ImportOpenSfMOperator(
             path,
             self.image_dp,
             self.image_fp_type,
-            self.suppress_distortion_warnings,
             self.reconstruction_number,
+            self.suppress_distortion_warnings,
             self,
         )
 

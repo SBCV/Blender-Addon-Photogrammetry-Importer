@@ -13,8 +13,10 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class OpenSfMJSONFileHandler:
+    """Class to read and write :code:`OpenSfM` files."""
+
     @staticmethod
-    def convert_intrinsics(
+    def _convert_intrinsics(
         json_camera_intrinsics, relative_fp, suppress_distortion_warnings, op
     ):
 
@@ -35,7 +37,8 @@ class OpenSfMJSONFileHandler:
             cy = height / 2
             log_report(
                 "WARNING",
-                "Principal point not provided, setting it to the image center.",
+                "Principal point not provided, setting it to the image"
+                + " center.",
                 op,
             )
         elif projection_type == "brown":
@@ -44,7 +47,8 @@ class OpenSfMJSONFileHandler:
             if fx != fy:
                 log_report(
                     "WARNING",
-                    "Focal length in x and y direction differs, setting it to the average value.",
+                    "Focal length in x and y direction differs, setting it"
+                    + " to the average value.",
                     op,
                 )
             focal_length = (fx + fy) * 0.5
@@ -60,7 +64,7 @@ class OpenSfMJSONFileHandler:
         return [focal_length, cx, cy, width, height, radial_distortion]
 
     @staticmethod
-    def rodrigues_to_matrix(rodrigues_vec):
+    def _rodrigues_to_matrix(rodrigues_vec):
         # https://docs.opencv.org/4.2.0/d9/d0c/group__calib3d.html#ga61585db663d9da06b68e70cfbf6a1eac
         #   Check the formulas under Rodrigues()
         # https://github.com/opencv/opencv/blob/master/modules/calib3d/src/calibration.cpp
@@ -94,7 +98,7 @@ class OpenSfMJSONFileHandler:
         return rot_mat
 
     @staticmethod
-    def parse_cameras(
+    def _parse_cameras(
         json_data, image_dp, image_fp_type, suppress_distortion_warnings, op
     ):
 
@@ -112,7 +116,6 @@ class OpenSfMJSONFileHandler:
             camera._absolute_fp = os.path.join(image_dp, view_name)
 
             intrinsic_key = view["camera"]
-
             (
                 focal_length,
                 cx,
@@ -120,27 +123,25 @@ class OpenSfMJSONFileHandler:
                 width,
                 height,
                 radial_distortion,
-            ) = OpenSfMJSONFileHandler.convert_intrinsics(
+            ) = OpenSfMJSONFileHandler._convert_intrinsics(
                 json_cameras_intrinsics[intrinsic_key],
                 camera._relative_fp,
                 suppress_distortion_warnings,
                 op,
             )
-
             camera.height = height
             camera.width = width
-
             camera_calibration_matrix = np.array(
                 [[focal_length, 0, cx], [0, focal_length, cy], [0, 0, 1]]
             )
-
             camera.set_calibration(
                 camera_calibration_matrix, radial_distortion
             )
 
             rodrigues_vec = np.array(view["rotation"], dtype=float)
-            rot_mat = OpenSfMJSONFileHandler.rodrigues_to_matrix(rodrigues_vec)
-
+            rot_mat = OpenSfMJSONFileHandler._rodrigues_to_matrix(
+                rodrigues_vec
+            )
             camera.set_rotation_mat(rot_mat)
             camera.set_camera_translation_vector_after_rotation(
                 np.array(view["translation"], dtype=float)
@@ -150,7 +151,7 @@ class OpenSfMJSONFileHandler:
         return cams
 
     @staticmethod
-    def parse_points(json_data, op):
+    def _parse_points(json_data, op):
         points = []
         json_points = json_data["points"]
         for point_id in json_points:
@@ -169,33 +170,33 @@ class OpenSfMJSONFileHandler:
         input_opensfm_fp,
         image_dp,
         image_fp_type,
-        suppress_distortion_warnings,
         reconstruction_idx,
+        suppress_distortion_warnings=False,
         op=None,
     ):
+        """Parse a :code:`OpenSfM` (:code:`.json`) file."""
 
         log_report("INFO", "parse_opensfm_file: ...", op)
         log_report("INFO", "input_opensfm_fp: " + input_opensfm_fp, op)
         input_file = open(input_opensfm_fp, "r")
         json_data = json.load(input_file)
-        num_reconstructions = len(json_data)
         reconstruction_data = json_data[reconstruction_idx]
         if len(json_data) > 1:
             log_report(
                 "WARNING",
-                "OpenSfM file contains multiple reconstructions. Only reconstruction with index "
-                + str(reconstruction_idx)
-                + " is imported.",
+                "OpenSfM file contains multiple reconstructions. Only "
+                + f" reconstruction with index {reconstruction_idx} is"
+                + " imported.",
                 op,
             )
 
-        cams = OpenSfMJSONFileHandler.parse_cameras(
+        cams = OpenSfMJSONFileHandler._parse_cameras(
             reconstruction_data,
             image_dp,
             image_fp_type,
             suppress_distortion_warnings,
             op,
         )
-        points = OpenSfMJSONFileHandler.parse_points(reconstruction_data, op)
+        points = OpenSfMJSONFileHandler._parse_points(reconstruction_data, op)
         log_report("INFO", "parse_opensfm_file: Done", op)
         return cams, points
