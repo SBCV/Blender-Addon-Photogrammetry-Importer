@@ -7,7 +7,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 from photogrammetry_importer.utility.type_utility import is_float, is_int
 
 
-class DataSemantics(object):
+class _DataSemantics:
     def __init__(self):
         self.x_idx = None
         self.y_idx = None
@@ -31,9 +31,11 @@ class DataSemantics(object):
         ]
 
 
-class PointDataFileHandler(object):
+class PointDataFileHandler:
+    """Class to read and write common point data files."""
+
     @staticmethod
-    def read_lines_as_tuples(ifc, delimiter):
+    def _read_lines_as_tuples(ifc, delimiter):
         lines_as_tup = []
         for line in ifc.readlines():
             elements = line.split(delimiter)
@@ -41,8 +43,8 @@ class PointDataFileHandler(object):
         return lines_as_tup
 
     @staticmethod
-    def guess_data_semantics_from_tuple(data_tuple):
-        data_semantics = DataSemantics()
+    def _guess_data_semantics_from_tuple(data_tuple):
+        data_semantics = _DataSemantics()
         data_semantics.num_data_entries = len(data_tuple)
         # Data must start with subsequent float values
         # representing the three-dimensional position
@@ -98,8 +100,8 @@ class PointDataFileHandler(object):
         return data_semantics
 
     @staticmethod
-    def get_data_semantics_from_header(line):
-        data_semantics = DataSemantics()
+    def _get_data_semantics_from_header(line):
+        data_semantics = _DataSemantics()
         data_tuple = line.lstrip("//").rstrip().split(" ")
         data_semantics.num_data_entries = len(data_tuple)
 
@@ -133,8 +135,7 @@ class PointDataFileHandler(object):
         return data_semantics
 
     @staticmethod
-    def get_data_semantics_from_ascii(ifp, delimiter, has_header):
-        points = []
+    def _get_data_semantics_from_ascii(ifp, delimiter, has_header):
         with open(ifp, "r") as ifc:
             data_semantics = None
             if has_header:
@@ -142,29 +143,28 @@ class PointDataFileHandler(object):
                 if line.startswith("//"):
                     log_report("INFO", "Reading data semantics from header")
                     data_semantics = (
-                        PointDataFileHandler.get_data_semantics_from_header(
+                        PointDataFileHandler._get_data_semantics_from_header(
                             line
                         )
                     )
                     line = ifc.readline()
-                num_points = int(line.strip())
 
             if data_semantics is None:
                 log_report(
                     "INFO", "No header available, guessing data semantics"
                 )
-                lines_as_tuples = PointDataFileHandler.read_lines_as_tuples(
+                lines_as_tuples = PointDataFileHandler._read_lines_as_tuples(
                     ifc, delimiter=delimiter
                 )
                 data_semantics = (
-                    PointDataFileHandler.guess_data_semantics_from_tuple(
+                    PointDataFileHandler._guess_data_semantics_from_tuple(
                         lines_as_tuples[0]
                     )
                 )
             return data_semantics
 
     @staticmethod
-    def convert_data_semantics_to_list(data_semantics):
+    def _convert_data_semantics_to_list(data_semantics):
 
         named_list = [
             "s" + str(idx) for idx in range(data_semantics.num_data_entries)
@@ -179,6 +179,15 @@ class PointDataFileHandler(object):
 
     @staticmethod
     def parse_point_data_file(ifp, op=None):
+        """Parse a point data file.
+        
+        Supported file formats are: :code:`.ply`, :code:`.pcd`, :code:`.las`,
+        :code:`.laz`, :code:`.asc`, :code:`.pts` and :code:`.csv`.
+
+        Relies on the :code:`pyntcloud`, the :code:`pylas` and/or the
+        :code:`lazrs` library to parse the different file formats.
+        """
+
         log_report("INFO", "Parse Point Data File: ...")
         # https://pyntcloud.readthedocs.io/en/latest/io.html
         # https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O
@@ -197,11 +206,11 @@ class PointDataFileHandler(object):
         if ext in [".asc", ".pts"]:
             sep = " "
             data_semantics = (
-                PointDataFileHandler.get_data_semantics_from_ascii(
+                PointDataFileHandler._get_data_semantics_from_ascii(
                     ifp, sep, has_header=True
                 )
             )
-            names = PointDataFileHandler.convert_data_semantics_to_list(
+            names = PointDataFileHandler._convert_data_semantics_to_list(
                 data_semantics
             )
             point_cloud = PyntCloud.from_file(
@@ -211,11 +220,11 @@ class PointDataFileHandler(object):
         elif ext == ".csv":
             sep = ","
             data_semantics = (
-                PointDataFileHandler.get_data_semantics_from_ascii(
+                PointDataFileHandler._get_data_semantics_from_ascii(
                     ifp, sep, has_header=False
                 )
             )
-            names = PointDataFileHandler.convert_data_semantics_to_list(
+            names = PointDataFileHandler._convert_data_semantics_to_list(
                 data_semantics
             )
             point_cloud = PyntCloud.from_file(
