@@ -231,29 +231,35 @@ def add_camera_animation(
         camera_data.show_background_images = True
         bg_img = camera_data.background_images.new()
         dp = os.path.dirname(cameras_sorted[0].get_absolute_fp())
-        # The first entry (ALL OTHERS ARE IGNORED) in the "files" parameter
-        # in bpy.ops.clip.open() is used to determine the image in the image
-        # sequence. All images with higher sequence numbers are added to the
-        # movie clip.
-        first_sequence_fn = [{"name": cameras_sorted[0].get_file_name()}]
+
+        first_fn = cameras_sorted[0].get_file_name()
 
         # Remove previously created movie clips
-        movie_clip_name = os.path.basename(first_sequence_fn[0]["name"])
+        movie_clip_name = os.path.basename(first_fn)
         if movie_clip_name in bpy.data.movieclips:
             bpy.data.movieclips.remove(bpy.data.movieclips[movie_clip_name])
 
-        # https://docs.blender.org/api/current/bpy.types.MovieClip.html
-        # https://docs.blender.org/api/current/bpy.types.Sequences.html
-        # Using a video clip instead of an image sequence has the advantage that
-        # Blender automatically adjusts the start offset of the image sequence.
-        # (e.g. if the first image of the sequence is 100_7110.JPG, then one
-        # would have to set the offset to 7109)
-        bpy.ops.clip.open(directory=dp, files=first_sequence_fn)
-        bg_img.source = "MOVIE_CLIP"
+        if os.path.isfile(os.path.join(dp, first_fn)):
 
-        # The clip created with bpy.ops.clip.open() has the same name than the
-        # first image name of the image sequence.
-        bg_img.clip = bpy.data.movieclips[movie_clip_name]
+            # The first entry (ALL OTHERS ARE IGNORED) in the "files" parameter
+            # in bpy.ops.clip.open() is used to determine the image in the
+            # image sequence. All images with higher sequence numbers are added
+            # to the movie clip.
+            first_sequence_fn = [{"name": first_fn}]
+
+            # https://docs.blender.org/api/current/bpy.types.MovieClip.html
+            # https://docs.blender.org/api/current/bpy.types.Sequences.html
+            # Using a video clip instead of an image sequence has the advantage
+            # that Blender automatically adjusts the start offset of the image
+            # sequence (e.g. if the first image of the sequence is
+            #  100_7110.JPG, then one would have to set the offset to manually
+            # to 7109)
+            bpy.ops.clip.open(directory=dp, files=first_sequence_fn)
+            bg_img.source = "MOVIE_CLIP"
+
+            # The clip created with bpy.ops.clip.open() has the same name than
+            # the first image name of the image sequence.
+            bg_img.clip = bpy.data.movieclips[movie_clip_name]
 
 
 def color_from_value(val, min_val, max_val):

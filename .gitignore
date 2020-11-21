@@ -10,6 +10,8 @@ photogrammetry_importer.zip
 /examples/100_7110.JPG
 /images/camera_animation/*
 /examples/images/
+/examples_with_images/*
+/examples_without_images/*
 /photogrammetry_importer/.vscode/*
 /.vscode/.ropeproject/config.py
 /.vscode/.ropeproject/objectdb
