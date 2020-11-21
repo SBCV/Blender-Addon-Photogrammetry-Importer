@@ -180,7 +180,7 @@ class PointDataFileHandler:
     @staticmethod
     def parse_point_data_file(ifp, op=None):
         """Parse a point data file.
-        
+
         Supported file formats are: :code:`.ply`, :code:`.pcd`, :code:`.las`,
         :code:`.laz`, :code:`.asc`, :code:`.pts` and :code:`.csv`.
 

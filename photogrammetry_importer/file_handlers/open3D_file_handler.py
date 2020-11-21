@@ -12,6 +12,8 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class Open3DFileHandler:
+    """Class to read and write :code:`Open3D` files."""
+
     @staticmethod
     def parse_open3d_file(open3d_ifp, image_dp, image_fp_type, op):
         """Parse an :code:`Open3D` (:code:`.json` or :code:`.log`) file.

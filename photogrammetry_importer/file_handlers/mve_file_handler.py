@@ -16,7 +16,9 @@ from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.types.point import Point
 
 
-class MVEFileHandler(object):
+class MVEFileHandler:
+    """Class to read and write :code:`MVE` workspaces."""
+
     @staticmethod
     def _str_to_arr(some_str, target_type):
         return [target_type(x) for x in some_str.split()]

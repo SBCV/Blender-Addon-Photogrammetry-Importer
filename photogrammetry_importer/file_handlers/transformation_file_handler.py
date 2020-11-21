@@ -4,8 +4,11 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class TransformationFileHandler:
+    """Class to read directories with files storing transformations."""
+
     @staticmethod
     def parse_transformation_folder(t_idp, op=None):
+        """Parse a directory with files storing transformations."""
 
         if not os.path.isdir(t_idp):
             return []

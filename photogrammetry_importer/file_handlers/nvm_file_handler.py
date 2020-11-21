@@ -10,7 +10,8 @@ from photogrammetry_importer.utility.blender_camera_utility import (
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-class NVMFileHandler(object):
+class NVMFileHandler:
+    """Class to read and write :code:`VisualSfM` files."""
 
     # Check the LoadNVM function in util.h of the
     # Multicore bundle adjustment code for more details.
