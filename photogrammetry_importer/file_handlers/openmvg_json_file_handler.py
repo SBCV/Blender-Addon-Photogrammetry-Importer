@@ -11,8 +11,10 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class OpenMVGJSONFileHandler:
+    """Class to read and write :code:`OpenMVG` files."""
+
     @staticmethod
-    def get_default_polymorphic_name(intrinsics):
+    def _get_default_polymorphic_name(intrinsics):
         default_polymorpihc_name = None
         for _, intrinsic in intrinsics.items():
             if intrinsic["key"] == 0:
@@ -24,7 +26,7 @@ class OpenMVGJSONFileHandler:
         return default_polymorpihc_name
 
     @staticmethod
-    def parse_cameras(
+    def _parse_cameras(
         json_data,
         image_dp,
         image_fp_type,
@@ -32,28 +34,27 @@ class OpenMVGJSONFileHandler:
         op=None,
     ):
 
+        # For each input image there exists an entry in "views". In contrast,
+        # "extrinsics" contains only information of registered images (i.e.
+        # reconstructed camera poses) and may contain only information for a
+        # subset of images.
         views = {item["key"]: item for item in json_data["views"]}
         intrinsics = {item["key"]: item for item in json_data["intrinsics"]}
         extrinsics = {item["key"]: item for item in json_data["extrinsics"]}
 
         # Regard 3D stores the polymorhic attribute in the first intrinsic
         default_polymorphic_name = (
-            OpenMVGJSONFileHandler.get_default_polymorphic_name(intrinsics)
+            OpenMVGJSONFileHandler._get_default_polymorphic_name(intrinsics)
         )
 
-        # IMPORTANT:
-        # Views contain the description about the dataset and attribute to Pose and Intrinsic data.
-        # View -> id_pose, id_intrinsic
-        # Since sometimes some views cannot be localized, there is some missing pose and intrinsic data.
-        # Extrinsics may contain only a subset of views! (Potentially not all views are contained in the reconstruction)
-
         cams = []
-        # Iterate over views, and create camera if Intrinsic and Pose data exist
+        # Iterate over views and create a camera if intrinsic and extrinsic
+        # parameters exist
         for id, view in views.items():  # Iterate over views
 
-            id_view = view[
-                "key"
-            ]  # Should be equal to view['value']['ptr_wrapper']['data']['id_view']
+            id_view = view["key"]
+            # view["value"]["ptr_wrapper"]["data"] should be equal to
+            # view["value"]["ptr_wrapper"]["data"]["id_view"]
             view_data = view["value"]["ptr_wrapper"]["data"]
             id_pose = view_data["id_pose"]
             id_intrinsic = view_data["id_intrinsic"]
@@ -80,7 +81,7 @@ class OpenMVGJSONFileHandler:
                 camera.height = view_data["height"]
                 id_intrinsic = view_data["id_intrinsic"]
 
-                # handle intrinsic params
+                # Handle intrinsic params
                 intrinsic_values = intrinsics[int(id_intrinsic)]["value"]
                 intrinsic_data = intrinsic_values["ptr_wrapper"]["data"]
 
@@ -92,7 +93,8 @@ class OpenMVGJSONFileHandler:
                         "WARNING",
                         "Key polymorphic_name in intrinsic with id "
                         + str(id_intrinsic)
-                        + " is missing, substituting with polymorphic_name of first intrinsic.",
+                        + " is missing, substituting with polymorphic_name of"
+                        + " first intrinsic.",
                         op,
                     )
 
@@ -111,7 +113,8 @@ class OpenMVGJSONFileHandler:
                     cx = principal_point[0]
                     cy = principal_point[1]
 
-                # For Radial there are several options: "None", disto_k1, disto_k3
+                # For Radial there are several options:
+                # "None", disto_k1, disto_k3
                 if "disto_k3" in intrinsic_data:
                     radial_distortion = [
                         float(intrinsic_data["disto_k3"][0]),
@@ -149,7 +152,7 @@ class OpenMVGJSONFileHandler:
         return cams
 
     @staticmethod
-    def parse_points(json_data, view_index_to_absolute_fp=None, op=None):
+    def _parse_points(json_data, view_index_to_absolute_fp=None, op=None):
 
         compute_color = True
         try:
@@ -159,7 +162,8 @@ class OpenMVGJSONFileHandler:
         except ImportError:
             log_report(
                 "WARNING",
-                "Can not compute point cloud color information, since Pillow is not installed.",
+                "Can not compute point cloud color information, since Pillow"
+                + " is not installed.",
                 op,
             )
             compute_color = False
@@ -167,7 +171,8 @@ class OpenMVGJSONFileHandler:
         if view_index_to_absolute_fp is None:
             log_report(
                 "WARNING",
-                "Can not compute point cloud color information, since path to images is not correctly set.",
+                "Can not compute point cloud color information, since path to"
+                + " images is not correctly set.",
                 op,
             )
             compute_color = False
@@ -175,7 +180,8 @@ class OpenMVGJSONFileHandler:
         if compute_color:
             log_report(
                 "INFO",
-                "Try to collect color information from files (this might take a while)",
+                "Try to collect color information from files (this might take"
+                + " a while)",
                 op,
             )
             view_index_to_image = {}
@@ -186,7 +192,8 @@ class OpenMVGJSONFileHandler:
                 else:
                     log_report(
                         "WARNING",
-                        "Can not compute point cloud color information, since image file path is incorrect.",
+                        "Can not compute point cloud color information, since"
+                        + " image file path is incorrect.",
                         op,
                     )
                     compute_color = False
@@ -195,7 +202,8 @@ class OpenMVGJSONFileHandler:
         if compute_color:
             log_report(
                 "INFO",
-                "Compute color information from files (this might take a while)",
+                "Compute color information from files (this might take a"
+                + "  while)",
                 op,
             )
 
@@ -205,29 +213,26 @@ class OpenMVGJSONFileHandler:
 
             r = g = b = 0
 
-            # color information can only be computed if input files are provided
+            # Color information can only be computed if input files are
+            # provided
             if compute_color:
                 for observation in json_point["value"]["observations"]:
                     view_index = int(observation["key"])
 
-                    # REMARK: The order of ndarray.shape (first height, then width) is complimentary to
-                    # pils image.size (first width, then height).
-                    # That means
-                    # height, width = segmentation_as_matrix.shape
-                    # width, height = image.size
-
-                    # Therefore: x_in_openmvg_file == x_image == y_ndarray
-                    # and y_in_openmvg_file == y_image == x_ndarray
-                    x_in_json_file = float(
+                    # REMARK: The order of ndarray.shape (height, width) is
+                    # complimentary to pillow's image.size (width, height).
+                    # Therefore: x_openmvg_file == x_image == y_ndarray
+                    # and y_openmvg_file == y_image == x_ndarray
+                    x_json_file = float(
                         observation["value"]["x"][0]
                     )  # x has index 0
-                    y_in_json_file = float(
+                    y_json_file = float(
                         observation["value"]["x"][1]
                     )  # y has index 1
 
                     current_image = view_index_to_image[view_index]
                     current_r, current_g, current_b = current_image.getpixel(
-                        (x_in_json_file, y_in_json_file)
+                        (x_json_file, y_json_file)
                     )
                     r += current_r
                     g += current_g
@@ -257,12 +262,8 @@ class OpenMVGJSONFileHandler:
         suppress_distortion_warnings,
         op=None,
     ):
-        """
-        The path_to_input_files parameter is optional, if provided the returned points carry also color information
-        :param input_openMVG_file_path:
-        :param path_to_images: Path to the input images (used to infer the color of the structural points)
-        :return:
-        """
+        """Parse an :code:`OpenMVG` (:code:`.json`) file."""
+
         log_report("INFO", "parse_openmvg_file: ...", op)
         log_report(
             "INFO", "input_openMVG_file_path: " + input_openMVG_file_path, op
@@ -270,7 +271,7 @@ class OpenMVGJSONFileHandler:
         input_file = open(input_openMVG_file_path, "r")
         json_data = json.load(input_file)
 
-        cams = OpenMVGJSONFileHandler.parse_cameras(
+        cams = OpenMVGJSONFileHandler._parse_cameras(
             json_data,
             image_dp,
             image_fp_type,
@@ -280,7 +281,7 @@ class OpenMVGJSONFileHandler:
         view_index_to_absolute_fp = {
             cam.view_index: cam.get_absolute_fp() for cam in cams
         }
-        points = OpenMVGJSONFileHandler.parse_points(
+        points = OpenMVGJSONFileHandler._parse_points(
             json_data, view_index_to_absolute_fp, op
         )
         log_report("INFO", "parse_openmvg_file: Done", op)
