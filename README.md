@@ -6,6 +6,7 @@ Supported libraries (data formats):
 - [x] [Colmap](https://github.com/colmap/colmap) (Model folders (BIN and TXT), dense workspaces, NVM, PLY)  
 - [x] [Meshroom](https://alicevision.github.io/) (MG, JSON, SfM, PLY)
 - [x] [MVE](https://github.com/simonfuhrmann/mve) (Workspaces) <sup>1</sup>
+- [x] [Agisoft Metashape](https://www.agisoft.com/) (VisualSfM NVM) <sup>1</sup>
 - [x] [Open3D](http://www.open3d.org/) (JSON, LOG, PLY) <sup>1</sup>
 - [x] [OpenSfM](https://github.com/mapillary/OpenSfM) (JSON)
 - [x] [OpenMVG](https://github.com/openMVG/openMVG) (JSON, NVM, PLY) <sup>2</sup>
