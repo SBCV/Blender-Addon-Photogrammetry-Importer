@@ -11,6 +11,7 @@ photogrammetry_importer.zip
 /images/camera_animation/*
 /examples/images/
 /examples_with_images/*
+/examples_with_fountain_images/*
 /examples_without_images/*
 /photogrammetry_importer/.vscode/*
 /.vscode/.ropeproject/config.py
