@@ -10,7 +10,7 @@ from photogrammetry_importer.operators.export_op import ExportOperator
 
 
 class ExportColmapOperator(ExportOperator, ExportHelper):
-    """Export a Colmap model """
+    """:code:`Blender` operator to export a :code:`Colmap` model."""
 
     bl_idname = "export_scene.colmap"
     bl_label = "Export Colmap"
@@ -29,13 +29,11 @@ class ExportColmapOperator(ExportOperator, ExportHelper):
     # filter_folder : BoolProperty(default=True, options={'HIDDEN'})
 
     def execute(self, context):
-
+        """Export selected cameras and points as :code:`Colmap` model."""
         assert len(self.files) == 1
         odp = os.path.join(self.directory, self.files[0].name)
 
-        cameras, points = self.export_selected_cameras_and_vertices_of_meshes(
-            odp
-        )
+        cameras, points = self.get_selected_cameras_and_vertices_of_meshes(odp)
         for cam in cameras:
             assert cam.get_calibration_mat() is not None
 

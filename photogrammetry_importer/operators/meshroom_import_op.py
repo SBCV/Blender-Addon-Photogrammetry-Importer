@@ -34,8 +34,7 @@ class ImportMeshroomOperator(
     GeneralImportProperties,
     ImportHelper,
 ):
-
-    """Import a Meshroom MG/SfM/JSON file"""
+    """Import a :code:`Meshroom` MG/SfM/JSON file."""
 
     bl_idname = "import_scene.meshroom_sfm_json"
     bl_label = "Import Meshroom SfM/JSON/MG"
@@ -43,7 +42,8 @@ class ImportMeshroomOperator(
 
     filepath: StringProperty(
         name="Meshroom JSON File Path",
-        description="File path used for importing the Meshroom SfM/JSON/MG file",
+        description="File path used for importing the Meshroom SfM/JSON/MG"
+        + " file",
     )
     directory: StringProperty()
     filter_glob: StringProperty(
@@ -58,7 +58,8 @@ class ImportMeshroomOperator(
     ]
     sfm_node_type: EnumProperty(
         name="Structure From Motion Node Type",
-        description="Use this property to select the node with the structure from motion results to import.",
+        description="Use this property to select the node with the structure"
+        + " from motion results to import",
         items=sfm_node_items,
     )
     sfm_node_number: IntProperty(
@@ -77,7 +78,8 @@ class ImportMeshroomOperator(
     ]
     mesh_node_type: EnumProperty(
         name="Mesh Node Type",
-        description="Use this property to select the node with the mesh results to import.",
+        description="Use this property to select the node with the mesh"
+        + " results to import",
         items=mesh_node_items,
     )
 
@@ -89,7 +91,7 @@ class ImportMeshroomOperator(
     )
 
     def execute(self, context):
-
+        """Import a :code:`Meshroom` file/workspace."""
         path = os.path.join(self.directory, self.filepath)
         log_report("INFO", "path: " + str(path), self)
 
@@ -120,15 +122,13 @@ class ImportMeshroomOperator(
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        self.initialize_options(import_export_prefs)
+        """Set the default import options before running the operator."""
+        self.initialize_options_from_addon_preferences()
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
     def draw(self, context):
+        """Draw the import options corresponding to this operator."""
         layout = self.layout
         node_box = layout.box()
         node_box.prop(self, "sfm_node_type")

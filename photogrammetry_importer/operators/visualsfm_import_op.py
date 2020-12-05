@@ -23,15 +23,14 @@ from photogrammetry_importer.utility.camera_utility import (
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-class ImportNVMOperator(
+class ImportVisualSfMOperator(
     ImportOperator,
     CameraImportProperties,
     PointImportProperties,
     GeneralImportProperties,
     ImportHelper,
 ):
-
-    """Import a VisualSfM NVM file"""
+    """Import a :code:`VisualSfM` NVM file."""
 
     bl_idname = "import_scene.nvm"
     bl_label = "Import NVM"
@@ -45,14 +44,17 @@ class ImportNVMOperator(
     filter_glob: StringProperty(default="*.nvm", options={"HIDDEN"})
 
     def enhance_camera_with_images(self, cameras):
-        # Overwrites CameraImportProperties.enhance_camera_with_images()
+        """Enhance the imported cameras with image related information.
+
+        Overwrites the method in :code:`CameraImportProperties`.
+        """
         success = set_image_size_for_cameras(
             cameras, self.default_width, self.default_height, self
         )
         return cameras, success
 
     def execute(self, context):
-
+        """Import an :code:`VisualSfM` file."""
         path = os.path.join(self.directory, self.filepath)
         log_report("INFO", "path: " + str(path), self)
 
@@ -77,15 +79,13 @@ class ImportNVMOperator(
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        self.initialize_options(import_export_prefs)
+        """Set the default import options before running the operator."""
+        self.initialize_options_from_addon_preferences()
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
     def draw(self, context):
+        """Draw the import options corresponding to this operator."""
         layout = self.layout
         self.draw_camera_options(
             layout, draw_image_size=True, draw_principal_point=True

@@ -13,9 +13,10 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 def invert_y_and_z_axis(input_matrix_or_vector):
     """
-    VisualSFM and Blender use coordinate systems, which differ in the y and z coordinate
-    This Function inverts the y and the z coordinates in the corresponding matrix / vector entries
-    Iinvert y and z axis <==> rotation by 180 degree around the x axis
+    VisualSFM and Blender use coordinate systems, which differ in the y and
+    z coordinate. This Function inverts the y and the z coordinates in the
+    corresponding matrix / vector entries, which is equivalent to a
+    rotation by 180 degree around the x axis.
     """
     output_matrix_or_vector = input_matrix_or_vector.copy()
     output_matrix_or_vector[1] = -output_matrix_or_vector[1]

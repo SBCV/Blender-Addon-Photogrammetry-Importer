@@ -26,8 +26,7 @@ class ImportMVEOperator(
     PointImportProperties,
     GeneralImportProperties,
 ):
-
-    """Import a Multi-View Environment reconstruction folder."""
+    """Import a :code:`Multi-View Environment` reconstruction folder."""
 
     bl_idname = "import_scene.mve_folder"
     bl_label = "Import MVE Folder"
@@ -36,7 +35,7 @@ class ImportMVEOperator(
     directory: StringProperty()
 
     def execute(self, context):
-
+        """Import an :code:`MVE` workspace."""
         path = self.directory
         # Remove trailing slash
         path = os.path.dirname(path)
@@ -62,12 +61,8 @@ class ImportMVEOperator(
         return {"FINISHED"}
 
     def invoke(self, context, event):
-
-        addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        self.initialize_options(import_export_prefs)
+        """Set the default import options before running the operator."""
+        self.initialize_options_from_addon_preferences()
         # See:
         # https://blender.stackexchange.com/questions/14738/use-filemanager-to-select-directory-instead-of-file/14778
         # https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
@@ -75,6 +70,7 @@ class ImportMVEOperator(
         return {"RUNNING_MODAL"}
 
     def draw(self, context):
+        """Draw the import options corresponding to this operator."""
         layout = self.layout
         self.draw_camera_options(
             layout,

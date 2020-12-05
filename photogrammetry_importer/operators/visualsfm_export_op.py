@@ -11,8 +11,8 @@ from photogrammetry_importer.file_handlers.nvm_file_handler import (
 from photogrammetry_importer.operators.export_op import ExportOperator
 
 
-class ExportNVMOperator(ExportOperator, ExportHelper):
-    """Export a NVM file"""
+class ExportVisualSfMOperator(ExportOperator, ExportHelper):
+    """Export a :code:`VisualSfM` file."""
 
     bl_idname = "export_scene.nvm"
     bl_label = "Export NVM"
@@ -30,11 +30,12 @@ class ExportNVMOperator(ExportOperator, ExportHelper):
     filter_glob: StringProperty(default="*.nvm", options={"HIDDEN"})
 
     def execute(self, context):
+        """Export selected cameras and points as :code:`VisualSfM` file."""
         assert len(self.files) == 1
         ofp = os.path.join(self.directory, self.files[0].name)
 
-        cameras, points = self.export_selected_cameras_and_vertices_of_meshes(
-            ""
+        cameras, points = self.get_selected_cameras_and_vertices_of_meshes(
+            odp=""
         )
         for cam in cameras:
             assert cam.get_calibration_mat() is not None

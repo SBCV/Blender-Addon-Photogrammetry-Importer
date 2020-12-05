@@ -31,8 +31,7 @@ class ImportPointDataOperator(
     GeneralImportProperties,
     ImportHelper,
 ):
-
-    """Import point data (PLY file) as point cloud"""
+    """Import point data (e.g. a :code:`PLY` file) as point cloud."""
 
     bl_idname = "import_scene.point_data"
     bl_label = "Import Point Data"
@@ -48,6 +47,7 @@ class ImportPointDataOperator(
     )
 
     def execute(self, context):
+        """Import a file with point data (e.g. :code:`PLY`)."""
         path = os.path.join(self.directory, self.filepath)
         log_report("INFO", "path: " + str(path), self)
 
@@ -69,15 +69,13 @@ class ImportPointDataOperator(
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        self.initialize_options(import_export_prefs)
+        """Set the default import options before running the operator."""
+        self.initialize_options_from_addon_preferences()
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
     def draw(self, context):
+        """Draw the import options corresponding to this operator."""
         layout = self.layout
         self.draw_point_options(layout)
         self.draw_transformation_options(layout)

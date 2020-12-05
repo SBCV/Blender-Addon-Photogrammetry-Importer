@@ -3,22 +3,14 @@ import os
 import numpy as np
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.types.camera import Camera
+from photogrammetry_importer.utility.blender_utility import invert_y_and_z_axis
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
 class ExportOperator(bpy.types.Operator):
-    def invert_y_and_z_axis(self, input_matrix_or_vector):
-        """
-        VisualSFM and Blender use coordinate systems, which differ in the y and z coordinate
-        This Function inverts the y and the z coordinates in the corresponding matrix / vector entries
-        Iinvert y and z axis <==> rotation by 180 degree around the x axis
-        """
-        output_matrix_or_vector = input_matrix_or_vector.copy()
-        output_matrix_or_vector[1] = -output_matrix_or_vector[1]
-        output_matrix_or_vector[2] = -output_matrix_or_vector[2]
-        return output_matrix_or_vector
+    """Abstract basic export operator."""
 
-    def get_calibration_mat(self, blender_camera):
+    def _get_calibration_mat(self, blender_camera):
         log_report("INFO", "get_calibration_mat: ...", self)
         scene = bpy.context.scene
         render_resolution_width = scene.render.resolution_x
@@ -64,14 +56,7 @@ class ExportOperator(bpy.types.Operator):
         log_report("INFO", "get_calibration_mat: Done", self)
         return calibration_mat
 
-    def get_computer_vision_camera_matrix(self, blender_camera):
-
-        """
-        Blender and Computer Vision Camera Coordinate Frame Systems (like VisualSfM, Bundler)
-        differ by their y and z axis
-        :param blender_camera:
-        :return:
-        """
+    def _get_computer_vision_camera_matrix(self, blender_camera):
 
         # Only if the objects have a scale of 1, the 3x3 part
         # of the corresponding matrix_world contains a pure rotation.
@@ -88,10 +73,11 @@ class ExportOperator(bpy.types.Operator):
         gt_camera_rotation_inverse = camera_matrix.copy()[0:3, 0:3]
         gt_camera_rotation = gt_camera_rotation_inverse.T
 
-        # Important: Blender uses a camera coordinate frame system, which looks down the negative z-axis.
-        # This differs from the camera coordinate systems used by most SfM tools/frameworks.
-        # Thus, rotate the camera rotation matrix by 180 degrees (i.e. invert the y and z axis).
-        gt_camera_rotation = self.invert_y_and_z_axis(gt_camera_rotation)
+        # Important: Blender uses a camera coordinate frame system, which looks
+        # down the negative z-axis. This differs from the camera coordinate
+        # systems used by most SfM tools/frameworks. Thus, rotate the camera
+        # rotation matrix by 180 degrees (i.e. invert the y and z axis).
+        gt_camera_rotation = invert_y_and_z_axis(gt_camera_rotation)
         gt_camera_rotation_inverse = gt_camera_rotation.T
 
         rotated_camera_matrix_around_x_by_180 = camera_matrix.copy()
@@ -100,9 +86,10 @@ class ExportOperator(bpy.types.Operator):
         ] = gt_camera_rotation_inverse
         return rotated_camera_matrix_around_x_by_180
 
-    def export_selected_cameras_and_vertices_of_meshes(self, odp):
+    def get_selected_cameras_and_vertices_of_meshes(self, odp):
+        """Get selected cameras and vertices."""
         log_report(
-            "INFO", "export_selected_cameras_and_vertices_of_meshes: ...", self
+            "INFO", "get_selected_cameras_and_vertices_of_meshes: ...", self
         )
         cameras = []
         points = []
@@ -112,12 +99,12 @@ class ExportOperator(bpy.types.Operator):
         for obj in bpy.context.selected_objects:
             if obj.type == "CAMERA":
                 log_report("INFO", "obj.name: " + str(obj.name), self)
-                calibration_mat = self.get_calibration_mat(obj)
+                calibration_mat = self._get_calibration_mat(obj)
                 # log_report('INFO', 'calibration_mat:', self)
                 # log_report('INFO', str(calibration_mat), self)
 
                 camera_matrix_computer_vision = (
-                    self.get_computer_vision_camera_matrix(obj)
+                    self._get_computer_vision_camera_matrix(obj)
                 )
 
                 cam = Camera()
@@ -150,7 +137,13 @@ class ExportOperator(bpy.types.Operator):
                     points += obj_points
         log_report(
             "INFO",
-            "export_selected_cameras_and_vertices_of_meshes: Done",
+            "get_selected_cameras_and_vertices_of_meshes: Done",
             self,
         )
         return cameras, points
+
+    def execute(self, context):
+        """Abstract method that must be overriden by a subclass."""
+        # Pythons ABC class and Blender's operators do not work well
+        # together in the context of multiple inheritance.
+        raise NotImplementedError("Subclasses must override this function!")

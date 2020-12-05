@@ -30,9 +30,7 @@ class ImportColmapOperator(
     MeshImportProperties,
     GeneralImportProperties,
 ):
-
-    """Import a Colmap model (folder with .txt/.bin) or a Colmap workspace folder
-    with dense point clouds and meshes."""
+    """:code:`Blender` operator to import a :code:`Colmap` model/workspace."""
 
     bl_idname = "import_scene.colmap_model"
     bl_label = "Import Colmap Model Folder"
@@ -42,7 +40,7 @@ class ImportColmapOperator(
     # filter_folder : BoolProperty(default=True, options={'HIDDEN'})
 
     def execute(self, context):
-
+        """Import a :code:`Colmap` model/workspace."""
         path = self.directory
         # Remove trailing slash
         path = os.path.dirname(path)
@@ -70,12 +68,8 @@ class ImportColmapOperator(
         return {"FINISHED"}
 
     def invoke(self, context, event):
-
-        addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        self.initialize_options(import_export_prefs)
+        """Set the default import options before running the operator."""
+        self.initialize_options_from_addon_preferences()
         # See:
         # https://blender.stackexchange.com/questions/14738/use-filemanager-to-select-directory-instead-of-file/14778
         # https://docs.blender.org/api/current/bpy.types.WindowManager.html#bpy.types.WindowManager.fileselect_add
@@ -83,6 +77,7 @@ class ImportColmapOperator(
         return {"RUNNING_MODAL"}
 
     def draw(self, context):
+        """Draw the import options corresponding to this operator."""
         layout = self.layout
         self.draw_camera_options(layout, draw_depth_map_import=True)
         self.draw_point_options(layout)

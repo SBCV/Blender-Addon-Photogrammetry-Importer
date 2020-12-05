@@ -8,7 +8,9 @@ from photogrammetry_importer.operators.meshroom_import_op import (
     ImportMeshroomOperator,
 )
 from photogrammetry_importer.operators.mve_import_op import ImportMVEOperator
-from photogrammetry_importer.operators.nvm_import_op import ImportNVMOperator
+from photogrammetry_importer.operators.visualsfm_import_op import (
+    ImportVisualSfMOperator,
+)
 from photogrammetry_importer.operators.openmvg_import_op import (
     ImportOpenMVGOperator,
 )
@@ -22,7 +24,9 @@ from photogrammetry_importer.operators.point_data_import_op import (
     ImportPointDataOperator,
 )
 
-from photogrammetry_importer.operators.nvm_export_op import ExportNVMOperator
+from photogrammetry_importer.operators.visualsfm_export_op import (
+    ExportVisualSfMOperator,
+)
 from photogrammetry_importer.operators.colmap_export_op import (
     ExportColmapOperator,
 )
@@ -78,7 +82,9 @@ def point_data_import_operator_function(self, context):
 
 
 def visualsfm_import_operator_function(self, context):
-    self.layout.operator(ImportNVMOperator.bl_idname, text="VisualSfM (.nvm)")
+    self.layout.operator(
+        ImportVisualSfMOperator.bl_idname, text="VisualSfM (.nvm)"
+    )
 
 
 # Export Functions
@@ -89,7 +95,9 @@ def colmap_export_operator_function(self, context):
 
 
 def visualsfm_export_operator_function(self, context):
-    self.layout.operator(ExportNVMOperator.bl_idname, text="VisualSfM (.nvm)")
+    self.layout.operator(
+        ExportVisualSfMOperator.bl_idname, text="VisualSfM (.nvm)"
+    )
 
 
 # Define register/unregister Functions
@@ -181,7 +189,7 @@ def register_importers(import_prefs):
     )
     register_importer(
         import_prefs.visualsfm_importer_bool,
-        ImportNVMOperator,
+        ImportVisualSfMOperator,
         visualsfm_import_operator_function,
     )
 
@@ -203,7 +211,9 @@ def unregister_importers():
     unregister_importer(
         ImportPointDataOperator, point_data_import_operator_function
     )
-    unregister_importer(ImportNVMOperator, visualsfm_import_operator_function)
+    unregister_importer(
+        ImportVisualSfMOperator, visualsfm_import_operator_function
+    )
 
 
 def register_exporters(export_prefs):
@@ -215,7 +225,7 @@ def register_exporters(export_prefs):
     )
     register_exporter(
         export_prefs.visualsfm_exporter_bool,
-        ExportNVMOperator,
+        ExportVisualSfMOperator,
         visualsfm_export_operator_function,
     )
 
@@ -223,4 +233,6 @@ def register_exporters(export_prefs):
 def unregister_exporters():
     """ Unregister exporters. """
     unregister_exporter(ExportColmapOperator, colmap_export_operator_function)
-    unregister_exporter(ExportNVMOperator, visualsfm_export_operator_function)
+    unregister_exporter(
+        ExportVisualSfMOperator, visualsfm_export_operator_function
+    )

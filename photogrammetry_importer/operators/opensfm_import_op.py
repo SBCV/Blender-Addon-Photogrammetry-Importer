@@ -28,8 +28,7 @@ class ImportOpenSfMOperator(
     GeneralImportProperties,
     ImportHelper,
 ):
-
-    """Import an OpenSfM JSON file"""
+    """Import an :code:`OpenSfM` JSON file"""
 
     bl_idname = "import_scene.opensfm_json"
     bl_label = "Import OpenSfM JSON"
@@ -44,12 +43,13 @@ class ImportOpenSfMOperator(
 
     reconstruction_number: IntProperty(
         name="Reconstruction Number",
-        description="If the input file contains multiple reconstructions, use this property to select the desired reconstruction.",
+        description="If the input file contains multiple reconstructions, use"
+        + " this property to select the desired reconstruction.",
         default=0,
     )
 
     def execute(self, context):
-
+        """Import an :code:`OpenSfM` :code:`JSON` file."""
         path = os.path.join(self.directory, self.filepath)
         log_report("INFO", "path: " + str(path), self)
 
@@ -76,15 +76,13 @@ class ImportOpenSfMOperator(
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        self.initialize_options(import_export_prefs)
+        """Set the default import options before running the operator."""
+        self.initialize_options_from_addon_preferences()
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
     def draw(self, context):
+        """Draw the import options corresponding to this operator."""
         layout = self.layout
         layout.prop(self, "reconstruction_number")
         self.draw_camera_options(layout)

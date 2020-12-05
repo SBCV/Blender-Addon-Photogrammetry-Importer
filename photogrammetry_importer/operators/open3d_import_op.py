@@ -33,8 +33,7 @@ class ImportOpen3DOperator(
     GeneralImportProperties,
     ImportHelper,
 ):
-
-    """Import an Open3D LOG/JSON file"""
+    """Import an :code:`Open3D` LOG/JSON file"""
 
     bl_idname = "import_scene.open3d_log_json"
     bl_label = "Import Open3D LOG/JSON"
@@ -48,7 +47,10 @@ class ImportOpen3DOperator(
     filter_glob: StringProperty(default="*.log;*.json", options={"HIDDEN"})
 
     def enhance_camera_with_intrinsics(self, cameras):
+        """Enhances the imported cameras with intrinsic information.
 
+        Overwrites the method in :code:`CameraImportProperties`.
+        """
         intrinsic_missing = False
         for cam in cameras:
             if not cam.has_intrinsics():
@@ -61,13 +63,15 @@ class ImportOpen3DOperator(
         else:
             log_report(
                 "INFO",
-                "Using intrinsics from user options, since not present in the reconstruction file (.log).",
+                "Using intrinsics from user options, since not present in the"
+                + " reconstruction file (.log).",
                 self,
             )
             if math.isnan(self.default_focal_length):
                 log_report(
                     "ERROR",
-                    "User must provide the focal length using the import options.",
+                    "User must provide the focal length using the import"
+                    + " options.",
                     self,
                 )
                 return [], False
@@ -76,16 +80,18 @@ class ImportOpen3DOperator(
                 log_report(
                     "WARNING",
                     "Setting the principal point to the image center.",
-                    op,
+                    self,
                 )
 
             for cam in cameras:
                 if math.isnan(self.default_pp_x) or math.isnan(
                     self.default_pp_y
                 ):
-                    # If no images are provided, the user must provide a default principal point
+                    # If no images are provided, the user must provide a
+                    # default principal point
                     assert cam.width is not None
-                    # If no images are provided, the user must provide a default principal point
+                    # If no images are provided, the user must provide a
+                    # default principal point
                     assert cam.height is not None
                     default_cx = cam.width / 2.0
                     default_cy = cam.height / 2.0
@@ -101,7 +107,7 @@ class ImportOpen3DOperator(
                 cam.set_calibration_mat(intrinsics)
             return cameras, True
 
-    def image_size_initialized(self, cameras):
+    def _image_size_initialized(self, cameras):
         missing_data = False
         for camera in cameras:
             if camera.width is None or camera.height is None:
@@ -111,9 +117,11 @@ class ImportOpen3DOperator(
         return is_initialized
 
     def enhance_camera_with_images(self, cameras):
+        """Enhance the imported cameras with image related information.
 
-        if not self.image_size_initialized(cameras):
-            # Overwrites CameraImportProperties.enhance_camera_with_images()
+        Overwrites the method in :code:`CameraImportProperties`.
+        """
+        if not self._image_size_initialized(cameras):
             success = set_image_size_for_cameras(
                 cameras, self.default_width, self.default_height, self
             )
@@ -122,7 +130,7 @@ class ImportOpen3DOperator(
         return cameras, success
 
     def execute(self, context):
-
+        """Import an :code:`Open3D` file."""
         path = os.path.join(self.directory, self.filepath)
         log_report("INFO", "path: " + str(path), self)
 
@@ -133,7 +141,6 @@ class ImportOpen3DOperator(
             path, self.image_dp, self.image_fp_type, self
         )
 
-        log_report("INFO", "aaaaa " + str(cameras[0].width), self)
         log_report("INFO", "Number cameras: " + str(len(cameras)), self)
 
         reconstruction_collection = add_collection("Reconstruction Collection")
@@ -143,15 +150,13 @@ class ImportOpen3DOperator(
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        addon_name = self.get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        self.initialize_options(import_export_prefs)
+        """Set the default import options before running the operator."""
+        self.initialize_options_from_addon_preferences()
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
     def draw(self, context):
+        """Draw the import options corresponding to this operator."""
         layout = self.layout
         self.draw_camera_options(
             layout,
