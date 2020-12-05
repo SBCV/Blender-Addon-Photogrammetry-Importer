@@ -98,7 +98,8 @@ class ExportOperator(bpy.types.Operator):
         camera_index = 0
         for obj in bpy.context.selected_objects:
             if obj.type == "CAMERA":
-                log_report("INFO", "obj.name: " + str(obj.name), self)
+                obj_name = str(obj.name).replace(" ", "_")
+                log_report("INFO", "obj_name: " + obj_name, self)
                 calibration_mat = self._get_calibration_mat(obj)
                 # log_report('INFO', 'calibration_mat:', self)
                 # log_report('INFO', str(calibration_mat), self)
@@ -109,7 +110,7 @@ class ExportOperator(bpy.types.Operator):
 
                 cam = Camera()
                 cam.id = camera_index
-                cam.set_relative_fp(str(obj.name), Camera.IMAGE_FP_TYPE_NAME)
+                cam.set_relative_fp(obj_name, Camera.IMAGE_FP_TYPE_NAME)
                 cam.image_dp = odp
                 cam.width = bpy.context.scene.render.resolution_x
                 cam.height = bpy.context.scene.render.resolution_y
