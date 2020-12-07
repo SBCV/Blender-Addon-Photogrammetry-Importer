@@ -117,7 +117,6 @@ def render_opengl_image(image_name, cam, point_size):
     draw_manager = DrawManager.get_singleton()
     coords, colors = draw_manager.get_coords_and_colors()
 
-    scene = bpy.context.scene
     render = bpy.context.scene.render
 
     width = render.resolution_x
