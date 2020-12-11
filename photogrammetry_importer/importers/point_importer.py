@@ -7,9 +7,6 @@ from bpy.props import (
     FloatProperty,
     FloatVectorProperty,
 )
-from photogrammetry_importer.utility.blender_animation_utility import (
-    add_transformation_animation,
-)
 from photogrammetry_importer.utility.blender_opengl_utility import draw_points
 from photogrammetry_importer.utility.blender_point_utility import (
     add_points_as_mesh,
@@ -17,7 +14,7 @@ from photogrammetry_importer.utility.blender_point_utility import (
 )
 
 
-class PointImportProperties:
+class PointImporter:
     """
     This class encapsulates Blender UI properties that are required to
     visualize the reconstructed points correctly.
@@ -115,9 +112,7 @@ class PointImportProperties:
             mesh_box = point_box.box()
             mesh_box.prop(self, "add_points_as_mesh_oject")
 
-    def import_photogrammetry_points(
-        self, points, reconstruction_collection, transformations_sorted=None
-    ):
+    def import_photogrammetry_points(self, points, reconstruction_collection):
         if self.import_points:
             if self.point_cloud_display_sparsity > 1:
                 points = points[:: self.point_cloud_display_sparsity]
@@ -136,7 +131,7 @@ class PointImportProperties:
                 else:
                     particle_overwrite_color = None
 
-                particle_point_cloud_obj_name = add_points_as_particle_system(
+                add_points_as_particle_system(
                     points,
                     self.mesh_type,
                     self.point_extent,
@@ -147,18 +142,8 @@ class PointImportProperties:
                 )
 
             if self.add_points_as_mesh_oject:
-                point_cloud_obj_name = add_points_as_mesh(
+                add_points_as_mesh(
                     points,
                     reconstruction_collection,
                     op=self,
                 )
-
-            # if transformations_sorted is not None:
-            # add_transformation_animation(
-            #     point_cloud_obj_name,
-            #     transformations_sorted,
-            #     number_interpolation_frames=1,
-            #     interpolation_type=None,
-            #     remove_rotation_discontinuities=False,
-            #     op=self,
-            # )

@@ -9,15 +9,9 @@ from photogrammetry_importer.preferences.dependency_preferences import (
     get_module_status_description,
 )
 from photogrammetry_importer.utility.blender_logging_utility import log_report
-from photogrammetry_importer.properties.camera_import_properties import (
-    CameraImportProperties,
-)
-from photogrammetry_importer.properties.point_import_properties import (
-    PointImportProperties,
-)
-from photogrammetry_importer.properties.mesh_import_properties import (
-    MeshImportProperties,
-)
+from photogrammetry_importer.importers.camera_importer import CameraImporter
+from photogrammetry_importer.importers.point_importer import PointImporter
+from photogrammetry_importer.importers.mesh_importer import MeshImporter
 
 from photogrammetry_importer.registration.registration import (
     register_importers,
@@ -33,9 +27,9 @@ def get_addon_name():
 
 class PhotogrammetryImporterPreferences(
     bpy.types.AddonPreferences,
-    CameraImportProperties,
-    PointImportProperties,
-    MeshImportProperties,
+    CameraImporter,
+    PointImporter,
+    MeshImporter,
 ):
 
     # __name__ == photogrammetry_importer.preferences.addon_preferences

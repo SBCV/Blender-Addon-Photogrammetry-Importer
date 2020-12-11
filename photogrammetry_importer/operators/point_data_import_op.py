@@ -4,15 +4,8 @@ from bpy.props import StringProperty
 from bpy_extras.io_utils import ImportHelper
 
 from photogrammetry_importer.operators.import_op import ImportOperator
-from photogrammetry_importer.properties.point_import_properties import (
-    PointImportProperties,
-)
-from photogrammetry_importer.properties.transformation_import_properties import (
-    TransformationImportProperties,
-)
-from photogrammetry_importer.properties.general_import_properties import (
-    GeneralImportProperties,
-)
+from photogrammetry_importer.importers.point_importer import PointImporter
+from photogrammetry_importer.importers.option_importer import OptionImporter
 
 from photogrammetry_importer.file_handlers.point_data_file_handler import (
     PointDataFileHandler,
@@ -26,9 +19,8 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 class ImportPointDataOperator(
     ImportOperator,
-    PointImportProperties,
-    TransformationImportProperties,
-    GeneralImportProperties,
+    PointImporter,
+    OptionImporter,
     ImportHelper,
 ):
     """Import point data (e.g. a :code:`PLY` file) as point cloud."""
@@ -54,16 +46,8 @@ class ImportPointDataOperator(
         points = PointDataFileHandler.parse_point_data_file(path, self)
         log_report("INFO", "Number points: " + str(len(points)), self)
 
-        transformations_sorted = (
-            TransformationFileHandler.parse_transformation_folder(
-                self.path_to_transformations, self
-            )
-        )
-
         reconstruction_collection = add_collection("Reconstruction Collection")
-        self.import_photogrammetry_points(
-            points, reconstruction_collection, transformations_sorted
-        )
+        self.import_photogrammetry_points(points, reconstruction_collection)
         self.apply_general_options()
 
         return {"FINISHED"}
@@ -78,5 +62,4 @@ class ImportPointDataOperator(
         """Draw the import options corresponding to this operator."""
         layout = self.layout
         self.draw_point_options(layout)
-        self.draw_transformation_options(layout)
         self.draw_general_options(layout)

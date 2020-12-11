@@ -8,7 +8,7 @@ from photogrammetry_importer.utility.blender_mesh_utility import (
 )
 
 
-class MeshImportProperties:
+class MeshImporter:
     """ This class encapsulates Blender UI properties that are required to import a mesh. """
 
     import_mesh: BoolProperty(

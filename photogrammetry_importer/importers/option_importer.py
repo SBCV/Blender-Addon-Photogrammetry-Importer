@@ -5,7 +5,7 @@ from bpy.props import BoolProperty
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-class GeneralImportProperties:
+class OptionImporter:
     """ This class encapsulates general Blender UI properties. """
 
     adjust_clipping_distance: BoolProperty(

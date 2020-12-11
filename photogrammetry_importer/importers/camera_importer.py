@@ -18,7 +18,7 @@ from photogrammetry_importer.utility.blender_camera_utility import (
 from photogrammetry_importer.types.camera import Camera
 
 
-class CameraImportProperties:
+class CameraImporter:
     """
     This class encapsulates Blender UI properties that are required to
     visualize the reconstructed cameras correctly.
