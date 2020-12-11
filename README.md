@@ -45,6 +45,18 @@ Compatible with Blender 2.80 onwards. There is an older version of the addon ava
 - [Contribution](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/contribution.html)
 - [Recent features / Changelog](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/changelog.html)
 
+## Paper
+If you use this library for scientific purposes, please consider to cite the following paper.
+
+<a href="https://arxiv.org/pdf/2012.01044.pdf"><img class="image" align="left" width="150px" src="https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/paper_preview0p15.png"></a>
+<a href="https://arxiv.org/pdf/2012.01044.pdf">[pdf]</a>&nbsp;&nbsp;<a href="https://arxiv.org/abs/2012.01044">[arxiv]</a><br>
+@article{PhotogrammetryForModeling2021,<br>
+&nbsp;title={{A Photogrammetry-based Framework to Facilitate Image-based Modeling and Automatic Camera Tracking}},<br>
+&nbsp;author={Bullinger, Sebastian and Bodensteiner, Christoph and Arens, Michael},<br>
+&nbsp;booktitle={International Conference on Computer Graphics Theory and Applications},<br>
+&nbsp;year={2021},<br>
+&nbsp;note={to appear}}<br clear="left"/>
+
 ## Example
 This repository contains an example NVM file. The imported result looks as follows.
 ![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/import_result.jpg)
