@@ -21,7 +21,7 @@ from photogrammetry_importer.registration.registration import (
 )
 
 
-def get_addon_name():
+def _get_addon_name():
     return __name__.split(".")[0]
 
 
@@ -31,9 +31,8 @@ class PhotogrammetryImporterPreferences(
     PointImporter,
     MeshImporter,
 ):
-
     # __name__ == photogrammetry_importer.preferences.addon_preferences
-    bl_idname = get_addon_name()
+    bl_idname = _get_addon_name()
 
     # Importer
     colmap_importer_bool: BoolProperty(name="Colmap Importer", default=True)
@@ -129,14 +128,13 @@ class PhotogrammetryImporterPreferences(
             setattr(self, annotation_key, source_default_value)
 
     def reset(self):
-        camera_properties_original = CameraImportProperties()
-        point_properties_original = PointImportProperties()
-        mesh_properties_original = MeshImportProperties()
+        camera_importer_original = CameraImporter()
+        point_importer_original = PointImporter()
+        mesh_importer_original = MeshImporter()
 
-        self.copy_values_from_annotations(camera_properties_original)
-        self.copy_values_from_annotations(point_properties_original)
-        self.copy_values_from_annotations(mesh_properties_original)
-        self.copy_values_from_annotations(self)
+        self.copy_values_from_annotations(camera_importer_original)
+        self.copy_values_from_annotations(point_importer_original)
+        self.copy_values_from_annotations(mesh_importer_original)
 
 
 class ResetPreferences(bpy.types.Operator):
@@ -149,7 +147,7 @@ class ResetPreferences(bpy.types.Operator):
 
     def execute(self, context):
         log_report("INFO", "Reset preferences: ...", self)
-        addon_name = get_addon_name()
+        addon_name = _get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[
             addon_name
         ].preferences
@@ -175,7 +173,7 @@ class UpdateImportersAndExporters(bpy.types.Operator):
 
     def execute(self, context):
         log_report("INFO", "Update importers and exporters: ...", self)
-        addon_name = get_addon_name()
+        addon_name = _get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[
             addon_name
         ].preferences
