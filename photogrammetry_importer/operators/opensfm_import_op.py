@@ -4,9 +4,10 @@ from bpy.props import StringProperty, IntProperty
 from bpy_extras.io_utils import ImportHelper
 
 from photogrammetry_importer.operators.import_op import ImportOperator
+from photogrammetry_importer.operators.general_options import GeneralOptions
+
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
-from photogrammetry_importer.importers.option_importer import OptionImporter
 
 from photogrammetry_importer.file_handlers.opensfm_json_file_handler import (
     OpenSfMJSONFileHandler,
@@ -19,7 +20,7 @@ class ImportOpenSfMOperator(
     ImportOperator,
     CameraImporter,
     PointImporter,
-    OptionImporter,
+    GeneralOptions,
     ImportHelper,
 ):
     """Import an :code:`OpenSfM` JSON file"""

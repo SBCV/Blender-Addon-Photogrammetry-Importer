@@ -5,9 +5,11 @@ from bpy.props import StringProperty
 from bpy_extras.io_utils import ImportHelper
 
 from photogrammetry_importer.operators.import_op import ImportOperator
+from photogrammetry_importer.operators.general_options import GeneralOptions
+
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
-from photogrammetry_importer.importers.option_importer import OptionImporter
+
 from photogrammetry_importer.file_handlers.open3D_file_handler import (
     Open3DFileHandler,
 )
@@ -24,7 +26,7 @@ class ImportOpen3DOperator(
     ImportOperator,
     CameraImporter,
     PointImporter,
-    OptionImporter,
+    GeneralOptions,
     ImportHelper,
 ):
     """Import an :code:`Open3D` LOG/JSON file"""

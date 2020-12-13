@@ -4,8 +4,9 @@ from bpy.props import StringProperty
 from bpy_extras.io_utils import ImportHelper
 
 from photogrammetry_importer.operators.import_op import ImportOperator
+from photogrammetry_importer.operators.general_options import GeneralOptions
+
 from photogrammetry_importer.importers.point_importer import PointImporter
-from photogrammetry_importer.importers.option_importer import OptionImporter
 
 from photogrammetry_importer.file_handlers.point_data_file_handler import (
     PointDataFileHandler,
@@ -20,7 +21,7 @@ from photogrammetry_importer.utility.blender_logging_utility import log_report
 class ImportPointDataOperator(
     ImportOperator,
     PointImporter,
-    OptionImporter,
+    GeneralOptions,
     ImportHelper,
 ):
     """Import point data (e.g. a :code:`PLY` file) as point cloud."""

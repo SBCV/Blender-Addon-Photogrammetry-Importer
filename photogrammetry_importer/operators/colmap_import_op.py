@@ -3,10 +3,11 @@ import bpy
 from bpy.props import StringProperty
 
 from photogrammetry_importer.operators.import_op import ImportOperator
+from photogrammetry_importer.operators.general_options import GeneralOptions
+
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
 from photogrammetry_importer.importers.mesh_importer import MeshImporter
-from photogrammetry_importer.importers.option_importer import OptionImporter
 
 from photogrammetry_importer.file_handlers.colmap_file_handler import (
     ColmapFileHandler,
@@ -20,7 +21,7 @@ class ImportColmapOperator(
     CameraImporter,
     PointImporter,
     MeshImporter,
-    OptionImporter,
+    GeneralOptions,
 ):
     """:code:`Blender` operator to import a :code:`Colmap` model/workspace."""
 

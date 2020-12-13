@@ -3,9 +3,10 @@ import bpy
 from bpy.props import StringProperty
 
 from photogrammetry_importer.operators.import_op import ImportOperator
+from photogrammetry_importer.operators.general_options import GeneralOptions
+
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
-from photogrammetry_importer.importers.option_importer import OptionImporter
 
 from photogrammetry_importer.file_handlers.mve_file_handler import (
     MVEFileHandler,
@@ -18,7 +19,7 @@ class ImportMVEOperator(
     ImportOperator,
     CameraImporter,
     PointImporter,
-    OptionImporter,
+    GeneralOptions,
 ):
     """Import a :code:`Multi-View Environment` reconstruction folder."""
 

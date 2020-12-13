@@ -4,9 +4,10 @@ from bpy.props import StringProperty
 from bpy_extras.io_utils import ImportHelper
 
 from photogrammetry_importer.operators.import_op import ImportOperator
+from photogrammetry_importer.operators.general_options import GeneralOptions
+
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
-from photogrammetry_importer.importers.option_importer import OptionImporter
 
 from photogrammetry_importer.file_handlers.nvm_file_handler import (
     NVMFileHandler,
@@ -22,7 +23,7 @@ class ImportVisualSfMOperator(
     ImportOperator,
     CameraImporter,
     PointImporter,
-    OptionImporter,
+    GeneralOptions,
     ImportHelper,
 ):
     """Import a :code:`VisualSfM` NVM file."""

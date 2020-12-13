@@ -5,8 +5,8 @@ from bpy.props import BoolProperty
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-class OptionImporter:
-    """ This class encapsulates general Blender UI properties. """
+class GeneralOptions:
+    """Class to define and apply general options."""
 
     adjust_clipping_distance: BoolProperty(
         name="Adjust Clipping Distance",
@@ -15,10 +15,12 @@ class OptionImporter:
     )
 
     def draw_general_options(self, layout):
+        """Draw general options."""
         mesh_box = layout.box()
         mesh_box.prop(self, "adjust_clipping_distance")
 
     def apply_general_options(self):
+        """Apply the options defined by this class."""
         if self.adjust_clipping_distance:
             log_report(
                 "INFO", "Adjust clipping distance of 3D view: ...", self
