@@ -1,1 +1,1 @@
-""" Contains properties used by the import and export operators. """
+"""Contains classes useful for import operators."""

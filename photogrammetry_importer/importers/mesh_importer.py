@@ -9,31 +9,33 @@ from photogrammetry_importer.utility.blender_mesh_utility import (
 
 
 class MeshImporter:
-    """ This class encapsulates Blender UI properties that are required to import a mesh. """
+    """Importer for meshes."""
 
     import_mesh: BoolProperty(
         name="Import Mesh",
         description="Import mesh (if available)."
-        + " Only relevant for files/folders referencing/containing mesh files"
-        + " (such as *.mg files of Meshroom or dense Colmap folders)."
-        + " Note that Blenders build-in ply- and obj-importer are quite slow.",
+        " Only relevant for files/folders referencing/containing mesh files"
+        " (such as *.mg files of Meshroom or dense Colmap folders)."
+        " Note that Blenders build-in ply- and obj-importer are quite slow",
         default=False,
     )
 
     add_mesh_color_emission: BoolProperty(
         name="Add Color Emission of Mesh",
         description="Enabling color emission improves the visibility of the"
-        + " mesh colors",
+        " mesh colors",
         default=True,
     )
 
     def draw_mesh_options(self, layout):
+        """Draw mesh import options."""
         mesh_box = layout.box()
         mesh_box.prop(self, "import_mesh")
         if self.import_mesh:
             mesh_box.prop(self, "add_mesh_color_emission")
 
     def import_photogrammetry_mesh(self, mesh_fp, reconstruction_collection):
+        """Import a mesh using the properties of this class."""
         if self.import_mesh and mesh_fp is not None:
             log_report("INFO", "Importing mesh: ...", self)
             previous_collection = bpy.context.collection

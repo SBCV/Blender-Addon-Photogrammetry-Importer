@@ -38,10 +38,10 @@ class ImportVisualSfMOperator(
     directory: StringProperty()
     filter_glob: StringProperty(default="*.nvm", options={"HIDDEN"})
 
-    def enhance_camera_with_images(self, cameras):
+    def set_image_size_of_cameras(self, cameras):
         """Enhance the imported cameras with image related information.
 
-        Overwrites the method in :code:`CameraImportProperties`.
+        Overwrites the method in :code:`CameraImporter`.
         """
         success = set_image_size_for_cameras(
             cameras, self.default_width, self.default_height, self

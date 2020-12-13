@@ -40,10 +40,10 @@ class ImportOpen3DOperator(
     directory: StringProperty()
     filter_glob: StringProperty(default="*.log;*.json", options={"HIDDEN"})
 
-    def enhance_camera_with_intrinsics(self, cameras):
+    def set_intrinsics_of_cameras(self, cameras):
         """Enhances the imported cameras with intrinsic information.
 
-        Overwrites the method in :code:`CameraImportProperties`.
+        Overwrites the method in :code:`CameraImporter`.
         """
         intrinsic_missing = False
         for cam in cameras:
@@ -110,10 +110,10 @@ class ImportOpen3DOperator(
         is_initialized = not missing_data
         return is_initialized
 
-    def enhance_camera_with_images(self, cameras):
+    def set_image_size_of_cameras(self, cameras):
         """Enhance the imported cameras with image related information.
 
-        Overwrites the method in :code:`CameraImportProperties`.
+        Overwrites the method in :code:`CameraImporter`.
         """
         if not self._image_size_initialized(cameras):
             success = set_image_size_for_cameras(

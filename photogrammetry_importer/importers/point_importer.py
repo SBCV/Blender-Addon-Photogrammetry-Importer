@@ -15,10 +15,7 @@ from photogrammetry_importer.utility.blender_point_utility import (
 
 
 class PointImporter:
-    """
-    This class encapsulates Blender UI properties that are required to
-    visualize the reconstructed points correctly.
-    """
+    """Importer for points."""
 
     import_points: BoolProperty(
         name="Import Points", description="Import Points", default=True
@@ -26,27 +23,27 @@ class PointImporter:
     point_cloud_display_sparsity: IntProperty(
         name="Point Cloud Display Sparsity",
         description="Adjust the sparsity of the point cloud. A value of n "
-        + "means that every n-th point in the point cloud is added.",
+        "means that every n-th point in the point cloud is added",
         default=1,
         min=1,
     )
     draw_points_with_gpu: BoolProperty(
         name="Draw Points in the 3D View with OpenGL.",
         description="Draw Points in the 3D View. Allows to visualize point "
-        + "clouds with many elements. These are not visible in eevee/cycles "
-        + "renderings.",
+        "clouds with many elements. These are not visible in eevee/cycles "
+        "renderings.",
         default=True,
     )
     add_points_to_point_cloud_handle: BoolProperty(
         name="Add point data to the point cloud handle.",
         description="This allows to draw the point cloud (again) with OpenGL "
-        + "after saving and reloading the blend file.",
+        "after saving and reloading the blend file.",
         default=True,
     )
     add_points_as_particle_system: BoolProperty(
         name="Add Points as Particle System",
         description="Use a particle system to represent vertex positions with "
-        + "objects. Can be rendered with eevee/cycles.",
+        "objects. Can be rendered with eevee/cycles.",
         default=False,
     )
     mesh_items = [
@@ -67,7 +64,7 @@ class PointImporter:
     add_particle_color_emission: BoolProperty(
         name="Add Particle Color Emission",
         description="Add particle color emission to increase the visibility "
-        + "of the individual objects of the particle system.",
+        "of the individual objects of the particle system.",
         default=True,
     )
     set_particle_color_flag: BoolProperty(
@@ -87,11 +84,12 @@ class PointImporter:
     add_points_as_mesh_oject: BoolProperty(
         name="Add Points as Mesh Object",
         description="Use a mesh object to represent the point cloud with the "
-        + "vertex positions.",
+        "vertex positions.",
         default=False,
     )
 
     def draw_point_options(self, layout, draw_everything=False):
+        """Draw point import options."""
         point_box = layout.box()
         point_box.prop(self, "import_points")
         point_box.prop(self, "point_cloud_display_sparsity")
@@ -113,6 +111,7 @@ class PointImporter:
             mesh_box.prop(self, "add_points_as_mesh_oject")
 
     def import_photogrammetry_points(self, points, reconstruction_collection):
+        """Import a point cloud using the properties of this class."""
         if self.import_points:
             if self.point_cloud_display_sparsity > 1:
                 points = points[:: self.point_cloud_display_sparsity]
