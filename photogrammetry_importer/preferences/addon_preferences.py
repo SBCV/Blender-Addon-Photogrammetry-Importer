@@ -12,12 +12,7 @@ from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
 from photogrammetry_importer.importers.mesh_importer import MeshImporter
 
-from photogrammetry_importer.registration.registration import (
-    register_importers,
-    unregister_importers,
-    register_exporters,
-    unregister_exporters,
-)
+from photogrammetry_importer.registration.registration import Registration
 
 
 def _get_addon_name():
@@ -187,11 +182,11 @@ class UpdateImporterExporterOperator(bpy.types.Operator):
             addon_name
         ].preferences
 
-        unregister_importers()
-        register_importers(import_export_prefs)
+        Registration.unregister_importers()
+        Registration.register_importers(import_export_prefs)
 
-        unregister_exporters()
-        register_exporters(import_export_prefs)
+        Registration.unregister_exporters()
+        Registration.register_exporters(import_export_prefs)
 
         log_report("INFO", "Update importers and exporters: Done", self)
         return {"FINISHED"}

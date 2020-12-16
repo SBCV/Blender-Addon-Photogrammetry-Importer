@@ -1,1 +1,1 @@
-""" Contains functions to import and export operators. """
+""" Contains functions to register import and export operators. """

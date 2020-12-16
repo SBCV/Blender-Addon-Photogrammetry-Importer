@@ -60,12 +60,7 @@ from photogrammetry_importer.preferences.addon_preferences import (
     AddonPreferences,
 )
 
-from photogrammetry_importer.registration.registration import (
-    register_importers,
-    unregister_importers,
-    register_exporters,
-    unregister_exporters,
-)
+from photogrammetry_importer.registration.registration import Registration
 
 from photogrammetry_importer.panels.view_3d_panel import OpenGLPanel
 from photogrammetry_importer.utility.blender_opengl_utility import (
@@ -76,12 +71,12 @@ bpy.app.handlers.load_post.append(redraw_points)
 
 
 def register():
-    """ Register importers, exporters and panels. """
+    """Register importers, exporters and panels."""
     bpy.utils.register_class(AddonPreferences)
 
     import_export_prefs = bpy.context.preferences.addons[__name__].preferences
-    register_importers(import_export_prefs)
-    register_exporters(import_export_prefs)
+    Registration.register_importers(import_export_prefs)
+    Registration.register_exporters(import_export_prefs)
 
     bpy.utils.register_class(OpenGLPanel)
 
@@ -92,11 +87,11 @@ def register():
 
 
 def unregister():
-    """ Unregister importers, exporters and panels. """
+    """Unregister importers, exporters and panels."""
     bpy.utils.unregister_class(AddonPreferences)
 
-    unregister_importers()
-    unregister_exporters()
+    Registration.unregister_importers()
+    Registration.unregister_exporters()
 
     bpy.utils.unregister_class(OpenGLPanel)
 
