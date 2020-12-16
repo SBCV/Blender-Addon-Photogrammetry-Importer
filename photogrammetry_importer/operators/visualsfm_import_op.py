@@ -12,6 +12,9 @@ from photogrammetry_importer.importers.point_importer import PointImporter
 from photogrammetry_importer.file_handlers.nvm_file_handler import (
     NVMFileHandler,
 )
+
+from photogrammetry_importer.types.camera import Camera
+
 from photogrammetry_importer.utility.blender_utility import add_collection
 
 from photogrammetry_importer.utility.blender_logging_utility import log_report
