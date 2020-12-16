@@ -1,22 +1,29 @@
 import os
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
-try:
-    from PIL import Image as _PILImage
-except ImportError:
-    _PILImage = None
-
 
 class ImageFileHandler:
     """Class to read and write images using :code:`Pillow`."""
 
-    @staticmethod
-    def read_image_size(image_ifp, default_width, default_height, op=None):
+    PILImage = None
+
+    @classmethod
+    def read_image_size(
+        cls, image_ifp, default_width, default_height, op=None
+    ):
         """Read image size from disk."""
 
-        if _PILImage is not None and os.path.isfile(image_ifp):
+        if cls.PILImage is None:
+            try:
+                from PIL import Image as _PILImage
+
+                cls.PILImage = _PILImage
+            except ImportError:
+                pass
+
+        if cls.PILImage is not None and os.path.isfile(image_ifp):
             # This does NOT load the data into memory -> should be fast!
-            image = _PILImage.open(image_ifp)
+            image = cls.PILImage.open(image_ifp)
             width, height = image.size
             success = True
         elif default_width > 0 and default_height > 0:
@@ -33,7 +40,7 @@ class ImageFileHandler:
             )
             success = True
         else:
-            if _PILImage is None:
+            if cls.PILImage is None:
                 log_report(
                     "ERROR",
                     "PIL/PILLOW is not installed. Can not read image from disc"
@@ -55,7 +62,7 @@ class ImageFileHandler:
                 + ")",
                 op,
             )
-            if _PILImage is None:
+            if cls.PILImage is None:
                 log_report(
                     "ERROR",
                     "Adjust the default width/height values to import the"
