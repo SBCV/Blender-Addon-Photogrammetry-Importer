@@ -46,7 +46,7 @@ def get_world_matrix_from_translation_vec(translation_vec, rotation):
 
 def compute_camera_matrix_world(camera, convert_coordinate_system=True):
     translation_vec = camera.get_translation_vec()
-    rotation_mat = camera.get_rotation_mat()
+    rotation_mat = camera.get_rotation_as_rotation_mat()
     if convert_coordinate_system:
         # Transform the camera coordinate system from computer vision camera coordinate frames
         # to the computer vision camera coordinate frames

@@ -140,7 +140,7 @@ class OpenMVGJSONFileHandler:
                 )
                 extrinsic_params = extrinsics[id_pose]
                 cam_rotation_list = extrinsic_params["value"]["rotation"]
-                camera.set_rotation_mat(
+                camera.set_rotation_with_rotation_mat(
                     np.array(cam_rotation_list, dtype=float)
                 )
                 camera.set_camera_center_after_rotation(

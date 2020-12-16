@@ -87,7 +87,7 @@ class NVMFileHandler:
 
             current_camera = Camera()
             # Setting the quaternion also sets the rotation matrix
-            current_camera.set_quaternion(quaternion)
+            current_camera.set_rotation_with_quaternion(quaternion)
 
             # Set the camera center after rotation
             current_camera._center = center_vec
@@ -95,7 +95,7 @@ class NVMFileHandler:
             # set the camera view direction as normal w.r.t world coordinates
             cam_view_vec_cam_coord = np.array([0, 0, 1]).T
             cam_rotation_matrix_inv = np.linalg.inv(
-                current_camera.get_rotation_mat()
+                current_camera.get_rotation_as_rotation_mat()
             )
             cam_view_vec_world_coord = cam_rotation_matrix_inv.dot(
                 cam_view_vec_cam_coord
@@ -103,7 +103,7 @@ class NVMFileHandler:
             current_camera.normal = cam_view_vec_world_coord
 
             translation_vec = NVMFileHandler._compute_translation_vector(
-                center_vec, current_camera.get_rotation_mat()
+                center_vec, current_camera.get_rotation_as_rotation_mat()
             )
             current_camera._translation_vec = translation_vec
 
@@ -297,7 +297,7 @@ class NVMFileHandler:
         # <Camera> = <File name> <focal length> <quaternion WXYZ> <camera center> <radial distortion> 0
 
         for camera in cameras:
-            quaternion = camera.get_quaternion()
+            quaternion = camera.get_rotation_as_quaternion()
 
             current_line = camera.get_relative_fp()
             current_line += "\t" + str(camera.get_calibration_mat()[0][0])

@@ -1,1 +1,1 @@
-""" Contains types used by different subpackages. """
+""" Contains data types used to represent reconstruction results. """

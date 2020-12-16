@@ -96,8 +96,8 @@ class Open3DFileHandler:
                     Open3DFileHandler._read_matrix_row(chunk[3]),
                 ]
 
-                # Note: the transformation matrix in the .json file is the inverse of
-                #       the transformation matrix in the .log file
+                # Note: the transformation matrix in the .json file is the
+                # inverse of the transformation matrix in the .log file
                 extrinsic_matrix = np.asarray(matrix_list, dtype=float)
 
                 cam = Camera()
@@ -107,7 +107,7 @@ class Open3DFileHandler:
                 image_absolute_fp = os.path.join(image_dp, image_relative_fp)
                 cam._absolute_fp = image_absolute_fp
 
-                # Accuracy of rotation matrices is too low => disable rotation test
+                # Accuracy of rotation matrices is too low => disable test
                 cam.set_4x4_cam_to_world_mat(
                     extrinsic_matrix, check_rotation=False
                 )

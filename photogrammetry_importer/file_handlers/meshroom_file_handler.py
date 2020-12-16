@@ -119,7 +119,7 @@ class MeshroomFileHandler:
             extrinsic_params = extrinsic["pose"]["transform"]
 
             cam_rotation_list = extrinsic_params["rotation"]
-            camera.set_rotation_mat(
+            camera.set_rotation_with_rotation_mat(
                 np.array(cam_rotation_list, dtype=float).reshape(3, 3).T
             )
             camera.set_camera_center_after_rotation(

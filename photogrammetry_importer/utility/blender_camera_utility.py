@@ -276,6 +276,17 @@ def color_from_value(val, min_val, max_val):
     return r, g, b, 1
 
 
+def _get_camera_obj_gui_str(camera):
+    """Get a string suitable for Blender's GUI describing the camera."""
+    # Replace special characters
+    # image_fp_clean = image_fp.replace("/", "_").replace("\\", "_").replace(":", "_")
+    image_fp_stem = os.path.splitext(camera.get_relative_fp())[0]
+    # Blender supports only object names with length 63
+    # However, we need also space for additional suffixes
+    image_fp_suffix = image_fp_stem[-40:]
+    return image_fp_suffix
+
+
 def add_cameras(
     cameras,
     parent_collection,
@@ -367,7 +378,7 @@ def add_cameras(
 
         # camera_name = "Camera %d" % index     # original code
         # Replace the camera name so it matches the image name (without extension)
-        blender_image_name_stem = camera.get_blender_obj_gui_str()
+        blender_image_name_stem = _get_camera_obj_gui_str(camera)
         camera_name = blender_image_name_stem + "_cam"
         bcamera = add_single_camera(camera_name, camera, op)
         camera_object = add_obj(bcamera, camera_name, camera_collection)
@@ -426,19 +437,17 @@ def add_cameras(
         if not add_depth_maps_as_point_cloud:
             continue
 
-        if camera.depth_map_fp is None:
+        if camera.get_depth_map_fp() is None:
             continue
 
         if depth_map_indices is not None:
             if index not in depth_map_indices:
                 continue
 
-        depth_map_fp = camera.depth_map_fp
-
         # Group image plane and camera:
         camera_depth_map_pair_collection_current = add_collection(
             "Camera Depth Map Pair Collection %s"
-            % os.path.basename(depth_map_fp),
+            % os.path.basename(camera.get_depth_map_fp()),
             camera_depth_map_pair_collection,
         )
 
@@ -458,7 +467,7 @@ def add_cameras(
             # TODO Setting this to true causes an error message
             add_points_to_point_cloud_handle=False,
             reconstruction_collection=depth_map_collection,
-            object_anchor_handle_name=camera.get_blender_obj_gui_str()
+            object_anchor_handle_name=_get_camera_obj_gui_str(camera)
             + "_depth_point_cloud",
             color=color,
             op=op,
@@ -575,14 +584,14 @@ def set_principal_point_for_cameras(
         default_pp_y = cameras[0].height / 2.0
 
     for camera in cameras:
-        if not camera.is_principal_point_initialized():
+        if not camera.has_principal_point():
             camera.set_principal_point([default_pp_x, default_pp_y])
 
 
 def principal_points_initialized(cameras):
     principal_points_initialized = True
     for camera in cameras:
-        if not camera.is_principal_point_initialized():
+        if not camera.has_principal_point():
             principal_points_initialized = False
             break
     return principal_points_initialized

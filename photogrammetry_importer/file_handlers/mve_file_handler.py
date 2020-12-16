@@ -161,7 +161,7 @@ class MVEFileHandler:
             MVEFileHandler._str_to_arr(translation_str, target_type=float)
         )
 
-        camera.set_rotation_mat(rotation_mat)
+        camera.set_rotation_with_rotation_mat(rotation_mat)
         camera.set_camera_translation_vector_after_rotation(translation_vec)
         return camera
 
@@ -200,14 +200,14 @@ class MVEFileHandler:
                         subdir, "depth-L" + str(level) + ".mvei"
                     )
                     if os.path.isfile(depth_ifp):
-                        camera.set_depth_map(
-                            depth_ifp,
+                        camera.set_depth_map_callback(
                             MVEFileHandler.read_depth_map,
+                            depth_ifp,
                             Camera.DEPTH_MAP_WRT_UNIT_VECTORS,
                             shift_depth_map_to_pixel_center=True,
                         )
                         break
-                if camera.depth_map_fp is None:
+                if camera.get_depth_map_fp() is None:
                     log_report(
                         "WARNING", "No depth map found in " + subdir, op
                     )

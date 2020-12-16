@@ -114,7 +114,7 @@ class ColmapFileHandler:
         for col_image in id_to_col_images.values():
             current_camera = Camera()
             current_camera.id = col_image.id
-            current_camera.set_quaternion(col_image.qvec)
+            current_camera.set_rotation_with_quaternion(col_image.qvec)
             current_camera.set_camera_translation_vector_after_rotation(
                 col_image.tvec
             )
@@ -168,9 +168,9 @@ class ColmapFileHandler:
                     depth_map_ifp = photometric_ifp
                 else:
                     depth_map_ifp = None
-                current_camera.set_depth_map(
-                    depth_map_ifp,
+                current_camera.set_depth_map_callback(
                     read_array,
+                    depth_map_ifp,
                     Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS,
                     shift_depth_map_to_pixel_center=False,
                 )
@@ -354,7 +354,7 @@ class ColmapFileHandler:
 
             colmap_image = ColmapImage(
                 id=cam.id,
-                qvec=cam.get_quaternion(),
+                qvec=cam.get_rotation_as_quaternion(),
                 tvec=cam.get_translation_vec(),
                 camera_id=cam.id,
                 name=cam.get_file_name(),

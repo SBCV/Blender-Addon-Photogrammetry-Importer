@@ -1,16 +1,14 @@
-__author__ = "sebastian"
-
 import math
 import os
 import numpy as np
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
-class Camera(object):
-    """
-    This class represents a reconstructed camera and provides functionality
-    to manage intrinsic and extrinsic camera parameters as well as image
-    information.
+class Camera:
+    """This class represents a reconstructed camera.
+
+    It provides functionality to manage intrinsic and extrinsic camera
+    parameters as well as corresponding image and depth map information.
     """
 
     panoramic_type_equirectangular = "EQUIRECTANGULAR"
@@ -36,6 +34,7 @@ class Camera(object):
 
         self.image_fp_type = None
         self.image_dp = None
+
         # Use these attributes ONLY with the corresponding methods
         self._relative_fp = None
         self._absolute_fp = None
@@ -44,12 +43,13 @@ class Camera(object):
 
         self.width = None
         self.height = None
-        self.panoramic_type = None
+        self._panoramic_type = None
 
-        self.depth_map_fp = None
-        self.depth_map_callback = None
-        self.depth_map_semantic = None
-        self.shift_depth_map_to_pixel_center = None
+        # Parameters of the depth map callback
+        self._depth_map_callback = None
+        self._depth_map_fp = None
+        self._depth_map_semantic = None
+        self._shift_depth_map_to_pixel_center = None
 
         self.id = None  # A unique identifier (natural number)
 
@@ -67,16 +67,20 @@ class Camera(object):
         )
 
     def get_file_name(self):
+        """Return the file name of the image used to register this camera."""
         return os.path.basename(self.get_absolute_fp())
 
     def set_relative_fp(self, relative_fp, image_fp_type):
+        """Set the relative file path of the corresponding image."""
         self._relative_fp = relative_fp
         self.image_fp_type = image_fp_type
 
     def get_relative_fp(self):
+        """Return the relative file path of the corresponding image."""
         return self._get_relative_fp(self._relative_fp, self._absolute_fp)
 
     def get_undistorted_relative_fp(self):
+        """Return the relative file path of the undistorted image."""
         return self._get_relative_fp(
             self._undistorted_relative_fp, self._undistorted_absolute_fp
         )
@@ -95,12 +99,15 @@ class Camera(object):
             assert False
 
     def set_absolute_fp(self, absolute_fp):
+        """Set the absolute file path of the corresponding image."""
         self._absolute_fp = absolute_fp
 
     def get_absolute_fp(self):
+        """Return the absolute file path of the corresponding image."""
         return self._get_absolute_fp(self._relative_fp, self._absolute_fp)
 
     def get_undistored_absolute_fp(self):
+        """Return the absolute file path of the undistorted image."""
         if self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
             assert False  # Not supported for undistorted images
         return self._get_absolute_fp(
@@ -123,6 +130,7 @@ class Camera(object):
             assert False
 
     def has_undistorted_absolute_fp(self):
+        """Determine if there is an absolute path to the undistorted image."""
         requirements = False
         if self.image_fp_type == Camera.IMAGE_FP_TYPE_NAME:
             requirements = (self.image_dp is not None) and (
@@ -144,27 +152,22 @@ class Camera(object):
                 has_fp = True
         return has_fp
 
-    def get_blender_obj_gui_str(self):
-        # Replace special characters
-        # image_fp_clean = image_fp.replace("/", "_").replace("\\", "_").replace(":", "_")
-        image_fp_stem = os.path.splitext(self.get_relative_fp())[0]
-        # Blender supports only object names with length 63
-        # However, we need also space for additional suffixes
-        image_fp_suffix = image_fp_stem[-40:]
-        return image_fp_suffix
-
     def set_calibration(self, calibration_mat, radial_distortion):
+        """Set calibration matrix and distortion parameter."""
         self._calibration_mat = np.asarray(calibration_mat, dtype=float)
         self._radial_distortion = radial_distortion
         assert self._radial_distortion is not None
 
     def has_focal_length(self):
+        """Return wether the focal length value has been defined or not."""
         return self._calibration_mat[0][0] > 0
 
     def get_focal_length(self):
+        """Return the focal length value."""
         return self._calibration_mat[0][0]
 
     def get_field_of_view(self):
+        """Return the field of view corresponding to the focal length."""
         assert self.width is not None and self.height is not None
         angle = (
             math.atan(
@@ -175,69 +178,80 @@ class Camera(object):
         return angle
 
     def has_intrinsics(self):
-        return (
-            self.has_focal_length() and self.is_principal_point_initialized()
-        )
+        """Return wether the intrinsic parameters have been defined or not."""
+        return self.has_focal_length() and self.has_principal_point()
 
-    def check_calibration_mat(self):
-        assert (
-            self.has_focal_length() and self.is_principal_point_initialized()
-        )
+    def _check_calibration_mat(self):
+        assert self.has_focal_length() and self.has_principal_point()
 
     def get_calibration_mat(self):
-        self.check_calibration_mat()
+        """Return the calibration matrix."""
+        self._check_calibration_mat()
         return self._calibration_mat
 
     def set_calibration_mat(self, calibration_mat):
+        """Set the calibration matrix."""
         self._calibration_mat = calibration_mat
 
     def set_principal_point(self, principal_point):
+        """Set the principal point."""
         self._calibration_mat[0][2] = principal_point[0]
         self._calibration_mat[1][2] = principal_point[1]
 
     def get_principal_point(self):
+        """Return the principal point."""
         calibration_mat = self.get_calibration_mat()
         cx = calibration_mat[0][2]
         cy = calibration_mat[1][2]
         return np.asarray([cx, cy], dtype=float)
 
-    def is_principal_point_initialized(self):
+    def has_principal_point(self):
+        """Return wether the principal point has been defined or not."""
         cx_zero = np.isclose(self._calibration_mat[0][2], 0.0)
         cy_zero = np.isclose(self._calibration_mat[1][2], 0.0)
         initialized = (not cx_zero) and (not cy_zero)
         return initialized
 
     def is_panoramic(self):
-        return self.panoramic_type is not None
+        """Return wether the camera model is a panoramic camera or not."""
+        return self._panoramic_type is not None
 
     def set_panoramic_type(self, panoramic_type):
-        self.panoramic_type = panoramic_type
+        """Set the panoramic camera type."""
+        self._panoramic_type = panoramic_type
 
     def get_panoramic_type(self):
-        return self.panoramic_type
+        """Return the panoramic camera type (if any)."""
+        return self._panoramic_type
 
     @staticmethod
     def compute_calibration_mat(focal_length, cx, cy):
+        """Return the calibration matrix."""
         return np.array(
             [[focal_length, 0, cx], [0, focal_length, cy], [0, 0, 1]],
             dtype=float,
         )
 
-    def set_quaternion(self, quaternion):
+    def set_rotation_with_quaternion(self, quaternion):
+        """Set the camera rotation using a quaternion."""
         self._quaternion = quaternion
-        # we must change the rotation matrixes as well
+        # We must change the rotation matrixes as well.
         self._rotation_mat = Camera.quaternion_to_rotation_matrix(quaternion)
 
-    def set_rotation_mat(self, rotation_mat, check_rotation=True):
+    def set_rotation_with_rotation_mat(
+        self, rotation_mat, check_rotation=True
+    ):
+        """Set the camera rotation using a rotation matrix."""
         if check_rotation:
-            assert Camera.is_rotation_mat_valid(rotation_mat)
+            assert self.__class__._is_rotation_mat_valid(rotation_mat)
         self._rotation_mat = rotation_mat
-        # we must change the quaternion as well
+        # We must change the quaternion as well.
         self._quaternion = Camera.rotation_matrix_to_quaternion(rotation_mat)
 
     def set_camera_center_after_rotation(self, center, check_rotation=True):
+        """Set the camera center after setting the camera rotation."""
         if check_rotation:
-            assert Camera.is_rotation_mat_valid(self._rotation_mat)
+            assert self.__class__._is_rotation_mat_valid(self._rotation_mat)
         self._center = center
         # t = -R C
         self._translation_vec = -np.dot(self._rotation_mat, center)
@@ -245,28 +259,34 @@ class Camera(object):
     def set_camera_translation_vector_after_rotation(
         self, translation_vector, check_rotation=True
     ):
+        """Set the camera translation after setting the camera rotation."""
         if check_rotation:
-            assert Camera.is_rotation_mat_valid(self._rotation_mat)
+            assert self.__class__._is_rotation_mat_valid(self._rotation_mat)
         self._translation_vec = translation_vector
         # C = -R^T t
         self._center = -np.dot(
             self._rotation_mat.transpose(), translation_vector
         )
 
-    def get_quaternion(self):
+    def get_rotation_as_quaternion(self):
+        """Return the rotation as quaternion."""
         return self._quaternion
 
-    def get_rotation_mat(self):
+    def get_rotation_as_rotation_mat(self):
+        """Return the rotation as rotation matrix."""
         return self._rotation_mat
 
     def get_translation_vec(self):
+        """Return the translation vector."""
         return self._translation_vec
 
     def get_camera_center(self):
+        """Return the camera center."""
         return self._center
 
     def set_4x4_cam_to_world_mat(self, cam_to_world_mat, check_rotation=True):
-        self.set_rotation_mat(
+        """Set the extrinsic parameters."""
+        self.set_rotation_with_rotation_mat(
             cam_to_world_mat[0:3, 0:3].transpose(),
             check_rotation=check_rotation,
         )
@@ -275,19 +295,21 @@ class Camera(object):
         )
 
     @staticmethod
-    def is_rotation_mat_valid(some_mat):
-        # Test if rotation_mat is really a rotation matrix (i.e. det = -1 or det = 1)
+    def _is_rotation_mat_valid(some_mat):
+        # Test if rotation_mat is really a rotation matrix
+        # (i.e. det = -1 or det = 1)
         det = np.linalg.det(some_mat)
         res = np.isclose(det, 1) or np.isclose(det, -1)
         return res
 
     @staticmethod
     def quaternion_to_rotation_matrix(q):
-        """
-        Original C++ Method ('SetQuaternionRotation()') defined in pba/src/pba/DataInterface.h
-        Parallel bundle adjustment (pba) code (used by visualsfm) is provided here:
-        http://grail.cs.washington.edu/projects/mcba/
-        """
+        """Convert a quaternion to a rotation matrix."""
+
+        # Original C++ method ('SetQuaternionRotation()') is defined in
+        # pba/src/pba/DataInterface.h.
+        # Parallel bundle adjustment (pba) code (used by visualsfm) is provided
+        # here: http://grail.cs.washington.edu/projects/mcba/
         qq = math.sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3])
         if qq > 0:  # Normalize the quaternion
             qw = q[0] / qq
@@ -311,11 +333,12 @@ class Camera(object):
 
     @staticmethod
     def rotation_matrix_to_quaternion(m):
-        """
-        Original C++ Method ('GetQuaternionRotation()') defined in  pba/src/pba/DataInterface.h
-        Parallel bundle adjustment (pba) code (used by visualsfm) is provided here:
-        http://grail.cs.washington.edu/projects/mcba/
-        """
+        """Convert a rotation matrix to a quaternion."""
+
+        # Original C++ method ('GetQuaternionRotation()') is defined in
+        # pba/src/pba/DataInterface.h
+        # Parallel bundle adjustment (pba) code (used by visualsfm) is provided
+        # here: http://grail.cs.washington.edu/projects/mcba/
         q = np.array([0, 0, 0, 0], dtype=float)
         q[0] = 1 + m[0][0] + m[1][1] + m[2][2]
         if q[0] > 0.000000001:
@@ -344,55 +367,61 @@ class Camera(object):
                 q[0] = (m[0][1] - m[1][0]) / s
         return q
 
-    def set_depth_map(
+    def set_depth_map_callback(
         self,
-        depth_map_ifp,
         depth_map_callback,
+        depth_map_ifp,
         depth_map_semantic,
         shift_depth_map_to_pixel_center,
     ):
-        self.depth_map_fp = depth_map_ifp
-        self.depth_map_callback = depth_map_callback
-        self.depth_map_semantic = depth_map_semantic
-        self.shift_depth_map_to_pixel_center = shift_depth_map_to_pixel_center
+        """Set the depth map callback."""
+        self._depth_map_callback = depth_map_callback
+        self._depth_map_fp = depth_map_ifp
+        self._depth_map_semantic = depth_map_semantic
+        self._shift_depth_map_to_pixel_center = shift_depth_map_to_pixel_center
+
+    def get_depth_map_fp(self):
+        """Return the depth map file path."""
+        return self._depth_map_fp
 
     def get_depth_map(self):
-        if os.path.isfile(self.depth_map_fp):
-            return self.depth_map_callback(self.depth_map_fp)
+        """Return the depth map."""
+        if os.path.isfile(self._depth_map_fp):
+            return self._depth_map_callback(self._depth_map_fp)
         else:
             return None
 
     def get_4x4_cam_to_world_mat(self):
-        """
-        Return the camera to world matrix.
+        """Return the camera to world transformation matrix.
 
         This matrix can be used to convert homogeneous points given in camera
-        coordinates into homogeneous points given in world coordinates.
-        :return: 4x4 matrix
+        coordinates to homogeneous points given in world coordinates.
         """
         # M = [R^T    c]
         #     [0      1]
         homogeneous_mat = np.identity(4, dtype=float)
-        homogeneous_mat[0:3, 0:3] = self.get_rotation_mat().transpose()
+        homogeneous_mat[
+            0:3, 0:3
+        ] = self.get_rotation_as_rotation_mat().transpose()
         homogeneous_mat[0:3, 3] = self.get_camera_center()
         return homogeneous_mat
 
     def convert_depth_map_to_world_coords(
         self, depth_map_display_sparsity=100
     ):
-
+        """Convert the depth map to points in world coordinates."""
         log_report("INFO", "Converting depth map to world coordinates: ...")
         cam_coords = self.convert_depth_map_to_cam_coords(
             depth_map_display_sparsity
         )
 
-        world_coords = self.cam_to_world_coord_multiple_coords(cam_coords)
+        world_coords = self.convert_cam_coords_to_world_coords(cam_coords)
 
         log_report("INFO", "Converting depth map to world coordinates: Done")
         return world_coords
 
-    def cam_to_world_coord_multiple_coords(self, cam_coords):
-
+    def convert_cam_coords_to_world_coords(self, cam_coords):
+        """Convert camera coordinates to world coordinates."""
         num_coords = cam_coords.shape[0]
         hom_entries = np.ones(num_coords).reshape((num_coords, 1))
         cam_coords_hom = np.hstack((cam_coords, hom_entries))
@@ -403,7 +432,7 @@ class Camera(object):
         return world_coords
 
     def convert_depth_map_to_cam_coords(self, depth_map_display_sparsity=100):
-
+        """Convert the depth map to points in camera coordinates."""
         assert depth_map_display_sparsity > 0
 
         depth_map = self.get_depth_map()
@@ -416,13 +445,13 @@ class Camera(object):
             x_step_size = self.width / width
             y_step_size = self.height / height
 
-        fx, fy, skew, cx, cy = self.split_intrinsic_mat(
+        fx, fy, skew, cx, cy = self._split_intrinsic_mat(
             self.get_calibration_mat()
         )
 
-        # Use the local coordinate system of the camera to analyze its viewing directions
-        # The Blender camera coordinate system looks along the negative z axis (blue),
-        # the up axis points along the y axis (green).
+        # Use the local coordinate system of the camera to analyze its viewing
+        # directions.The Blender camera coordinate system looks along the
+        # negative z axis (blue), the up axis points along the y axis (green).
 
         indices = np.indices((height, width))
         y_index_list = indices[0].flatten()
@@ -432,7 +461,7 @@ class Camera(object):
 
         assert len(x_index_list) == len(y_index_list) == len(depth_values)
 
-        if self.shift_depth_map_to_pixel_center:
+        if self._shift_depth_map_to_pixel_center:
             # https://github.com/simonfuhrmann/mve/blob/master/libs/mve/depthmap.cc
             #  math::Vec3f v = invproj * math::Vec3f(
             #       (float)x + 0.5f, (float)y + 0.5f, 1.0f);
@@ -440,8 +469,8 @@ class Camera(object):
             v_index_coord_list = y_step_size * y_index_list + 0.5
         else:
             # https://github.com/colmap/colmap/blob/dev/src/base/reconstruction.cc
-            #   // COLMAP assumes that the upper left pixel center is (0.5, 0.5)
-            # i.e. pixels are already shifted
+            # COLMAP assumes that the upper left pixel center is (0.5, 0.5)
+            # i.e. the pixels are already shifted
             u_index_coord_list = x_step_size * x_index_list
             v_index_coord_list = y_step_size * y_index_list
 
@@ -475,7 +504,7 @@ class Camera(object):
                 ::depth_map_display_sparsity
             ]
 
-        if self.depth_map_semantic == Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS:
+        if self._depth_map_semantic == Camera.DEPTH_MAP_WRT_CANONICAL_VECTORS:
             # In this case, the depth values are defined w.r.t. the canonical
             # vectors. This kind of depth data is used by Colmap.
             x_coords_filtered = (
@@ -488,7 +517,7 @@ class Camera(object):
                 z_coords_canonical_filtered * depth_values_filtered
             )
 
-        elif self.depth_map_semantic == Camera.DEPTH_MAP_WRT_UNIT_VECTORS:
+        elif self._depth_map_semantic == Camera.DEPTH_MAP_WRT_UNIT_VECTORS:
             # In this case the depth values are defined w.r.t. the normalized
             # canonical vectors. This kind of depth data is used by MVE.
             cannonical_norms_filtered = np.linalg.norm(
@@ -527,7 +556,7 @@ class Camera(object):
         return cam_coords
 
     @staticmethod
-    def split_intrinsic_mat(intrinsic_mat):
+    def _split_intrinsic_mat(intrinsic_mat):
         f_x = intrinsic_mat[0][0]
         f_y = intrinsic_mat[1][1]
         skew = intrinsic_mat[0][1]

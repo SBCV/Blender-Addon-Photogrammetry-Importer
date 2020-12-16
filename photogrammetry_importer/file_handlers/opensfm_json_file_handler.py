@@ -142,7 +142,7 @@ class OpenSfMJSONFileHandler:
             rot_mat = OpenSfMJSONFileHandler._rodrigues_to_matrix(
                 rodrigues_vec
             )
-            camera.set_rotation_mat(rot_mat)
+            camera.set_rotation_with_rotation_mat(rot_mat)
             camera.set_camera_translation_vector_after_rotation(
                 np.array(view["translation"], dtype=float)
             )
