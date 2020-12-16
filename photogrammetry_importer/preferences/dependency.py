@@ -162,6 +162,7 @@ class OptionalDependencyManager:
 
 class InstallOptionalDependenciesOperator(bpy.types.Operator):
     """Operator to install all (optional) dependencies of this addon."""
+
     bl_idname = "photogrammetry_importer.install_dependencies"
     bl_label = "Download and Install Optional Dependencies (be patient!)"
     bl_description = (
@@ -185,6 +186,7 @@ class InstallOptionalDependenciesOperator(bpy.types.Operator):
 
 class UninstallOptionalDependenciesOperator(bpy.types.Operator):
     """Operator to uninstall all (optional) dependencies of this addon."""
+
     bl_idname = "photogrammetry_importer.uninstall_dependencies"
     bl_label = "Uninstall Optional Dependencies"
     bl_description = (

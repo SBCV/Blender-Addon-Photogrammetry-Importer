@@ -171,12 +171,13 @@ class AddonPreferences(
 
 class UpdateImporterExporterOperator(bpy.types.Operator):
     """Operator to activate and deactivate importers and exporters."""
+
     bl_idname = "photogrammetry_importer.update_importer_exporter"
     bl_label = "Update (Enable / Disable) Importers and Exporters"
 
     def execute(self, context):
         """Activate and deactivate importers and exporters.
-        
+
         Uses the selected options of :class:`.AddonPreferences` to determine
         active and inactive importers and exporters.
         """
@@ -198,6 +199,7 @@ class UpdateImporterExporterOperator(bpy.types.Operator):
 
 class ResetImportOptionsOperator(bpy.types.Operator):
     """Operator to reset import options."""
+
     bl_idname = "photogrammetry_importer.reset_import_options"
     bl_label = "Reset Import Options to Factory Settings"
 
