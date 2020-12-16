@@ -2,11 +2,10 @@ import os
 import bpy
 from bpy.props import BoolProperty, EnumProperty
 
-from photogrammetry_importer.preferences.dependency_preferences import (
-    InstallOptionalDependencies,
-    UninstallOptionalDependencies,
-    get_dependencies,
-    get_module_status_description,
+from photogrammetry_importer.preferences.dependency import (
+    InstallOptionalDependenciesOperator,
+    UninstallOptionalDependenciesOperator,
+    OptionalDependencyManager,
 )
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 from photogrammetry_importer.importers.camera_importer import CameraImporter
@@ -25,14 +24,25 @@ def _get_addon_name():
     return __name__.split(".")[0]
 
 
-class PhotogrammetryImporterPreferences(
+class AddonPreferences(
     bpy.types.AddonPreferences,
     CameraImporter,
     PointImporter,
     MeshImporter,
 ):
+    """Class to manage persistent addon preferences."""
+
     # __name__ == photogrammetry_importer.preferences.addon_preferences
     bl_idname = _get_addon_name()
+
+    visible_preferences: EnumProperty(
+        name="Use original frames",
+        items=(
+            ("DEPENDENCIES", "Dependencies", ""),
+            ("IMPORTEREXPORTER", "Importer / Exporter", ""),
+            ("IMPORTOPTIONS", "Import Options", ""),
+        ),
+    )
 
     # Importer
     colmap_importer_bool: BoolProperty(name="Colmap Importer", default=True)
@@ -55,42 +65,41 @@ class PhotogrammetryImporterPreferences(
 
     @classmethod
     def register(cls):
-        bpy.utils.register_class(InstallOptionalDependencies)
-        bpy.utils.register_class(UninstallOptionalDependencies)
-        bpy.utils.register_class(ResetPreferences)
-        bpy.utils.register_class(UpdateImportersAndExporters)
+        """Register corresponding operators."""
+        bpy.utils.register_class(InstallOptionalDependenciesOperator)
+        bpy.utils.register_class(UninstallOptionalDependenciesOperator)
+        bpy.utils.register_class(ResetImportOptionsOperator)
+        bpy.utils.register_class(UpdateImporterExporterOperator)
 
     @classmethod
     def unregister(cls):
-        bpy.utils.unregister_class(InstallOptionalDependencies)
-        bpy.utils.unregister_class(UninstallOptionalDependencies)
-        bpy.utils.unregister_class(ResetPreferences)
-        bpy.utils.unregister_class(UpdateImportersAndExporters)
+        """Unregister corresponding operators."""
+        bpy.utils.unregister_class(InstallOptionalDependenciesOperator)
+        bpy.utils.unregister_class(UninstallOptionalDependenciesOperator)
+        bpy.utils.unregister_class(ResetImportOptionsOperator)
+        bpy.utils.unregister_class(UpdateImporterExporterOperator)
 
-    def draw(self, context):
-        layout = self.layout
-        install_dependency_box = layout.box()
+    def _draw_dependencies(self, install_dependency_box):
+        install_dependency_box.label(text="Dependencies:")
         install_dependency_box.operator(
-            InstallOptionalDependencies.bl_idname, icon="CONSOLE"
+            InstallOptionalDependenciesOperator.bl_idname, icon="CONSOLE"
         )
         install_dependency_box.operator(
-            UninstallOptionalDependencies.bl_idname, icon="CONSOLE"
+            UninstallOptionalDependenciesOperator.bl_idname, icon="CONSOLE"
         )
-        dependencies = get_dependencies()
+        dependency_manager = OptionalDependencyManager.get_singleton()
+        dependencies = dependency_manager.get_dependencies()
         for dependency in dependencies:
-            status = get_module_status_description(dependency)
+            status = dependency.get_installation_status()
             install_dependency_box.label(
                 text=f"{dependency.gui_name}: {status}"
             )
         install_dependency_box.label(
-            text="After uninstalling the dependencies one may restart Blender "
-            + " to clear the references to the module within Blender."
+            text="After uninstalling the dependencies one must restart Blender"
+            " to clear the references to the module within Blender."
         )
 
-        reset_box = layout.box()
-        reset_box.operator(ResetPreferences.bl_idname)
-
-        importer_exporter_box = layout.box()
+    def _draw_importer_exporter(self, importer_exporter_box):
         importer_exporter_box.label(text="Active Importers / Exporters:")
         split = importer_exporter_box.split()
         column = split.column()
@@ -109,16 +118,38 @@ class PhotogrammetryImporterPreferences(
         exporter_box.prop(self, "colmap_exporter_bool")
         exporter_box.prop(self, "visualsfm_exporter_bool")
 
-        importer_exporter_box.operator(UpdateImportersAndExporters.bl_idname)
+        importer_exporter_box.operator(
+            UpdateImporterExporterOperator.bl_idname
+        )
 
-        import_options_box = layout.box()
-        import_options_box.label(text="Default Import Options:")
+    def draw(self, context):
+        """Draw available preference options."""
+        layout = self.layout
+        layout.row()
+        layout.row().label(
+            text='Select "Dependencies", "Importer / Exporter" or'
+            ' "Import Options" to view the corresponding preferences.'
+        )
+        layout.row().prop(self, "visible_preferences", expand=True)
+        layout.row()
+        if self.visible_preferences == "DEPENDENCIES":
+            install_dependency_box = layout.box()
+            self._draw_dependencies(install_dependency_box)
 
-        self.draw_camera_options(import_options_box, draw_everything=True)
-        self.draw_point_options(import_options_box, draw_everything=True)
-        self.draw_mesh_options(import_options_box)
+        if self.visible_preferences == "IMPORTEREXPORTER":
+            importer_exporter_box = layout.box()
+            self._draw_importer_exporter(importer_exporter_box)
 
-    def copy_values_from_annotations(self, source):
+        if self.visible_preferences == "IMPORTOPTIONS":
+            import_options_box = layout.box()
+            import_options_box.label(text="Default Import Options:")
+            import_options_box.operator(ResetImportOptionsOperator.bl_idname)
+
+            self.draw_camera_options(import_options_box, draw_everything=True)
+            self.draw_point_options(import_options_box, draw_everything=True)
+            self.draw_mesh_options(import_options_box)
+
+    def _copy_values_from_annotations(self, source):
         for annotation_key in source.__annotations__:
             source_annotation = source.__annotations__[annotation_key]
             if source_annotation[0] == EnumProperty:
@@ -127,51 +158,28 @@ class PhotogrammetryImporterPreferences(
                 source_default_value = source_annotation[1]["default"]
             setattr(self, annotation_key, source_default_value)
 
-    def reset(self):
+    def reset_import_options(self):
+        """Reset the import options to factor settings."""
         camera_importer_original = CameraImporter()
         point_importer_original = PointImporter()
         mesh_importer_original = MeshImporter()
 
-        self.copy_values_from_annotations(camera_importer_original)
-        self.copy_values_from_annotations(point_importer_original)
-        self.copy_values_from_annotations(mesh_importer_original)
+        self._copy_values_from_annotations(camera_importer_original)
+        self._copy_values_from_annotations(point_importer_original)
+        self._copy_values_from_annotations(mesh_importer_original)
 
 
-class ResetPreferences(bpy.types.Operator):
-    bl_idname = "photogrammetry_importer.reset_preferences"
-    bl_label = "Reset Preferences to Factory Settings"
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        log_report("INFO", "Reset preferences: ...", self)
-        addon_name = _get_addon_name()
-        import_export_prefs = bpy.context.preferences.addons[
-            addon_name
-        ].preferences
-        import_export_prefs.reset()
-
-        unregister_importers()
-        register_importers(import_export_prefs)
-
-        unregister_exporters()
-        register_exporters(import_export_prefs)
-
-        log_report("INFO", "Reset preferences: Done", self)
-        return {"FINISHED"}
-
-
-class UpdateImportersAndExporters(bpy.types.Operator):
-    bl_idname = "photogrammetry_importer.update_importers_and_exporters"
+class UpdateImporterExporterOperator(bpy.types.Operator):
+    """Operator to activate and deactivate importers and exporters."""
+    bl_idname = "photogrammetry_importer.update_importer_exporter"
     bl_label = "Update (Enable / Disable) Importers and Exporters"
 
-    @classmethod
-    def poll(cls, context):
-        return True
-
     def execute(self, context):
+        """Activate and deactivate importers and exporters.
+        
+        Uses the selected options of :class:`.AddonPreferences` to determine
+        active and inactive importers and exporters.
+        """
         log_report("INFO", "Update importers and exporters: ...", self)
         addon_name = _get_addon_name()
         import_export_prefs = bpy.context.preferences.addons[
@@ -185,4 +193,22 @@ class UpdateImportersAndExporters(bpy.types.Operator):
         register_exporters(import_export_prefs)
 
         log_report("INFO", "Update importers and exporters: Done", self)
+        return {"FINISHED"}
+
+
+class ResetImportOptionsOperator(bpy.types.Operator):
+    """Operator to reset import options."""
+    bl_idname = "photogrammetry_importer.reset_import_options"
+    bl_label = "Reset Import Options to Factory Settings"
+
+    def execute(self, context):
+        """Reset import options to factory settings."""
+        log_report("INFO", "Reset preferences: ...", self)
+        addon_name = _get_addon_name()
+        import_export_prefs = bpy.context.preferences.addons[
+            addon_name
+        ].preferences
+        import_export_prefs.reset_import_options()
+
+        log_report("INFO", "Reset preferences: Done", self)
         return {"FINISHED"}

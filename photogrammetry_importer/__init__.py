@@ -57,7 +57,7 @@ modules = developer_utility.setup_addon_modules(
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 from photogrammetry_importer.preferences.addon_preferences import (
-    PhotogrammetryImporterPreferences,
+    AddonPreferences,
 )
 
 from photogrammetry_importer.registration.registration import (
@@ -77,7 +77,7 @@ bpy.app.handlers.load_post.append(redraw_points)
 
 def register():
     """ Register importers, exporters and panels. """
-    bpy.utils.register_class(PhotogrammetryImporterPreferences)
+    bpy.utils.register_class(AddonPreferences)
 
     import_export_prefs = bpy.context.preferences.addons[__name__].preferences
     register_importers(import_export_prefs)
@@ -93,7 +93,7 @@ def register():
 
 def unregister():
     """ Unregister importers, exporters and panels. """
-    bpy.utils.unregister_class(PhotogrammetryImporterPreferences)
+    bpy.utils.unregister_class(AddonPreferences)
 
     unregister_importers()
     unregister_exporters()
