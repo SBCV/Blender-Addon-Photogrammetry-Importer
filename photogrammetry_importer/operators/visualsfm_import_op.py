@@ -13,9 +13,7 @@ from photogrammetry_importer.file_handlers.nvm_file_handler import (
     NVMFileHandler,
 )
 from photogrammetry_importer.utility.blender_utility import add_collection
-from photogrammetry_importer.utility.camera_utility import (
-    set_image_size_for_cameras,
-)
+
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 
@@ -44,7 +42,7 @@ class ImportVisualSfMOperator(
 
         Overwrites the method in :code:`CameraImporter`.
         """
-        success = set_image_size_for_cameras(
+        success = Camera.set_image_size_for_cameras(
             cameras, self.default_width, self.default_height, self
         )
         return cameras, success

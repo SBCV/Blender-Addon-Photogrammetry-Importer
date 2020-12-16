@@ -14,9 +14,6 @@ from photogrammetry_importer.file_handlers.open3D_file_handler import (
     Open3DFileHandler,
 )
 from photogrammetry_importer.utility.blender_utility import add_collection
-from photogrammetry_importer.utility.camera_utility import (
-    set_image_size_for_cameras,
-)
 from photogrammetry_importer.utility.blender_logging_utility import log_report
 
 from photogrammetry_importer.types.camera import Camera
@@ -118,7 +115,7 @@ class ImportOpen3DOperator(
         Overwrites the method in :code:`CameraImporter`.
         """
         if not self._image_size_initialized(cameras):
-            success = set_image_size_for_cameras(
+            success = Camera.set_image_size_for_cameras(
                 cameras, self.default_width, self.default_height, self
             )
         else:
