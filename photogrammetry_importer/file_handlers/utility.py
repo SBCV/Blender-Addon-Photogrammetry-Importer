@@ -3,7 +3,7 @@ from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 def check_radial_distortion(radial_distortion, camera_name, op=None):
-    """Check if the reconstructed radial distortion is supported."""
+    """Check if the radial distortion is compatible with Blender."""
 
     # TODO: Integrate lens distortion nodes
     # https://docs.blender.org/manual/en/latest/compositing/types/distort/lens_distortion.html

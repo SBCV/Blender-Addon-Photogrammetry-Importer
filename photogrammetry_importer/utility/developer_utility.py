@@ -5,14 +5,11 @@ import importlib
 
 
 def setup_addon_modules(path, package_name, reload):
-    """
-    Imports and reloads all modules in this addon.
+    """Imports and reloads all modules in this addon.
 
-    path -- __path__ from __init__.py
-    package_name -- __name__ from __init__.py
-
-    Individual modules can define a __reload_order_index__ property which
-    will be used to reload the modules in a specific order. The default is 0.
+    Individual modules can define a :code:`__reload_order_index__` property
+    which will be used to reload the modules in a specific order. The default
+    is 0.
     """
 
     def get_submodule_names(path=path[0], root=""):

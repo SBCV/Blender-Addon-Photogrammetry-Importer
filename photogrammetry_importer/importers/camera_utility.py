@@ -84,7 +84,7 @@ def _get_camera_obj_gui_str(camera):
 def invert_y_and_z_axis(input_matrix_or_vector):
     """Invert the y and z axis of a given matrix or vector.
 
-    Many SfM / MVS librariesuse coordinate systems that differ from Blender's
+    Many SfM / MVS libraries use coordinate systems that differ from Blender's
     coordinate system in the y and the z coordinate. This function inverts the
     y and the z coordinates in the corresponding matrix / vector entries, which
     is equivalent to a rotation by 180 degree around the x axis.

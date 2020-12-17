@@ -3,6 +3,7 @@ from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 def add_color_emission_to_material(mesh_obj):
+    """Add color emmision for the given mesh to improve the visibility."""
     for material in mesh_obj.data.materials:
         node_tree = material.node_tree
         if "Principled BSDF" not in node_tree.nodes:  # is created by default
@@ -22,6 +23,7 @@ def add_mesh_vertex_color_material(
     mesh_material_name,
     add_mesh_color_emission,
 ):
+    """Add a material with vertex colors to the given mesh."""
     material = bpy.data.materials.new(name=mesh_material_name)
     mesh_obj.data.materials.append(material)
 

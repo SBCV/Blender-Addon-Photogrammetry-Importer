@@ -2,7 +2,7 @@ import bpy
 
 
 def add_empty(empty_name, collection=None):
-    """Add an empty object to the scene."""
+    """Add an empty to the scene."""
     if collection is None:
         collection = bpy.context.collection
     empty_obj = bpy.data.objects.new(empty_name, None)

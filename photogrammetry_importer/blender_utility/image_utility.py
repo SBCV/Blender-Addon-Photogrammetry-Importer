@@ -3,7 +3,7 @@ import bpy
 
 
 def save_image_to_disk(image_name, file_path, save_alpha=True):
-    """Save image to disk."""
+    """Save a Blender image to disk."""
 
     file_ext = os.path.splitext(file_path)[1]
     # https://docs.blender.org/api/current/bpy.types.Image.html#bpy.types.Image.file_format

@@ -1,8 +1,9 @@
 import os
+import re
 
 
-def natural_key(some_string):
-    """See http://www.codinghorror.com/blog/archives/001018.html"""
+def _natural_key(some_string):
+    """Return a key that allows for natural sorting."""
     return [
         int(s) if s.isdigit() else s for s in re.split(r"(\d+)", some_string)
     ]
@@ -20,9 +21,10 @@ def get_file_paths_in_dir(
     natural_sorting=False,
     recursive=False,
 ):
+    """Return the paths of the files in the given directory.
 
-    """ext can be a list of extensions or a single extension
-    (e.g. ['.jpg', '.png'] or '.jpg')
+    The parameter :code:`ext` can be a list of extensions or a single extension
+    (e.g. [:code:`.jpg`, :code:`.png`] or :code:`.jpg`).
     """
 
     if recursive:
@@ -74,7 +76,7 @@ def get_file_paths_in_dir(
 
     if sort_result:
         if natural_sorting:
-            ifp_s = sorted(ifp_s, key=natural_key)
+            ifp_s = sorted(ifp_s, key=_natural_key)
         else:
             ifp_s = sorted(ifp_s)
 
@@ -90,6 +92,7 @@ def get_image_file_paths_in_dir(
     recursive=True,
     target_str_or_list=None,
 ):
+    """Return the paths of the images in the given directory."""
     return get_file_paths_in_dir(
         idp,
         ext=[
@@ -129,7 +132,7 @@ def get_subdirs(
     natural_sorting=False,
     recursive=False,
 ):
-
+    """Return the paths of the subdirectories in the given directory."""
     if recursive:
         sub_dps = []
         if base_name_only:
@@ -151,7 +154,7 @@ def get_subdirs(
 
     if sort_result:
         if natural_sorting:
-            sub_dps = sorted(sub_dps, key=natural_key)
+            sub_dps = sorted(sub_dps, key=_natural_key)
         else:
             sub_dps = sorted(sub_dps)
 
