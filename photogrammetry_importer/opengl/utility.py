@@ -7,14 +7,12 @@ from gpu.types import GPUOffScreen
 from gpu_extras.batch import batch_for_shader
 
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.utility.blender_opengl_draw_manager import (
-    DrawManager,
-)
-from photogrammetry_importer.utility.blender_utility import add_empty
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.opengl.draw_manager import DrawManager
+from photogrammetry_importer.blender_utility.object_utility import add_empty
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
-def draw_coords_with_color(
+def _draw_coords_with_color(
     coords,
     colors,
     add_points_to_point_cloud_handle,
@@ -45,11 +43,11 @@ def draw_points(
     object_anchor_handle_name="OpenGL Point Cloud",
     op=None,
 ):
-
+    """Draw points using OpenGL."""
     log_report("INFO", "Add particle draw handlers", op)
 
     coords, colors = Point.split_points(points)
-    object_anchor_handle = draw_coords_with_color(
+    object_anchor_handle = _draw_coords_with_color(
         coords,
         colors,
         add_points_to_point_cloud_handle,
@@ -68,11 +66,12 @@ def draw_coords(
     color=(0, 0, 255, 1.0),
     op=None,
 ):
+    """Draw coordinates using OpenGL."""
     if len(color) == 3:
         color = (color[0], color[1], color[2], 1)
     assert len(color) == 4
     colors = [color for coord in coords]
-    object_anchor_handle = draw_coords_with_color(
+    object_anchor_handle = _draw_coords_with_color(
         coords,
         colors,
         add_points_to_point_cloud_handle,
@@ -85,6 +84,7 @@ def draw_coords(
 
 @persistent
 def redraw_points(dummy):
+    """Redraw points of the previous Blender session."""
 
     # This test is very cheap, so it will not cause
     # huge overheads for scenes without point clouds
@@ -114,6 +114,7 @@ def redraw_points(dummy):
 
 
 def render_opengl_image(image_name, cam, point_size):
+    """Render the points of the current :class:`DrawManager`."""
     draw_manager = DrawManager.get_singleton()
     coords, colors = draw_manager.get_coords_and_colors()
 
@@ -156,11 +157,11 @@ def render_opengl_image(image_name, cam, point_size):
 
     offscreen.free()
 
-    image = create_image_lazy(image_name, width, height)
-    copy_buffer_to_pixel(buffer, image)
+    image = _create_image_lazy(image_name, width, height)
+    _copy_buffer_to_pixel(buffer, image)
 
 
-def create_image_lazy(image_name, width, height):
+def _create_image_lazy(image_name, width, height):
     if image_name not in bpy.data.images:
         image = bpy.data.images.new(image_name, width, height)
     else:
@@ -170,7 +171,7 @@ def create_image_lazy(image_name, width, height):
     return image
 
 
-def copy_buffer_to_pixel(buffer, image):
+def _copy_buffer_to_pixel(buffer, image):
 
     # According to
     #   https://developer.blender.org/D2734
@@ -179,7 +180,7 @@ def copy_buffer_to_pixel(buffer, image):
     # bgl.Buffer and bpy.types.Image.pixels
     # (this makes the extraction very slow)
 
-    # # from photogrammetry_importer.utility.stop_watch import StopWatch
+    # # from photogrammetry_importer.utility.timing_utility import StopWatch
     # Option 1 (faster)
     # sw = StopWatch()
     image.pixels = [v / 255 for v in buffer]

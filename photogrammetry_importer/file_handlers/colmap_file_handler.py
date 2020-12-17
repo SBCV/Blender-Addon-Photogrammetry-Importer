@@ -12,10 +12,10 @@ from photogrammetry_importer.ext.read_write_model import (
 
 from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.utility.blender_camera_utility import (
+from photogrammetry_importer.file_handlers.utility import (
     check_radial_distortion,
 )
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 # From photogrammetry_importer\ext\read_write_model.py
 # CAMERA_MODELS = {

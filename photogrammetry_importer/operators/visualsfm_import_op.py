@@ -5,6 +5,9 @@ from bpy_extras.io_utils import ImportHelper
 
 from photogrammetry_importer.operators.import_op import ImportOperator
 from photogrammetry_importer.operators.general_options import GeneralOptions
+from photogrammetry_importer.operators.utility import (
+    set_image_size_for_cameras,
+)
 
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
@@ -15,9 +18,11 @@ from photogrammetry_importer.file_handlers.nvm_file_handler import (
 
 from photogrammetry_importer.types.camera import Camera
 
-from photogrammetry_importer.utility.blender_utility import add_collection
+from photogrammetry_importer.blender_utility.object_utility import (
+    add_collection,
+)
 
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 class ImportVisualSfMOperator(
@@ -45,7 +50,7 @@ class ImportVisualSfMOperator(
 
         Overwrites the method in :code:`CameraImporter`.
         """
-        success = Camera.set_image_size_for_cameras(
+        success = set_image_size_for_cameras(
             cameras, self.default_width, self.default_height, self
         )
         return cameras, success

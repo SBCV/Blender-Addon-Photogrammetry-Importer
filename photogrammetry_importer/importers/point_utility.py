@@ -3,15 +3,15 @@ import numpy as np
 from mathutils import Vector
 
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.utility.blender_utility import (
+from photogrammetry_importer.blender_utility.object_utility import (
     add_collection,
     add_obj,
 )
-from photogrammetry_importer.utility.stop_watch import StopWatch
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.utility.timing_utility import StopWatch
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
-def copy_values_to_image(value_tripplets, image_name):
+def _copy_values_to_image(value_tripplets, image_name):
     """ Copy values to image pixels. """
     image = bpy.data.images[image_name]
     # working on a copy of the pixels results in a MASSIVE performance speed
@@ -27,18 +27,18 @@ def copy_values_to_image(value_tripplets, image_name):
     image.pixels = local_pixels[:]
 
 
-def compute_particle_color_texture(colors, name="ParticleColor"):
+def _compute_particle_color_texture(colors, name="ParticleColor"):
     # To view the texture we set the height of the texture to vis_image_height
     image = bpy.data.images.new(name=name, width=len(colors), height=1)
 
-    copy_values_to_image(colors, image.name)
+    _copy_values_to_image(colors, image.name)
     image = bpy.data.images[image.name]
     # https://docs.blender.org/api/current/bpy.types.Image.html#bpy.types.Image.pack
     image.pack()
     return image
 
 
-def create_particle_color_nodes(
+def _create_particle_color_nodes(
     node_tree, colors, particle_overwrite_color=None
 ):
 
@@ -57,7 +57,7 @@ def create_particle_color_nodes(
         else:
             particle_color_node = node_tree.nodes.new("ShaderNodeTexImage")
 
-        particle_color_node.image = compute_particle_color_texture(colors)
+        particle_color_node.image = _compute_particle_color_texture(colors)
         texture_size = len(colors)
         particle_color_node.interpolation = "Closest"
 
@@ -97,7 +97,7 @@ def create_particle_color_nodes(
     return particle_color_node
 
 
-def add_particle(
+def _add_particle_obj(
     colors,
     particle_obj_name,
     particle_material_name,
@@ -125,7 +125,7 @@ def add_particle(
     reconstruction_collection.objects.link(particle_obj)
     bpy.context.collection.objects.unlink(particle_obj)
 
-    add_particle_material(
+    _add_particle_material(
         colors,
         particle_obj,
         particle_material_name,
@@ -136,7 +136,7 @@ def add_particle(
     return particle_obj
 
 
-def add_particle_material(
+def _add_particle_material(
     colors,
     particle_obj,
     particle_material_name,
@@ -168,7 +168,7 @@ def add_particle_material(
         material_output_node.inputs["Surface"],
     )
 
-    particle_color_node = create_particle_color_nodes(
+    particle_color_node = _create_particle_color_nodes(
         node_tree, colors, particle_overwrite_color
     )
 
@@ -184,7 +184,7 @@ def add_particle_material(
         )
 
 
-def add_particle_system(
+def _add_particle_system_obj(
     coords, particle_obj, point_cloud_obj_name, reconstruction_collection
 ):
     point_cloud_mesh = bpy.data.meshes.new(point_cloud_obj_name)
@@ -211,7 +211,7 @@ def add_particle_system(
     return point_cloud_obj
 
 
-def add_points_as_particle_system(
+def add_points_as_object_with_particle_system(
     points,
     mesh_type,
     point_extent,
@@ -220,6 +220,7 @@ def add_points_as_particle_system(
     particle_overwrite_color=None,
     op=None,
 ):
+    """Add a point cloud as particle system."""
     log_report("INFO", "Adding Points as Particle System: ...", op)
     stop_watch = StopWatch()
 
@@ -241,7 +242,7 @@ def add_points_as_particle_system(
         points_subset = points[i : i + max_number_particles]
         coords, colors = Point.split_points(points_subset)
 
-        particle_obj = add_particle(
+        particle_obj = _add_particle_obj(
             colors,
             particle_obj_name,
             particle_material_name,
@@ -251,7 +252,7 @@ def add_points_as_particle_system(
             point_extent,
             particle_system_collection,
         )
-        point_cloud_obj = add_particle_system(
+        point_cloud_obj = _add_particle_system_obj(
             coords,
             particle_obj,
             point_cloud_obj_name,
@@ -265,7 +266,8 @@ def add_points_as_particle_system(
     return point_cloud_obj.name
 
 
-def add_points_as_mesh(points, reconstruction_collection, op=None):
+def add_points_as_mesh_vertices(points, reconstruction_collection, op=None):
+    """Add a point cloud as mesh."""
     log_report("INFO", "Adding Points as Mesh: ...", op)
     stop_watch = StopWatch()
     point_cloud_obj_name = "Mesh Point Cloud"

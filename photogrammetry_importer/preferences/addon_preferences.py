@@ -7,7 +7,7 @@ from photogrammetry_importer.preferences.dependency import (
     UninstallOptionalDependenciesOperator,
     OptionalDependencyManager,
 )
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
 from photogrammetry_importer.importers.mesh_importer import MeshImporter

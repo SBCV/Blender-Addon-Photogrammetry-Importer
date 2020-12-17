@@ -1,5 +1,5 @@
 import bpy
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 def add_color_emission_to_material(mesh_obj):

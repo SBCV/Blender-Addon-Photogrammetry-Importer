@@ -54,7 +54,7 @@ modules = developer_utility.setup_addon_modules(
 
 # The root dir is Blenders addon folder.
 # Therefore, we need the "photogrammetry_importer" specifier for this addon
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 from photogrammetry_importer.preferences.addon_preferences import (
     AddonPreferences,
@@ -63,9 +63,7 @@ from photogrammetry_importer.preferences.addon_preferences import (
 from photogrammetry_importer.registration.registration import Registration
 
 from photogrammetry_importer.panels.view_3d_panel import OpenGLPanel
-from photogrammetry_importer.utility.blender_opengl_utility import (
-    redraw_points,
-)
+from photogrammetry_importer.opengl.utility import redraw_points
 
 bpy.app.handlers.load_post.append(redraw_points)
 

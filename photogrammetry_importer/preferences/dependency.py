@@ -2,7 +2,7 @@ import subprocess
 import importlib
 from collections import defaultdict
 import bpy
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 class OptionalDependency:

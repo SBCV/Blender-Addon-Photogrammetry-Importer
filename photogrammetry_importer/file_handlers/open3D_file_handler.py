@@ -8,7 +8,7 @@ from photogrammetry_importer.utility.os_utility import (
     get_image_file_paths_in_dir,
 )
 
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 class Open3DFileHandler:

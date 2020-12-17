@@ -1,1 +1,1 @@
-""" Contains general and Blender-specific utility functions. """
+""" Contains general utility functions. """

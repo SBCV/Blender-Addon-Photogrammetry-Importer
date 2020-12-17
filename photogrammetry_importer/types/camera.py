@@ -1,7 +1,8 @@
 import math
 import os
 import numpy as np
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 class Camera:
@@ -563,27 +564,3 @@ class Camera:
         p_x = intrinsic_mat[0][2]
         p_y = intrinsic_mat[1][2]
         return f_x, f_y, skew, p_x, p_y
-
-    @staticmethod
-    def set_image_size_for_cameras(
-        cameras, default_width, default_height, op=None
-    ):
-        """ Set image sizes for cameras and return a boolean. """
-
-        from photogrammetry_importer.file_handlers.image_file_handler import (
-            ImageFileHandler,
-        )
-
-        log_report("INFO", "set_image_size_for_cameras: ", op)
-        success = True
-        for camera in cameras:
-            image_fp = camera.get_absolute_fp()
-            success, width, height = ImageFileHandler.read_image_size(
-                image_fp, default_width, default_height, op
-            )
-            camera.width = width
-            camera.height = height
-            if not success:
-                break
-        log_report("INFO", "set_image_size_for_cameras: Done", op)
-        return success

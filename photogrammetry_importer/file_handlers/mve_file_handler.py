@@ -8,10 +8,10 @@ from photogrammetry_importer.file_handlers.image_file_handler import (
     ImageFileHandler,
 )
 from photogrammetry_importer.utility.os_utility import get_subdirs
-from photogrammetry_importer.utility.blender_camera_utility import (
+from photogrammetry_importer.file_handlers.utility import (
     check_radial_distortion,
 )
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.types.point import Point
 

@@ -3,19 +3,15 @@ import numpy as np
 import bpy
 
 from photogrammetry_importer.types.point import Point
-from photogrammetry_importer.utility.blender_camera_utility import (
-    get_selected_camera,
-)
-from photogrammetry_importer.utility.blender_image_utility import (
+
+from photogrammetry_importer.blender_utility.image_utility import (
     save_image_to_disk,
 )
-from photogrammetry_importer.utility.blender_opengl_utility import (
-    render_opengl_image,
-)
-from photogrammetry_importer.utility.blender_opengl_draw_manager import (
-    DrawManager,
-)
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.opengl.utility import render_opengl_image
+
+from photogrammetry_importer.opengl.draw_manager import DrawManager
+
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 from bpy.props import (
     StringProperty,
@@ -25,6 +21,17 @@ from bpy.props import (
 )
 
 from bpy_extras.io_utils import ExportHelper
+
+
+def _get_selected_camera():
+    selection_names = [obj.name for obj in bpy.context.selected_objects]
+    if len(selection_names) == 0:
+        return None
+    selected_obj = bpy.data.objects[selection_names[0]]
+    if selected_obj.type == "CAMERA":
+        return selected_obj
+    else:
+        return None
 
 
 class OpenGLPanelSettings(bpy.types.PropertyGroup):
@@ -172,14 +179,14 @@ class SaveOpenGLRenderImageOperator(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         """Return the availability status of the operator."""
-        cam = get_selected_camera()
+        cam = _get_selected_camera()
         return cam is not None
 
     def execute(self, context):
         """Render the point cloud and save the result as image in Blender."""
         log_report("INFO", "Save opengl render as image: ...", self)
         save_point_size = context.scene.opengl_panel_settings.save_point_size
-        cam = get_selected_camera()
+        cam = _get_selected_camera()
         image_name = "OpenGL Render"
         log_report("INFO", "image_name: " + image_name, self)
         render_opengl_image(image_name, cam, save_point_size)
@@ -200,7 +207,7 @@ class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
     @classmethod
     def poll(cls, context):
         """Return the availability status of the operator."""
-        cam = get_selected_camera()
+        cam = _get_selected_camera()
         return cam is not None
 
     def execute(self, context):
@@ -216,7 +223,7 @@ class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
         # Used to cache the results
         image_name = "Export Opengl"
 
-        cam = get_selected_camera()
+        cam = _get_selected_camera()
         render_opengl_image(image_name, cam, save_point_size)
 
         save_alpha = scene.opengl_panel_settings.save_alpha
@@ -239,7 +246,7 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
     @classmethod
     def poll(cls, context):
         """Return the availability status of the operator."""
-        cam = get_selected_camera()
+        cam = _get_selected_camera()
         return cam is not None and cam.animation_data is not None
 
     def _get_animation_indices(self, obj):
@@ -281,7 +288,7 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
         image_name = "Export Opengl"
         ext = "." + file_format
         save_alpha = scene.opengl_panel_settings.save_alpha
-        cam = get_selected_camera()
+        cam = _get_selected_camera()
         indices = self._get_indices(use_camera_keyframes, cam)
         for idx in indices:
             bpy.context.scene.frame_set(idx)

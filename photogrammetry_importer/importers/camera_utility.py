@@ -1,73 +1,23 @@
 import os
-import math
 import bpy
 import colorsys
-import numpy as np
+from mathutils import Matrix
 from mathutils import Vector
-from collections import namedtuple
 
-from photogrammetry_importer.types.camera import Camera
-
-from photogrammetry_importer.utility.os_utility import (
-    get_image_file_paths_in_dir,
-)
-from photogrammetry_importer.utility.blender_utility import (
-    compute_camera_matrix_world,
+from photogrammetry_importer.blender_utility.object_utility import (
     add_collection,
     add_obj,
 )
-from photogrammetry_importer.utility.blender_animation_utility import (
-    add_transformation_animation,
-    add_camera_intrinsics_animation,
-)
-from photogrammetry_importer.utility.blender_opengl_utility import draw_coords
-from photogrammetry_importer.utility.stop_watch import StopWatch
+
+from photogrammetry_importer.opengl.utility import draw_coords
+from photogrammetry_importer.utility.timing_utility import StopWatch
 from photogrammetry_importer.utility.type_utility import is_int
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
-class DummyCamera(object):
-    def __init__(self):
-        self._relative_fp = None
-        self._absolute_fp = None
-        self.image_fp_type = None
-        self.image_dp = None
-
-    def get_file_name(self):
-        return os.path.basename(self.get_relative_fp())
-
-    def get_relative_fp(self):
-        return self._relative_fp
-
-    def get_absolute_fp(self):
-        return self._get_absolute_fp(self._relative_fp, self._absolute_fp)
-
-    def _get_absolute_fp(self, relative_fp, absolute_fp):
-        if self.image_fp_type == Camera.IMAGE_FP_TYPE_NAME:
-            assert self.image_dp is not None
-            assert relative_fp is not None
-            return os.path.join(self.image_dp, os.path.basename(relative_fp))
-        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE:
-            assert self.image_dp is not None
-            assert relative_fp is not None
-            return os.path.join(self.image_dp, relative_fp)
-        elif self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
-            assert absolute_fp is not None
-            return absolute_fp
-        else:
-            assert False
-
-
-CameraIntrinsics = namedtuple(
-    "CameraIntrinsics", "field_of_view shift_x shift_y"
-)
-
-
-def compute_shift(camera, relativ_to_largest_extend):
+def compute_principal_point_shift(camera, relativ_to_largest_extend):
+    """Return the shift of the principal point in the 3D view port."""
     # https://blender.stackexchange.com/questions/58235/what-are-the-units-for-camera-shift
-    # This is measured however in relation to the largest dimension of the rendered frame size.
-    # So lets say you are rendering in Full HD, that is 1920 x 1080 pixel image;
-    # a frame shift if 1 unit will shift exactly 1920 pixels in any direction, that is up/down/left/right.
 
     width = camera.width
     height = camera.height
@@ -80,8 +30,9 @@ def compute_shift(camera, relativ_to_largest_extend):
         width_denominator = width
         height_denominator = height
 
-    # Note, that the direction of the y coordinate is inverted
-    # (Difference between computer vision vs computer graphics coordinate system)
+    # Note, that the direction of the y coordinate is inverted - reflecting the
+    # difference between computer vision vs computer graphics coordinate
+    # system.
     shift_x = float((width / 2.0 - p_x) / float(width_denominator))
     shift_y = -float((height / 2.0 - p_y) / float(height_denominator))
 
@@ -91,178 +42,21 @@ def compute_shift(camera, relativ_to_largest_extend):
     return shift_x, shift_y
 
 
-def add_single_camera(camera_name, camera, op=None):
-    # Add camera:
+def add_single_camera(camera, camera_name, op=None):
+    """Add a camera as Blender object."""
     bcamera = bpy.data.cameras.new(camera_name)
-
     if camera.is_panoramic():
-        focal_length = 0.001  # minimal focal length
         bcamera.type = "PANO"
         bcamera.cycles.panorama_type = camera.get_panoramic_type()
-    else:
-        focal_length = camera.get_focal_length()
-
     #  Adjust field of view
     bcamera.angle = camera.get_field_of_view()
-
-    bcamera.shift_x, bcamera.shift_y = compute_shift(
+    bcamera.shift_x, bcamera.shift_y = compute_principal_point_shift(
         camera, relativ_to_largest_extend=True
     )
-
-    # log_report('INFO', 'focal_length: ' + str(focal_length))
-    # log_report('INFO', 'camera.get_calibration_mat(): ' + str(camera.get_calibration_mat()))
-    # log_report('INFO', 'width: ' + str(camera.width))
-    # log_report('INFO', 'height: ' + str(camera.height))
-    # log_report('INFO', 'p_x: ' + str(p_x))
-    # log_report('INFO', 'p_y: ' + str(p_y))
-
     return bcamera
 
 
-def enhance_cameras_with_dummy_cameras(
-    cameras, image_dp, image_fp_type, op=None
-):
-
-    rec_image_relative_fp = [camera.get_relative_fp() for camera in cameras]
-
-    all_image_relative_paths = get_image_file_paths_in_dir(
-        image_dp,
-        base_name_only=image_fp_type == Camera.IMAGE_FP_TYPE_NAME,
-        relative_path_only=image_fp_type == Camera.IMAGE_FP_TYPE_RELATIVE,
-        sort_result=True,
-        recursive=True,
-    )
-
-    non_rec_image_relative_paths = [
-        image_path
-        for image_path in all_image_relative_paths
-        if os.path.basename(image_path) not in rec_image_relative_fp
-    ]
-
-    for non_rec_image_path in non_rec_image_relative_paths:
-        cam = DummyCamera()
-        cam._relative_fp = non_rec_image_path
-        cam._absolute_fp = os.path.join(image_dp, cam._relative_fp)
-        cam.image_fp_type = image_fp_type
-        cam.image_dp = image_dp
-
-        cameras.append(cam)
-
-    return cameras
-
-
-def add_camera_animation(
-    cameras,
-    parent_collection,
-    animation_frame_source,
-    add_background_images,
-    number_interpolation_frames,
-    interpolation_type,
-    consider_missing_cameras_during_animation,
-    remove_rotation_discontinuities,
-    image_dp,
-    image_fp_type,
-    op=None,
-):
-    log_report("INFO", "Adding Camera Animation: ...")
-
-    if len(cameras) == 0:
-        return
-
-    if animation_frame_source == "ORIGINAL":
-        number_interpolation_frames = 0
-    elif animation_frame_source == "ADJUSTED":
-        add_background_images = False
-    else:
-        assert False
-
-    if consider_missing_cameras_during_animation:
-        cameras = enhance_cameras_with_dummy_cameras(
-            cameras, image_dp, image_fp_type, op
-        )
-
-    # Using the first reconstructed camera as template for the animated camera.
-    # The values are adjusted with add_transformation_animation() and
-    # add_camera_intrinsics_animation().
-    some_cam = cameras[0]
-    bcamera = add_single_camera("Animated Camera", some_cam, op)
-    cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)
-    cameras_sorted = sorted(
-        cameras, key=lambda camera: camera.get_relative_fp()
-    )
-
-    transformations_sorted = []
-    camera_intrinsics_sorted = []
-    for camera in cameras_sorted:
-        if isinstance(camera, DummyCamera):
-            matrix_world = None
-            camera_intrinsics = None
-        else:
-            matrix_world = compute_camera_matrix_world(camera)
-            shift_x, shift_y = compute_shift(
-                camera, relativ_to_largest_extend=True
-            )
-            camera_intrinsics = CameraIntrinsics(
-                camera.get_field_of_view(), shift_x, shift_y
-            )
-
-        transformations_sorted.append(matrix_world)
-        camera_intrinsics_sorted.append(camera_intrinsics)
-
-    add_transformation_animation(
-        animated_obj_name=cam_obj.name,
-        transformations_sorted=transformations_sorted,
-        number_interpolation_frames=number_interpolation_frames,
-        interpolation_type=interpolation_type,
-        remove_rotation_discontinuities=remove_rotation_discontinuities,
-        op=op,
-    )
-
-    add_camera_intrinsics_animation(
-        animated_obj_name=cam_obj.name,
-        intrinsics_sorted=camera_intrinsics_sorted,
-        number_interpolation_frames=number_interpolation_frames,
-        op=op,
-    )
-
-    if add_background_images:
-        # https://docs.blender.org/api/current/bpy.types.CameraBackgroundImage.html
-        camera_data = bpy.data.objects[cam_obj.name].data
-        camera_data.show_background_images = True
-        bg_img = camera_data.background_images.new()
-        dp = os.path.dirname(cameras_sorted[0].get_absolute_fp())
-
-        first_fn = cameras_sorted[0].get_file_name()
-
-        # Remove previously created movie clips
-        movie_clip_name = os.path.basename(first_fn)
-        if movie_clip_name in bpy.data.movieclips:
-            bpy.data.movieclips.remove(bpy.data.movieclips[movie_clip_name])
-
-        if os.path.isfile(os.path.join(dp, first_fn)):
-
-            # The first entry (ALL OTHERS ARE IGNORED) in the "files" parameter
-            # in bpy.ops.clip.open() is used to determine the image in the
-            # image sequence. All images with higher sequence numbers are added
-            # to the movie clip.
-            first_sequence_fn = [{"name": first_fn}]
-
-            # https://docs.blender.org/api/current/bpy.types.MovieClip.html
-            # https://docs.blender.org/api/current/bpy.types.Sequences.html
-            # Using a video clip instead of an image sequence has the advantage
-            # that Blender automatically adjusts the start offset of the image
-            # sequence (e.g. if the first image of the sequence is
-            #  100_7110.JPG, then one would have to set the offset to manually
-            # to 7109)
-            bpy.ops.clip.open(directory=dp, files=first_sequence_fn)
-            bg_img.source = "MOVIE_CLIP"
-
-            # The clip created with bpy.ops.clip.open() has the same name than
-            # the first image name of the image sequence.
-            bg_img.clip = bpy.data.movieclips[movie_clip_name]
-
-
-def color_from_value(val, min_val, max_val):
+def _color_from_value(val, min_val, max_val):
     # source: http://stackoverflow.com/questions/10901085/range-values-to-pseudocolor
 
     # convert val in range minval..maxval to the range 0..120 degrees which
@@ -287,6 +81,55 @@ def _get_camera_obj_gui_str(camera):
     return image_fp_suffix
 
 
+def invert_y_and_z_axis(input_matrix_or_vector):
+    """Invert the y and z axis of a given matrix or vector.
+
+    Many SfM / MVS librariesuse coordinate systems that differ from Blender's
+    coordinate system in the y and the z coordinate. This function inverts the
+    y and the z coordinates in the corresponding matrix / vector entries, which
+    is equivalent to a rotation by 180 degree around the x axis.
+    """
+    output_matrix_or_vector = input_matrix_or_vector.copy()
+    output_matrix_or_vector[1] = -output_matrix_or_vector[1]
+    output_matrix_or_vector[2] = -output_matrix_or_vector[2]
+    return output_matrix_or_vector
+
+
+def _get_world_matrix_from_translation_vec(translation_vec, rotation):
+    t = Vector(translation_vec).to_4d()
+    camera_rotation = Matrix()
+    for row in range(3):
+        camera_rotation[row][0:3] = rotation[row]
+
+    camera_rotation.transpose()  # = Inverse rotation
+
+    # Camera position in world coordinates
+    camera_center = -(camera_rotation @ t)
+    camera_center[3] = 1.0
+
+    camera_rotation = camera_rotation.copy()
+    camera_rotation.col[
+        3
+    ] = camera_center  # Set translation to camera position
+    return camera_rotation
+
+
+def compute_camera_matrix_world(camera, convert_coordinate_system=True):
+    """Compute Blender's :code:`matrix_world` for a given camera."""
+    translation_vec = camera.get_translation_vec()
+    rotation_mat = camera.get_rotation_as_rotation_mat()
+    if convert_coordinate_system:
+        # Transform the camera coordinate system from computer vision camera
+        # coordinate frames to the computer vision camera coordinate frames.
+        # That is, rotate the camera matrix around the x axis by 180 degrees,
+        # i.e. invert the x and y axis.
+        rotation_mat = invert_y_and_z_axis(rotation_mat)
+        translation_vec = invert_y_and_z_axis(translation_vec)
+    return _get_world_matrix_from_translation_vec(
+        translation_vec, rotation_mat
+    )
+
+
 def add_cameras(
     cameras,
     parent_collection,
@@ -307,19 +150,7 @@ def add_cameras(
     depth_map_id_or_name_str="",
     op=None,
 ):
-
-    """
-    ======== The images are currently only shown in BLENDER RENDER ========
-    ======== Make sure to enable TEXTURE SHADING in the 3D view to make the images visible ========
-
-    :param cameras:
-    :param image_dp:
-    :param add_image_planes:
-    :param convert_camera_coordinate_system:
-    :param camera_collection_name:
-    :param image_plane_collection_name:
-    :return:
-    """
+    """Add a set of reconstructed cameras to Blender's 3D view port."""
     log_report("INFO", "Adding Cameras: ...")
     stop_watch = StopWatch()
     camera_collection = add_collection(
@@ -380,7 +211,7 @@ def add_cameras(
         # Replace the camera name so it matches the image name (without extension)
         blender_image_name_stem = _get_camera_obj_gui_str(camera)
         camera_name = blender_image_name_stem + "_cam"
-        bcamera = add_single_camera(camera_name, camera, op)
+        bcamera = add_single_camera(camera, camera_name, op)
         camera_object = add_obj(bcamera, camera_name, camera_collection)
         matrix_world = compute_camera_matrix_world(camera)
         camera_object.matrix_world = matrix_world
@@ -458,7 +289,7 @@ def add_cameras(
         if use_default_depth_map_color:
             color = depth_map_default_color
         else:
-            color = color_from_value(
+            color = _color_from_value(
                 val=index, min_val=0, max_val=len(cameras)
             )
 
@@ -492,16 +323,13 @@ def add_camera_image_plane(
     image_planes_collection,
     op=None,
 ):
-    """
-    Create mesh for image plane
-    """
+    """Add an image plane corresponding to a reconstructed camera."""
     # log_report('INFO', 'add_camera_image_plane: ...')
     # log_report('INFO', 'name: ' + str(name))
 
     width = camera.width
     height = camera.height
     focal_length = camera.get_focal_length()
-    p_x, p_y = camera.get_principal_point()
 
     assert width is not None and height is not None
 
@@ -519,7 +347,9 @@ def add_camera_image_plane(
     view_dir = -Vector((0, 0, 1)) * plane_distance
     plane_center = view_dir
 
-    shift_x, shift_y = compute_shift(camera, relativ_to_largest_extend=False)
+    shift_x, shift_y = compute_principal_point_shift(
+        camera, relativ_to_largest_extend=False
+    )
 
     corners = ((-0.5, -0.5), (+0.5, -0.5), (+0.5, +0.5), (-0.5, +0.5))
     points = [
@@ -569,68 +399,3 @@ def add_camera_image_plane(
     mesh.validate()
     # log_report('INFO', 'add_camera_image_plane: Done')
     return mesh_obj
-
-
-def set_principal_point_for_cameras(
-    cameras, default_pp_x, default_pp_y, op=None
-):
-
-    if not math.isnan(default_pp_x) and not math.isnan(default_pp_y):
-        log_report("WARNING", "Setting principal points to default values!")
-    else:
-        log_report("WARNING", "Setting principal points to image centers!")
-        assert cameras[0].width is not None and cameras[0].height is not None
-        default_pp_x = cameras[0].width / 2.0
-        default_pp_y = cameras[0].height / 2.0
-
-    for camera in cameras:
-        if not camera.has_principal_point():
-            camera.set_principal_point([default_pp_x, default_pp_y])
-
-
-def principal_points_initialized(cameras):
-    principal_points_initialized = True
-    for camera in cameras:
-        if not camera.has_principal_point():
-            principal_points_initialized = False
-            break
-    return principal_points_initialized
-
-
-def get_selected_camera():
-    selection_names = [obj.name for obj in bpy.context.selected_objects]
-    if len(selection_names) == 0:
-        return None
-    selected_obj = bpy.data.objects[selection_names[0]]
-    if selected_obj.type == "CAMERA":
-        return selected_obj
-    else:
-        return None
-
-
-def check_radial_distortion(radial_distortion, camera_name, op=None):
-    # TODO
-    # Integrate lens distortion nodes
-    # https://docs.blender.org/manual/en/latest/compositing/types/distort/lens_distortion.html
-    # to properly support radial distortion consisting of a single parameter
-
-    if radial_distortion is None:
-        return
-    if np.array_equal(
-        np.asarray(radial_distortion), np.zeros_like(radial_distortion)
-    ):
-        return
-
-    output = (
-        "Blender does not support radial distortion of cameras in the 3D View."
-    )
-    output += (
-        " Distortion of camera "
-        + camera_name
-        + ": "
-        + str(radial_distortion)
-        + "."
-    )
-    output += " If possible, re-compute the reconstruction using a camera model without radial distortion parameters."
-    output += ' Use "Suppress Distortion Warnings" in the import settings to suppress this message.'
-    log_report("WARNING", output, op)

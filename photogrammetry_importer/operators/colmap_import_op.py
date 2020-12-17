@@ -12,8 +12,10 @@ from photogrammetry_importer.importers.mesh_importer import MeshImporter
 from photogrammetry_importer.file_handlers.colmap_file_handler import (
     ColmapFileHandler,
 )
-from photogrammetry_importer.utility.blender_utility import add_collection
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.object_utility import (
+    add_collection,
+)
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 class ImportColmapOperator(

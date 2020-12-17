@@ -1,3 +1,5 @@
+import math
+import bpy
 from bpy.props import (
     StringProperty,
     BoolProperty,
@@ -6,16 +8,14 @@ from bpy.props import (
     IntProperty,
     FloatVectorProperty,
 )
-from photogrammetry_importer.utility.blender_utility import (
-    adjust_render_settings_if_possible,
-)
-from photogrammetry_importer.utility.blender_camera_utility import (
-    principal_points_initialized,
-    set_principal_point_for_cameras,
-    add_cameras,
+
+from photogrammetry_importer.importers.camera_utility import add_cameras
+from photogrammetry_importer.importers.camera_animation_utility import (
     add_camera_animation,
 )
 from photogrammetry_importer.types.camera import Camera
+
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 class CameraImporter:
@@ -322,6 +322,63 @@ class CameraImporter:
         success = True
         return cameras, success
 
+    @staticmethod
+    def _principal_points_initialized(cameras):
+        principal_points_initialized = True
+        for camera in cameras:
+            if not camera.has_principal_point():
+                principal_points_initialized = False
+                break
+        return principal_points_initialized
+
+    @staticmethod
+    def _set_principal_point_for_cameras(
+        cameras, default_pp_x, default_pp_y, op=None
+    ):
+
+        if not math.isnan(default_pp_x) and not math.isnan(default_pp_y):
+            log_report(
+                "WARNING", "Setting principal points to default values!"
+            )
+        else:
+            log_report("WARNING", "Setting principal points to image centers!")
+            assert (
+                cameras[0].width is not None and cameras[0].height is not None
+            )
+            default_pp_x = cameras[0].width / 2.0
+            default_pp_y = cameras[0].height / 2.0
+
+        for camera in cameras:
+            if not camera.has_principal_point():
+                camera.set_principal_point([default_pp_x, default_pp_y])
+
+    @staticmethod
+    def _adjust_render_settings_if_possible(cameras, op=None):
+
+        if len(cameras) == 0:
+            return
+
+        possible = True
+        width = cameras[0].width
+        height = cameras[0].height
+
+        # Check if the cameras have same resolution
+        for cam in cameras:
+            if cam.width != width or cam.height != height:
+                possible = False
+                break
+
+        if possible:
+            bpy.context.scene.render.resolution_x = width
+            bpy.context.scene.render.resolution_y = height
+        else:
+            log_report(
+                "WARNING",
+                "Adjustment of render settings not possible, "
+                + "since the reconstructed cameras show different resolutions.",
+                op,
+            )
+
     def import_photogrammetry_cameras(self, cameras, parent_collection):
         """Import the cameras using the properties of this class."""
         if not self.import_cameras and not self.add_camera_motion_as_animation:
@@ -336,13 +393,15 @@ class CameraImporter:
             return {"FINISHED"}
 
         # The principal point may be part of the reconstruction data
-        if not principal_points_initialized(cameras):
-            set_principal_point_for_cameras(
+        if not self.__class__._principal_points_initialized(cameras):
+            self.__class__._set_principal_point_for_cameras(
                 cameras, self.default_pp_x, self.default_pp_y, self
             )
 
         if self.adjust_render_settings:
-            adjust_render_settings_if_possible(cameras, op=self)
+            self.__class__._adjust_render_settings_if_possible(
+                cameras, op=self
+            )
 
         if self.import_cameras:
             add_cameras(

@@ -2,7 +2,7 @@ import os
 import sys
 import bpy
 from bpy.props import BoolProperty
-from photogrammetry_importer.utility.blender_logging_utility import log_report
+from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 class GeneralOptions:

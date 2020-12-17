@@ -7,10 +7,10 @@ from bpy.props import (
     FloatProperty,
     FloatVectorProperty,
 )
-from photogrammetry_importer.utility.blender_opengl_utility import draw_points
-from photogrammetry_importer.utility.blender_point_utility import (
-    add_points_as_mesh,
-    add_points_as_particle_system,
+from photogrammetry_importer.opengl.utility import draw_points
+from photogrammetry_importer.importers.point_utility import (
+    add_points_as_mesh_vertices,
+    add_points_as_object_with_particle_system,
 )
 
 
@@ -130,7 +130,7 @@ class PointImporter:
                 else:
                     particle_overwrite_color = None
 
-                add_points_as_particle_system(
+                add_points_as_object_with_particle_system(
                     points,
                     self.mesh_type,
                     self.point_extent,
@@ -141,7 +141,7 @@ class PointImporter:
                 )
 
             if self.add_points_as_mesh_oject:
-                add_points_as_mesh(
+                add_points_as_mesh_vertices(
                     points,
                     reconstruction_collection,
                     op=self,
