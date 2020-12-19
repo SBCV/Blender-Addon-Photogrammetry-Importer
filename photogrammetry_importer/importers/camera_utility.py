@@ -36,8 +36,8 @@ def compute_principal_point_shift(camera, relativ_to_largest_extend):
     shift_x = float((width / 2.0 - p_x) / float(width_denominator))
     shift_y = -float((height / 2.0 - p_y) / float(height_denominator))
 
-    # log_report('INFO', 'shift_x: ' + str(shift_x))
-    # log_report('INFO', 'shift_y: ' + str(shift_y))
+    # log_report('INFO', 'shift_x: ' + str(shift_x), op)
+    # log_report('INFO', 'shift_y: ' + str(shift_y), op)
 
     return shift_x, shift_y
 
@@ -151,14 +151,14 @@ def add_cameras(
     op=None,
 ):
     """Add a set of reconstructed cameras to Blender's 3D view port."""
-    log_report("INFO", "Adding Cameras: ...")
+    log_report("INFO", "Adding Cameras: ...", op)
     stop_watch = StopWatch()
     camera_collection = add_collection(
         camera_collection_name, parent_collection
     )
 
     if add_image_planes:
-        log_report("INFO", "Adding image planes: True")
+        log_report("INFO", "Adding image planes: True", op)
         image_planes_collection = add_collection(
             image_plane_collection_name, parent_collection
         )
@@ -166,10 +166,10 @@ def add_cameras(
             "Camera Image Plane Pair Collection", parent_collection
         )
     else:
-        log_report("INFO", "Adding image planes: False")
+        log_report("INFO", "Adding image planes: False", op)
 
     if add_depth_maps_as_point_cloud:
-        log_report("INFO", "Adding depth maps as point cloud: True")
+        log_report("INFO", "Adding depth maps as point cloud: True", op)
         depth_map_collection = add_collection(
             depth_map_collection_name, parent_collection
         )
@@ -177,7 +177,7 @@ def add_cameras(
             "Camera Depth Map Pair Collection", parent_collection
         )
     else:
-        log_report("INFO", "Adding depth maps as point cloud: False")
+        log_report("INFO", "Adding depth maps as point cloud: False", op)
 
     depth_map_id_or_name_str = depth_map_id_or_name_str.rstrip()
     if depth_map_id_or_name_str == "":
@@ -202,6 +202,7 @@ def add_cameras(
                         + ". "
                         + "Possible values are: "
                         + str(cam_rel_fp_to_idx.keys()),
+                        op,
                     )
 
     # Adding cameras and image planes:
@@ -226,7 +227,9 @@ def add_cameras(
             image_path = camera.get_absolute_fp()
 
         if not os.path.isfile(image_path):
-            log_report("WARNING", "Could not find image at " + str(image_path))
+            log_report(
+                "WARNING", "Could not find image at " + str(image_path), op
+            )
             continue
 
         blender_image = bpy.data.images.load(image_path)
@@ -309,8 +312,8 @@ def add_cameras(
             depth_map_anchor_handle
         )
 
-    log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()))
-    log_report("INFO", "Adding Cameras: Done")
+    log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()), op)
+    log_report("INFO", "Adding Cameras: Done", op)
 
 
 def add_camera_image_plane(
@@ -324,8 +327,8 @@ def add_camera_image_plane(
     op=None,
 ):
     """Add an image plane corresponding to a reconstructed camera."""
-    # log_report('INFO', 'add_camera_image_plane: ...')
-    # log_report('INFO', 'name: ' + str(name))
+    # log_report('INFO', 'add_camera_image_plane: ...', op)
+    # log_report('INFO', 'name: ' + str(name), op)
 
     width = camera.width
     height = camera.height
@@ -397,5 +400,5 @@ def add_camera_image_plane(
     mesh_obj.matrix_world = matrix_world
     mesh.update()
     mesh.validate()
-    # log_report('INFO', 'add_camera_image_plane: Done')
+    # log_report('INFO', 'add_camera_image_plane: Done', op)
     return mesh_obj

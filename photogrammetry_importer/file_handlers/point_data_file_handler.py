@@ -135,13 +135,15 @@ class PointDataFileHandler:
         return data_semantics
 
     @staticmethod
-    def _get_data_semantics_from_ascii(ifp, delimiter, has_header):
+    def _get_data_semantics_from_ascii(ifp, delimiter, has_header, op=None):
         with open(ifp, "r") as ifc:
             data_semantics = None
             if has_header:
                 line = ifc.readline()
                 if line.startswith("//"):
-                    log_report("INFO", "Reading data semantics from header")
+                    log_report(
+                        "INFO", "Reading data semantics from header", op
+                    )
                     data_semantics = (
                         PointDataFileHandler._get_data_semantics_from_header(
                             line
@@ -151,7 +153,7 @@ class PointDataFileHandler:
 
             if data_semantics is None:
                 log_report(
-                    "INFO", "No header available, guessing data semantics"
+                    "INFO", "No header available, guessing data semantics", op
                 )
                 lines_as_tuples = PointDataFileHandler._read_lines_as_tuples(
                     ifc, delimiter=delimiter
@@ -188,7 +190,7 @@ class PointDataFileHandler:
         :code:`lazrs` library to parse the different file formats.
         """
 
-        log_report("INFO", "Parse Point Data File: ...")
+        log_report("INFO", "Parse Point Data File: ...", op)
         # https://pyntcloud.readthedocs.io/en/latest/io.html
         # https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O
         module_spec = importlib.util.find_spec("pyntcloud")
@@ -207,7 +209,7 @@ class PointDataFileHandler:
             sep = " "
             data_semantics = (
                 PointDataFileHandler._get_data_semantics_from_ascii(
-                    ifp, sep, has_header=True
+                    ifp, sep, has_header=True, op=op
                 )
             )
             names = PointDataFileHandler._convert_data_semantics_to_list(
@@ -221,7 +223,7 @@ class PointDataFileHandler:
             sep = ","
             data_semantics = (
                 PointDataFileHandler._get_data_semantics_from_ascii(
-                    ifp, sep, has_header=False
+                    ifp, sep, has_header=False, op=op
                 )
             )
             names = PointDataFileHandler._convert_data_semantics_to_list(
@@ -253,6 +255,6 @@ class PointDataFileHandler:
                 scalars=dict(),
             )
             points.append(point)
-        log_report("INFO", f"Number Points {len(points)}")
-        log_report("INFO", "Parse Point Data File: Done")
+        log_report("INFO", f"Number Points {len(points)}", op)
+        log_report("INFO", "Parse Point Data File: Done", op)
         return points

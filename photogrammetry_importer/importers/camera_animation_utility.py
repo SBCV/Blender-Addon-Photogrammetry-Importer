@@ -251,7 +251,7 @@ def add_camera_animation(
     op=None,
 ):
     """Add an animated camera from a set of reconstructed cameras."""
-    log_report("INFO", "Adding Camera Animation: ...")
+    log_report("INFO", "Adding Camera Animation: ...", op)
 
     if len(cameras) == 0:
         return
@@ -347,3 +347,4 @@ def add_camera_animation(
             # The clip created with bpy.ops.clip.open() has the same name than
             # the first image name of the image sequence.
             bg_img.clip = bpy.data.movieclips[movie_clip_name]
+    log_report("INFO", "Adding Camera Animation: Done", op)

@@ -2,8 +2,6 @@ import math
 import os
 import numpy as np
 
-from photogrammetry_importer.blender_utility.logging_utility import log_report
-
 
 class Camera:
     """This class represents a reconstructed camera.
@@ -411,14 +409,10 @@ class Camera:
         self, depth_map_display_sparsity=100
     ):
         """Convert the depth map to points in world coordinates."""
-        log_report("INFO", "Converting depth map to world coordinates: ...")
         cam_coords = self.convert_depth_map_to_cam_coords(
             depth_map_display_sparsity
         )
-
         world_coords = self.convert_cam_coords_to_world_coords(cam_coords)
-
-        log_report("INFO", "Converting depth map to world coordinates: Done")
         return world_coords
 
     def convert_cam_coords_to_world_coords(self, cam_coords):

@@ -338,10 +338,12 @@ class CameraImporter:
 
         if not math.isnan(default_pp_x) and not math.isnan(default_pp_y):
             log_report(
-                "WARNING", "Setting principal points to default values!"
+                "WARNING", "Setting principal points to default values!", op
             )
         else:
-            log_report("WARNING", "Setting principal points to image centers!")
+            log_report(
+                "WARNING", "Setting principal points to image centers!", op
+            )
             assert (
                 cameras[0].width is not None and cameras[0].height is not None
             )
