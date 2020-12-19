@@ -16,8 +16,8 @@ For each camera one can add the corresponding image plane. Pillow is required to
 
 There is an option to represent the point cloud with a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. **The color of the points / textures of the images are visible, if "Cycles Render" is selected and the 3D view is set to "Material".** Eevee does not (yet) support :code:`particle info` nodes. (Checkout the `manual <https://docs.blender.org/manual/es/dev/render/eevee/materials/nodes_support.html>`_ for more information.) Thus, it is currently **not possible** to render point clouds with individual particle colors **in Eevee**.
 
-NVM
-===
+VisualSfM
+=========
 The addon automatically looks for the fixed calibration line in the NVM file (i.e. :code:`NVM_V3 FixedK fx cx fy cy r`  (first line)).
 Without the fixed calibration line the addon assumes that the principal point is at the image center. NVM files contain no information about the size of the images. Use the import dialog to adjust the :code:`image path` to automatically read the image size from disc or set the default :code:`width` and :code:`height` values.
 
@@ -42,14 +42,17 @@ Do not forget to save your project (i.e. the :code:`*.mg` file), since the addon
 In order to import the original images corresponding to the :code:`*.mg` file, one can set the import option :code:`Image File Path Type` of the Blender-Addon to :code:`Absolute Path`.
 To import the undistorted :code:`*.exr` images set :code:`Image File Path Type` to :code:`File Name` and set :code:`Image Directory` to the folder with the :code:`*.exr` files.
 
-
 Regard3D
 ========
 By default Regard3D stores the Structure from Motion results in :code:`path/to/project/pictureset_0/matching_0/triangulation_0/sfm_data.bin`. Use `OpenMVG <https://github.com/openMVG/openMVG>`_ to convert the :code:`*.bin` to a :code:`*.json` file with :code:`openMVG_main_ConvertSfM_DataFormat -i path/to/sfm_data.bin -o path/to/cameras.json`. For Windows you can find the pre-built binaries of OpenMVG `here <https://github.com/openMVG/openMVG/releases/>`_.
 
 ASCII
 =====
-Each line in an ASCII file (:code:`.asc/.pts/.csv`) represents a point with several attributes (coords, normals, colors, ...). In the case of :code:`.asc/.pts/` there might be an optional header such as :code:`//X Y Z Rf Gf Bf Intensity` or :code:`//X Y Z Intensity R G B` that defines the order of the attributes. If no header is provided, the addon tries to estimate the order of the attributes. The color attributes can be defined as integer values (:code:`//R G B`) between :code:`0` and :code:`255` or float values (:code:`//Rf Gf Bf`) between :code:`0.0` and :code:`1.0`. Attributes other than position and color are ignored by the addon.
+Each line in an ASCII file (:code:`.asc/.pts/.csv`) represents a point with several attributes (coords, normals, colors, ...).
+In the case of :code:`.asc/.pts/` there might be an optional header such as :code:`//X Y Z Rf Gf Bf Intensity` or :code:`//X Y Z Intensity R G B` that defines the order of the attributes.
+If no header is provided, the addon tries to estimate the order of the attributes.
+The color attributes can be defined as integer values (:code:`R G B`) between :code:`0` and :code:`255` or float values (:code:`Rf Gf Bf`) between :code:`0.0` and :code:`1.0`.
+Attributes other than position and color are ignored by the addon.
 
 Meshes
 ======
