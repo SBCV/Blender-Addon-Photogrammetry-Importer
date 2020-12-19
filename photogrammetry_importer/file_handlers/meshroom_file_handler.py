@@ -433,7 +433,8 @@ class MeshroomFileHandler:
         else:
             log_report(
                 "WARNING",
-                "Meshroom project does not contain cameras or points",
+                "Meshroom project does not contain cameras or points. Have"
+                " you saved the project (i.e. the *.mg file)?",
                 op,
             )
             cams = []

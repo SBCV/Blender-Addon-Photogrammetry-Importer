@@ -28,13 +28,20 @@ The OpenMVG :code:`JSON` files contain no color information. The addon uses the 
 Meshroom
 ========
 By default Meshroom stores the Structure from Motion results (i.e. cameras and points) in Alembic (:code:`*.abc`) files. Since parsing :code:`*.abc` files requires building additional (heavy) dependencies, e.g. `this <https://github.com/alembic/alembic>`_ library, it is currently not supported by this addon.
-However, one can add a ConvertSfMFormat node in Meshroom (see image below) to write the reconstruction result to :code:`*.SfM` / :code:`*.json` files. 
+However, one can add a :code:`ConvertSfMFormat` node in Meshroom (see image below) to write the reconstruction result to :code:`*.SfM` / :code:`*.json` files.
 
 .. image:: ../../images/meshroom_export_json.jpg
    :scale: 40 %
    :align: center
 
-In addition to :code:`*.SfM` / :code:`*.json` files the addon allows to import :code:`*.mg` files, which allows to also import corresponding meshes. The addon prioritizes the output of recently added nodes (e.g. :code:`ConvertSfMFormat3` has a higher priority than :code:`ConvertSfMFormat`). For importing meshes the addon uses the following prioritization: first the output of :code:`Texturing`, then the output of :code:`Meshfiltering` and finally the output of :code:`Meshing`. In order to import the original images corresponding to the :code:`*.mg` file, one can set the import option :code:`Image File Path Type` of the Blender-Addon to :code:`Absolute Path`. To import the undistorted :code:`*.exr` images set :code:`Image File Path Type` to :code:`File Name` and set :code:`Image Directory` to the folder with the :code:`*.exr` files.
+In addition to :code:`*.SfM` / :code:`*.json` files the addon allows to import :code:`*.mg` files, which allows to also import corresponding meshes.
+The addon prioritizes the output of recently added nodes (e.g. :code:`ConvertSfMFormat3` has a higher priority than :code:`ConvertSfMFormat`).
+For importing meshes the addon uses the following prioritization: first the output of :code:`Texturing`, then the output of :code:`Meshfiltering` and finally the output of :code:`Meshing`.
+Do not forget to save your project (i.e. the :code:`*.mg` file), since the addon uses this file to determine available reconstruction results.
+
+In order to import the original images corresponding to the :code:`*.mg` file, one can set the import option :code:`Image File Path Type` of the Blender-Addon to :code:`Absolute Path`.
+To import the undistorted :code:`*.exr` images set :code:`Image File Path Type` to :code:`File Name` and set :code:`Image Directory` to the folder with the :code:`*.exr` files.
+
 
 Regard3D
 ========
