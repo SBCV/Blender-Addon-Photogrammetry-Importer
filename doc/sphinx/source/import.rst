@@ -45,7 +45,7 @@ To import the undistorted :code:`*.exr` images set :code:`Image File Path Type` 
 
 Regard3D
 ========
-By default Regard3D stores the Structure from Motion results in :code:`path/to/project/pictureset_0/matching_0/triangulation_0/sfm_data.bin`. Use [OpenMVG](https://github.com/openMVG/openMVG) to convert the :code:`*.bin` to a :code:`*.json` file with :code:`openMVG_main_ConvertSfM_DataFormat -i path/to/sfm_data.bin -o path/to/cameras.json`. For Windows you can find the pre-built binaries of OpenMVG `here <https://github.com/openMVG/openMVG/releases/>`_.
+By default Regard3D stores the Structure from Motion results in :code:`path/to/project/pictureset_0/matching_0/triangulation_0/sfm_data.bin`. Use `OpenMVG <https://github.com/openMVG/openMVG>`_ to convert the :code:`*.bin` to a :code:`*.json` file with :code:`openMVG_main_ConvertSfM_DataFormat -i path/to/sfm_data.bin -o path/to/cameras.json`. For Windows you can find the pre-built binaries of OpenMVG `here <https://github.com/openMVG/openMVG/releases/>`_.
 
 ASCII
 =====
