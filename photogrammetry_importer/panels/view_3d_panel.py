@@ -221,7 +221,7 @@ class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
         log_report("INFO", "Output File Path: " + ofp, self)
 
         # Used to cache the results
-        image_name = "Export Opengl"
+        image_name = "OpenGL Export"
 
         cam = _get_selected_camera()
         render_opengl_image(image_name, cam, save_point_size)
@@ -285,7 +285,7 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
             os.mkdir(output_dp)
 
         # Used to cache the results
-        image_name = "Export Opengl"
+        image_name = "OpenGL Export"
         ext = "." + file_format
         save_alpha = scene.opengl_panel_settings.save_alpha
         cam = _get_selected_camera()
