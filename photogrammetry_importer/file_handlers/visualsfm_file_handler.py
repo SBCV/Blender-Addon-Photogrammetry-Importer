@@ -10,7 +10,7 @@ from photogrammetry_importer.file_handlers.utility import (
 from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
-class NVMFileHandler:
+class VisualSfMFileHandler:
     """Class to read and write :code:`VisualSfM` files."""
 
     # Check the LoadNVM function in util.h of the
@@ -18,8 +18,9 @@ class NVMFileHandler:
     # http://grail.cs.washington.edu/projects/mcba/
     # pba/src/pba/util.h
 
-    @staticmethod
+    @classmethod
     def _parse_cameras(
+        cls,
         input_file,
         num_cameras,
         camera_calibration_matrix,
@@ -102,7 +103,7 @@ class NVMFileHandler:
             )
             current_camera.normal = cam_view_vec_world_coord
 
-            translation_vec = NVMFileHandler._compute_translation_vector(
+            translation_vec = cls._compute_translation_vector(
                 center_vec, current_camera.get_rotation_as_rotation_mat()
             )
             current_camera._translation_vec = translation_vec
@@ -163,8 +164,9 @@ class NVMFileHandler:
             # log_report('INFO', str(calib_mat), op)
         return calib_mat
 
-    @staticmethod
-    def parse_nvm_file(
+    @classmethod
+    def parse_visualsfm_file(
+        cls,
         input_visual_fsm_file_name,
         image_dp,
         image_fp_type,
@@ -185,9 +187,7 @@ class NVMFileHandler:
 
         # Read the first two lines (fixed)
         current_line = (input_file.readline()).rstrip()
-        calibration_matrix = NVMFileHandler._parse_fixed_calibration(
-            current_line, op
-        )
+        calibration_matrix = cls._parse_fixed_calibration(current_line, op)
         current_line = (input_file.readline()).rstrip()
         assert current_line == ""
 
@@ -198,7 +198,7 @@ class NVMFileHandler:
             op,
         )
 
-        cameras = NVMFileHandler._parse_cameras(
+        cameras = cls._parse_cameras(
             input_file,
             amount_cameras,
             calibration_matrix,
@@ -218,9 +218,7 @@ class NVMFileHandler:
                 + str(amount_points),
                 op,
             )
-            points = NVMFileHandler._parse_nvm_points(
-                input_file, amount_points
-            )
+            points = cls._parse_nvm_points(input_file, amount_points)
         else:
             points = []
 
@@ -271,21 +269,21 @@ class NVMFileHandler:
     def _nvm_line(content):
         return content + " " + os.linesep
 
-    @staticmethod
-    def write_nvm_file(output_nvm_file_name, cameras, points, op=None):
+    @classmethod
+    def write_visualsfm_file(
+        cls, output_nvm_file_name, cameras, points, op=None
+    ):
         """Write cameras and points as :code:`.nvm` file."""
 
         log_report("INFO", "Write NVM file: " + output_nvm_file_name, op)
 
         nvm_content = []
         nvm_content.append(
-            NVMFileHandler._nvm_line(
-                NVMFileHandler._create_nvm_first_line(cameras, op)
-            )
+            cls._nvm_line(cls._create_nvm_first_line(cameras, op))
         )
-        nvm_content.append(NVMFileHandler._nvm_line(""))
+        nvm_content.append(cls._nvm_line(""))
         amount_cameras = len(cameras)
-        nvm_content.append(NVMFileHandler._nvm_line(str(amount_cameras)))
+        nvm_content.append(cls._nvm_line(str(amount_cameras)))
         log_report(
             "INFO",
             "Amount Cameras (Images in NVM file):" + str(amount_cameras),

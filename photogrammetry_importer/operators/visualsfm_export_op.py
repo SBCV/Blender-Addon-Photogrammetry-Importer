@@ -5,8 +5,8 @@ from bpy_extras.io_utils import ExportHelper
 
 from bpy.props import CollectionProperty
 
-from photogrammetry_importer.file_handlers.nvm_file_handler import (
-    NVMFileHandler,
+from photogrammetry_importer.file_handlers.visualsfm_file_handler import (
+    VisualSfMFileHandler,
 )
 from photogrammetry_importer.operators.export_op import ExportOperator
 
@@ -40,6 +40,8 @@ class ExportVisualSfMOperator(ExportOperator, ExportHelper):
         for cam in cameras:
             assert cam.get_calibration_mat() is not None
 
-        NVMFileHandler.write_nvm_file(ofp, cameras, points, op=self)
+        VisualSfMFileHandler.write_visualsfm_file(
+            ofp, cameras, points, op=self
+        )
 
         return {"FINISHED"}

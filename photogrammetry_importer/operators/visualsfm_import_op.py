@@ -12,8 +12,8 @@ from photogrammetry_importer.operators.utility import (
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
 
-from photogrammetry_importer.file_handlers.nvm_file_handler import (
-    NVMFileHandler,
+from photogrammetry_importer.file_handlers.visualsfm_file_handler import (
+    VisualSfMFileHandler,
 )
 
 from photogrammetry_importer.types.camera import Camera
@@ -63,7 +63,7 @@ class ImportVisualSfMOperator(
         self.image_dp = self.get_default_image_path(path, self.image_dp)
         log_report("INFO", "image_dp: " + str(self.image_dp), self)
 
-        cameras, points = NVMFileHandler.parse_nvm_file(
+        cameras, points = VisualSfMFileHandler.parse_visualsfm_file(
             path,
             self.image_dp,
             self.image_fp_type,
