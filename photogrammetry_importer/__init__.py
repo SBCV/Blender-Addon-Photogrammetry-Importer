@@ -34,7 +34,7 @@ bl_info = {
     "blender": (2, 80, 0),
     "location": "File / Import and File/Export",
     "warning": "",
-    "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html",
+    "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/",
     "tracker_url": "https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/issues",
     "category": "Import-Export",
 }
