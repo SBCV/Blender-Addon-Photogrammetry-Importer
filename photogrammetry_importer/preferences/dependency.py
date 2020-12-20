@@ -1,3 +1,4 @@
+import sys
 import subprocess
 import importlib
 from collections import defaultdict
@@ -39,7 +40,7 @@ class OptionalDependency:
                 return
         try:
             subprocess.run(
-                [bpy.app.binary_path_python, "-m", "pip", "--version"],
+                [sys.executable, "-m", "pip", "--version"],
                 check=True,
             )
         except subprocess.CalledProcessError:
@@ -62,7 +63,7 @@ class OptionalDependency:
 
         # The "--user" option does not work with Blender's Python version.
         install_command = [
-            bpy.app.binary_path_python,
+            sys.executable,
             "-m",
             "pip",
             "install",
@@ -80,7 +81,7 @@ class OptionalDependency:
         self._install_pip(lazy=True)
 
         uninstall_command = [
-            bpy.app.binary_path_python,
+            sys.executable,
             "-m",
             "pip",
             "uninstall",
