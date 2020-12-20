@@ -59,11 +59,14 @@ class DrawManager:
         self._anchor_to_point_coords[object_anchor] = coords
         self._anchor_to_point_colors[object_anchor] = colors
 
-    def get_coords_and_colors(self):
+    def get_coords_and_colors(self, visible_only=False):
         """Return the coordinates and the colors of the maintained points."""
         transf_coord_list = []
         color_list = []
         for object_anchor in self._anchor_to_point_coords:
+
+            if visible_only and not object_anchor.visible_get():
+                continue
 
             coords = self._anchor_to_point_coords[object_anchor]
             transf_coord_list = (
