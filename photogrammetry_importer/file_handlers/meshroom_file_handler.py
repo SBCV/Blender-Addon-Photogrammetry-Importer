@@ -159,7 +159,7 @@ class MeshroomFileHandler:
         return points
 
     @staticmethod
-    def parse_sfm_file(
+    def parse_meshroom_sfm_file(
         sfm_ifp,
         image_idp,
         image_fp_type,
@@ -172,7 +172,7 @@ class MeshroomFileHandler:
         :code:`StructureFromMotion` / :code:`ConvertSfMFormat` node in
         :code:`Meshroom`.
         """
-        log_report("INFO", "parse_sfm_file: ...", op)
+        log_report("INFO", "parse_meshroom_sfm_file: ...", op)
         log_report("INFO", "sfm_ifp: " + sfm_ifp, op)
         input_file = open(sfm_ifp, "r")
         json_data = json.load(input_file)
@@ -193,7 +193,7 @@ class MeshroomFileHandler:
             )
         else:
             points = []
-        log_report("INFO", "parse_sfm_file: Done", op)
+        log_report("INFO", "parse_meshroom_sfm_file: Done", op)
         return cams, points
 
     @staticmethod
@@ -423,7 +423,7 @@ class MeshroomFileHandler:
             mesh_fp = None
 
         if meshroom_ifp is not None:
-            cams, points = MeshroomFileHandler.parse_sfm_file(
+            cams, points = MeshroomFileHandler.parse_meshroom_sfm_file(
                 meshroom_ifp,
                 image_dp,
                 image_fp_type,
