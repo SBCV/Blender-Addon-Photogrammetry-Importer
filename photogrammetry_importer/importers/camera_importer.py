@@ -409,7 +409,6 @@ class CameraImporter:
             add_cameras(
                 cameras,
                 parent_collection,
-                image_dp=self.image_dp,
                 add_background_images=self.add_background_images,
                 add_image_planes=self.add_image_planes,
                 add_depth_maps_as_point_cloud=self.add_depth_maps_as_point_cloud,

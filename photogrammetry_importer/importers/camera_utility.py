@@ -133,7 +133,6 @@ def compute_camera_matrix_world(camera, convert_coordinate_system=True):
 def add_cameras(
     cameras,
     parent_collection,
-    image_dp=None,
     add_background_images=False,
     add_image_planes=False,
     add_depth_maps_as_point_cloud=True,
