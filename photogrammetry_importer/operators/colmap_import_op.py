@@ -44,6 +44,7 @@ class ImportColmapOperator(
         self.image_dp = self.get_default_image_path(path, self.image_dp)
         cameras, points, mesh_ifp = ColmapFileHandler.parse_colmap_folder(
             path,
+            self.use_workspace_images,
             self.image_dp,
             self.image_fp_type,
             self.suppress_distortion_warnings,
@@ -74,7 +75,9 @@ class ImportColmapOperator(
     def draw(self, context):
         """Draw the import options corresponding to this operator."""
         layout = self.layout
-        self.draw_camera_options(layout, draw_depth_map_import=True)
+        self.draw_camera_options(
+            layout, draw_workspace_image_usage=True, draw_depth_map_import=True
+        )
         self.draw_point_options(layout)
         self.draw_mesh_options(layout)
         self.draw_general_options(layout)

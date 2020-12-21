@@ -21,6 +21,14 @@ from photogrammetry_importer.blender_utility.logging_utility import log_report
 class CameraImporter:
     """Importer for cameras and corresponding image information."""
 
+    use_workspace_images: BoolProperty(
+        name="Use Workspace Images",
+        description="If selected, use the (undistorted) images in the"
+        " workspace (if available). Otherwise use the images in the default"
+        " image path.",
+        default=True,
+    )
+
     image_fp_items = [
         (Camera.IMAGE_FP_TYPE_NAME, "File Name", "", 1),
         (Camera.IMAGE_FP_TYPE_RELATIVE, "Relative Path", "", 2),
@@ -235,6 +243,7 @@ class CameraImporter:
     def draw_camera_options(
         self,
         layout,
+        draw_workspace_image_usage=False,
         draw_image_fp=True,
         draw_depth_map_import=False,
         draw_image_size=False,
@@ -244,6 +253,9 @@ class CameraImporter:
     ):
         """Draw camera import options."""
         camera_box = layout.box()
+
+        if draw_workspace_image_usage or draw_everything:
+            camera_box.prop(self, "use_workspace_images")
 
         if draw_image_fp or draw_everything:
             camera_box.prop(self, "image_fp_type")

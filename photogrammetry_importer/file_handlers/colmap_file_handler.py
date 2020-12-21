@@ -282,7 +282,12 @@ class ColmapFileHandler:
 
     @staticmethod
     def parse_colmap_folder(
-        idp, image_dp, image_fp_type, suppress_distortion_warnings, op=None
+        idp,
+        use_workspace_images,
+        image_dp,
+        image_fp_type,
+        suppress_distortion_warnings,
+        op=None,
     ):
         """Parse a :code:`Colmap` model or a :code:`Colmap` workspace."""
         log_report("INFO", "idp: " + str(idp), op)
@@ -298,12 +303,12 @@ class ColmapFileHandler:
                 depth_map_idp,
                 mesh_ifp,
             ) = ColmapFileHandler._disassemble_colmap_workspace_folder(idp)
-            if os.path.isdir(image_idp_workspace):
+            if use_workspace_images and os.path.isdir(image_idp_workspace):
                 image_dp = image_idp_workspace
                 log_report("INFO", "Using image directory in workspace.", op)
         else:
             log_report("ERROR", "Invalid colmap model / workspace", op)
-            assert False
+            assert False, "Invalid colmap model / workspace"
 
         log_report("INFO", "image_dp: " + image_dp, op)
         cameras, points = ColmapFileHandler.parse_colmap_model_folder(
