@@ -230,6 +230,8 @@ def add_cameras(
                 "WARNING", "Could not find image at " + str(image_path), op
             )
             continue
+        else:
+            log_report("INFO", "Found image at " + str(image_path), op)
 
         blender_image = bpy.data.images.load(image_path)
 
