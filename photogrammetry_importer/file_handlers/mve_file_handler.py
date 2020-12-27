@@ -99,6 +99,9 @@ class MVEFileHandler:
         camera.image_dp = image_dp
         camera._relative_fp = relative_image_fp
         camera._absolute_fp = os.path.join(image_dp, relative_image_fp)
+        camera._undistorted_relative_fp = camera._relative_fp
+        camera._undistorted_absolute_fp = camera._absolute_fp
+
         camera.width = width
         camera.height = height
 

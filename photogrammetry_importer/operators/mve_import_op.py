@@ -71,6 +71,7 @@ class ImportMVEOperator(
         layout = self.layout
         self.draw_camera_options(
             layout,
+            reorganize_undistorted_images=True,
             draw_image_fp=False,
             draw_image_size=True,
             draw_depth_map_import=True,

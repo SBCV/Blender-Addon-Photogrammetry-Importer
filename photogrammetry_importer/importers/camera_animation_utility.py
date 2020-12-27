@@ -229,10 +229,14 @@ def _add_camera_intrinsics_animation(
     log_report("INFO", "Adding camera intrinsic parameter animation: Done", op)
 
 
-def _get_reorganized_file_name(cam, op=None):
-    original_stem, _ = os.path.splitext(cam.get_file_name())
+def _get_reorganized_file_name(cam, common_prefix, op=None):
+    full_original_stem, _ = os.path.splitext(cam.get_absolute_fp())
+    full_original_stem.startswith(full_original_stem)
+    unique_original_stem = full_original_stem.split(common_prefix, 1)[1]
+    unique_original_fn = unique_original_stem.replace(os.path.sep, "_")
+
     _, undistorted_ext = os.path.splitext(cam.get_undistorted_file_name())
-    reorganized_fn = original_stem + undistorted_ext
+    reorganized_fn = unique_original_fn + undistorted_ext
     return reorganized_fn
 
 
@@ -246,9 +250,7 @@ def _reorganize_undistorted_images(cameras_sorted, op):
         op,
     )
 
-    first_cam = cameras_sorted[0]
-    first_fn = _get_reorganized_file_name(first_cam)
-    undistorted_common_prefix = os.path.commonprefix(
+    common_prefix = os.path.commonprefix(
         [
             cam.get_undistorted_absolute_fp()
             for cam in cameras_sorted
@@ -256,23 +258,26 @@ def _reorganize_undistorted_images(cameras_sorted, op):
         ]
     )
     # Remove trailing slash
-    reorganized_dp = os.path.dirname(undistorted_common_prefix)
+    reorganized_dp = os.path.dirname(common_prefix)
     reorganized_undistorted_dp = reorganized_dp + "_restructured"
 
     log_report(
         "WARNING", f"Reorganized directory: {reorganized_undistorted_dp}", op
     )
-    log_report("WARNING", f"First file name: {first_fn}", op)
 
     if not os.path.isdir(reorganized_undistorted_dp):
         os.mkdir(reorganized_undistorted_dp)
 
     for cam in cameras_sorted:
-        reorganized_fn = _get_reorganized_file_name(cam)
+        reorganized_fn = _get_reorganized_file_name(cam, common_prefix)
         reorganized_fp = os.path.join(
             reorganized_undistorted_dp, reorganized_fn
         )
         shutil.copyfile(cam.get_undistorted_absolute_fp(), reorganized_fp)
+
+    first_cam = cameras_sorted[0]
+    first_fn = _get_reorganized_file_name(first_cam, common_prefix)
+    log_report("WARNING", f"First file name: {first_fn}", op)
 
     return reorganized_undistorted_dp, first_fn
 
