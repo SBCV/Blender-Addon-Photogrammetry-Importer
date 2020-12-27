@@ -60,7 +60,7 @@ class ImportMeshroomOperator(
     sfm_node_number: IntProperty(
         name="ConvertSfMFormat Node Number",
         description="Use this property to select the desired node."
-        + "By default the node with the highest number is imported.",
+        + " By default the node with the highest number is imported.",
         default=-1,
     )
 
@@ -81,7 +81,15 @@ class ImportMeshroomOperator(
     mesh_node_number: IntProperty(
         name="Mesh Node Number",
         description="Use this property to select the desired node."
-        + "By default the node with the highest number is imported.",
+        + " By default the node with the highest number is imported.",
+        default=-1,
+    )
+
+    # Prepare Dense Node
+    prepare_node_number: IntProperty(
+        name="Prepare Dense Node Number",
+        description="Use this property to select the desired node."
+        + " By default the node with the highest number is imported.",
         default=-1,
     )
 
@@ -91,10 +99,14 @@ class ImportMeshroomOperator(
         log_report("INFO", "path: " + str(path), self)
 
         self.image_dp = self.get_default_image_path(path, self.image_dp)
-        log_report("INFO", "image_dp: " + str(self.image_dp), self)
-
-        cameras, points, mesh_fp = MeshroomFileHandler.parse_meshroom_file(
+        (
+            cameras,
+            points,
+            mesh_fp,
+            image_dp,
+        ) = MeshroomFileHandler.parse_meshroom_file(
             path,
+            self.use_workspace_images,
             self.image_dp,
             self.image_fp_type,
             self.suppress_distortion_warnings,
@@ -102,8 +114,11 @@ class ImportMeshroomOperator(
             self.sfm_node_number,
             self.mesh_node_type,
             self.mesh_node_number,
+            self.prepare_node_number,
             self,
         )
+        self.image_dp = image_dp
+        log_report("INFO", "image_dp: " + str(self.image_dp), self)
 
         log_report("INFO", "Number cameras: " + str(len(cameras)), self)
         log_report("INFO", "Number points: " + str(len(points)), self)
@@ -130,7 +145,12 @@ class ImportMeshroomOperator(
         node_box.prop(self, "sfm_node_number")
         node_box.prop(self, "mesh_node_type")
         node_box.prop(self, "mesh_node_number")
-        self.draw_camera_options(layout)
+        node_box.prop(self, "prepare_node_number")
+        self.draw_camera_options(
+            layout,
+            draw_workspace_image_usage=True,
+            reorganize_undistorted_images=True,
+        )
         self.draw_point_options(layout)
         self.draw_mesh_options(layout)
         self.draw_general_options(layout)

@@ -25,9 +25,14 @@ class MeshroomFileHandler:
         assert result is not None
         return result
 
-    @staticmethod
+    @classmethod
     def _parse_cameras_from_json_data(
-        json_data, image_dp, image_fp_type, suppress_distortion_warnings, op
+        cls,
+        json_data,
+        image_dp,
+        image_fp_type,
+        suppress_distortion_warnings,
+        op,
     ):
 
         cams = []
@@ -63,9 +68,7 @@ class MeshroomFileHandler:
             view_index = int(extrinsic["poseId"])
             image_index_to_camera_index[view_index] = rec_index
 
-            corresponding_view = MeshroomFileHandler._get_element(
-                views, "poseId", view_index
-            )
+            corresponding_view = cls._get_element(views, "poseId", view_index)
 
             camera.image_fp_type = image_fp_type
             camera.image_dp = image_dp
@@ -85,7 +88,7 @@ class MeshroomFileHandler:
             camera.height = int(corresponding_view["height"])
             id_intrinsic = int(corresponding_view["intrinsicId"])
 
-            intrinsic_params = MeshroomFileHandler._get_element(
+            intrinsic_params = cls._get_element(
                 intrinsics, "intrinsicId", id_intrinsic
             )
 
@@ -158,8 +161,9 @@ class MeshroomFileHandler:
             points.append(custom_point)
         return points
 
-    @staticmethod
+    @classmethod
     def parse_meshroom_sfm_file(
+        cls,
         sfm_ifp,
         image_idp,
         image_fp_type,
@@ -180,7 +184,7 @@ class MeshroomFileHandler:
         (
             cams,
             image_index_to_camera_index,
-        ) = MeshroomFileHandler._parse_cameras_from_json_data(
+        ) = cls._parse_cameras_from_json_data(
             json_data,
             image_idp,
             image_fp_type,
@@ -188,30 +192,13 @@ class MeshroomFileHandler:
             op,
         )
         if "structure" in json_data:
-            points = MeshroomFileHandler._parse_points_from_json_data(
+            points = cls._parse_points_from_json_data(
                 json_data, image_index_to_camera_index, op
             )
         else:
             points = []
         log_report("INFO", "parse_meshroom_sfm_file: Done", op)
         return cams, points
-
-    @staticmethod
-    def _get_data_fp_of_node(cache_dp, data_node, fn_or_fn_list):
-        if isinstance(fn_or_fn_list, str):
-            fn_list = [fn_or_fn_list]
-        else:
-            fn_list = fn_or_fn_list
-        data_fp = None
-        if data_node is not None:
-            node_type = data_node["nodeType"]
-            uid_0 = data_node["uids"]["0"]
-            for fn in fn_list:
-                possible_data_fp = os.path.join(cache_dp, node_type, uid_0, fn)
-                if os.path.isfile(possible_data_fp):
-                    data_fp = possible_data_fp
-                    break
-        return data_fp
 
     @staticmethod
     def _get_latest_node(json_graph, node_type):
@@ -223,10 +210,10 @@ class MeshroomFileHandler:
         else:
             return json_graph[node_type + "_" + str(i)]
 
-    @staticmethod
-    def _get_node(json_graph, node_type, node_number, op):
+    @classmethod
+    def _get_node(cls, json_graph, node_type, node_number, op):
         if node_number == -1:
-            return MeshroomFileHandler._get_latest_node(json_graph, node_type)
+            return cls._get_latest_node(json_graph, node_type)
         else:
             node_key = node_type + "_" + str(node_number)
             if node_key in json_graph:
@@ -245,34 +232,53 @@ class MeshroomFileHandler:
                 assert False
 
     @staticmethod
+    def _get_data_fp_of_node(cache_dp, data_node, fn_or_fn_list):
+        if isinstance(fn_or_fn_list, str):
+            fn_list = [fn_or_fn_list]
+        else:
+            fn_list = fn_or_fn_list
+        if data_node is None:
+            return None
+        node_type = data_node["nodeType"]
+        uid_0 = data_node["uids"]["0"]
+        data_fp = None
+        for fn in fn_list:
+            possible_data_fp = os.path.join(cache_dp, node_type, uid_0, fn)
+            if os.path.isfile(possible_data_fp):
+                data_fp = possible_data_fp
+                break
+        return data_fp
+
+    @classmethod
     def _get_node_data_fp(
-        cache_dp, json_graph, node_type, node_number, fn_or_fn_list, op
+        cls, cache_dp, json_graph, node_type, node_number, fn_or_fn_list, op
     ):
-        data_node = MeshroomFileHandler._get_node(
-            json_graph, node_type, node_number, op
-        )
-        data_fp = MeshroomFileHandler._get_data_fp_of_node(
-            cache_dp, data_node, fn_or_fn_list
-        )
+        data_node = cls._get_node(json_graph, node_type, node_number, op)
+        data_fp = cls._get_data_fp_of_node(cache_dp, data_node, fn_or_fn_list)
         return data_fp
 
     @staticmethod
-    def parse_meshrom_mg_file(
-        mg_fp,
-        sfm_node_type,
-        sfm_node_number,
-        mesh_node_type,
-        mesh_node_number,
-        op=None,
+    def _get_data_dp_of_node(cache_dp, data_node):
+        if data_node is None:
+            return None
+        node_type = data_node["nodeType"]
+        uid_0 = data_node["uids"]["0"]
+        return os.path.join(cache_dp, node_type, uid_0)
+
+    @classmethod
+    def _get_node_data_dp(
+        cls, cache_dp, json_graph, node_type, node_number, op
     ):
-        """Parse a :code:`Meshroom` project file (:code:`.mg`)."""
+        data_node = cls._get_node(json_graph, node_type, node_number, op)
+        data_dp = cls._get_data_dp_of_node(cache_dp, data_node)
+        return data_dp
 
-        cache_dp = os.path.join(os.path.dirname(mg_fp), "MeshroomCache")
-        json_data = json.load(open(mg_fp, "r"))
-        json_graph = json_data["graph"]
-
+    @classmethod
+    def _get_sfm_fp(
+        cls, sfm_node_type, cache_dp, json_graph, sfm_node_number, op
+    ):
         if sfm_node_type == "ConvertSfMFormatNode":
-            sfm_fp = MeshroomFileHandler._get_node_data_fp(
+            sfm_fp = cls._get_node_data_fp(
                 cache_dp,
                 json_graph,
                 "ConvertSfMFormat",
@@ -281,7 +287,7 @@ class MeshroomFileHandler:
                 op,
             )
         elif sfm_node_type == "StructureFromMotionNode":
-            sfm_fp = MeshroomFileHandler._get_node_data_fp(
+            sfm_fp = cls._get_node_data_fp(
                 cache_dp,
                 json_graph,
                 "StructureFromMotion",
@@ -290,7 +296,7 @@ class MeshroomFileHandler:
                 op,
             )
         elif sfm_node_type == "AUTOMATIC":
-            sfm_fp = MeshroomFileHandler._get_node_data_fp(
+            sfm_fp = cls._get_node_data_fp(
                 cache_dp,
                 json_graph,
                 "ConvertSfMFormat",
@@ -299,7 +305,7 @@ class MeshroomFileHandler:
                 op,
             )
             if sfm_fp is None:
-                sfm_fp = MeshroomFileHandler._get_node_data_fp(
+                sfm_fp = cls._get_node_data_fp(
                     cache_dp,
                     json_graph,
                     "StructureFromMotion",
@@ -308,11 +314,16 @@ class MeshroomFileHandler:
                     op,
                 )
         else:
-            log_report("ERROR", "Select SfM node is not supported", op)
+            log_report("ERROR", "Selected SfM node is not supported", op)
             assert False
+        return sfm_fp
 
+    @classmethod
+    def _get_mesh_fp(
+        cls, mesh_node_type, cache_dp, json_graph, mesh_node_number, op
+    ):
         if mesh_node_type == "Texturing":
-            mesh_fp = MeshroomFileHandler._get_node_data_fp(
+            mesh_fp = cls._get_node_data_fp(
                 cache_dp,
                 json_graph,
                 "Texturing",
@@ -321,7 +332,7 @@ class MeshroomFileHandler:
                 op,
             )
         elif mesh_node_type == "MeshFiltering":
-            mesh_fp = MeshroomFileHandler._get_node_data_fp(
+            mesh_fp = cls._get_node_data_fp(
                 cache_dp,
                 json_graph,
                 "MeshFiltering",
@@ -330,7 +341,7 @@ class MeshroomFileHandler:
                 op,
             )
         elif mesh_node_type == "Meshing":
-            mesh_fp = MeshroomFileHandler._get_node_data_fp(
+            mesh_fp = cls._get_node_data_fp(
                 cache_dp,
                 json_graph,
                 "Meshing",
@@ -339,7 +350,7 @@ class MeshroomFileHandler:
                 op,
             )
         elif mesh_node_type == "AUTOMATIC":
-            mesh_fp = MeshroomFileHandler._get_node_data_fp(
+            mesh_fp = cls._get_node_data_fp(
                 cache_dp,
                 json_graph,
                 "Texturing",
@@ -348,7 +359,7 @@ class MeshroomFileHandler:
                 op,
             )
             if mesh_fp is None:
-                mesh_fp = MeshroomFileHandler._get_node_data_fp(
+                mesh_fp = cls._get_node_data_fp(
                     cache_dp,
                     json_graph,
                     "MeshFiltering",
@@ -357,7 +368,7 @@ class MeshroomFileHandler:
                     op,
                 )
             if mesh_fp is None:
-                mesh_fp = MeshroomFileHandler._get_node_data_fp(
+                mesh_fp = cls._get_node_data_fp(
                     cache_dp,
                     json_graph,
                     "Meshing",
@@ -366,15 +377,57 @@ class MeshroomFileHandler:
                     op,
                 )
         else:
-            log_report("ERROR", "Select Mesh node is not supported", op)
+            log_report("ERROR", "Select Mesh node is not supported!", op)
             assert False
+        return mesh_fp
+
+    @classmethod
+    def _get_image_dp(cls, cache_dp, json_graph, prepare_node_number, op):
+        prepare_dp = cls._get_node_data_dp(
+            cache_dp,
+            json_graph,
+            "PrepareDenseScene",
+            prepare_node_number,
+            op,
+        )
+        return prepare_dp
+
+    @classmethod
+    def parse_meshrom_mg_file(
+        cls,
+        mg_fp,
+        sfm_node_type,
+        sfm_node_number,
+        mesh_node_type,
+        mesh_node_number,
+        prepare_node_number,
+        op=None,
+    ):
+        """Parse a :code:`Meshroom` project file (:code:`.mg`)."""
+
+        cache_dp = os.path.join(os.path.dirname(mg_fp), "MeshroomCache")
+        json_data = json.load(open(mg_fp, "r"))
+        json_graph = json_data["graph"]
+
+        sfm_fp = cls._get_sfm_fp(
+            sfm_node_type, cache_dp, json_graph, sfm_node_number, op
+        )
+
+        mesh_fp = cls._get_mesh_fp(
+            mesh_node_type, cache_dp, json_graph, mesh_node_number, op
+        )
+
+        image_dp = cls._get_image_dp(
+            cache_dp, json_graph, prepare_node_number, op
+        )
 
         if sfm_fp is not None:
             log_report("INFO", "Found the following sfm file: " + sfm_fp, op)
         else:
             log_report(
                 "INFO",
-                "Request target SfM result does not exist in this meshroom project",
+                "Request target SfM result does not exist in this meshroom"
+                " project.",
                 op,
             )
 
@@ -383,15 +436,17 @@ class MeshroomFileHandler:
         else:
             log_report(
                 "INFO",
-                "Request target mesh does not exist in this meshroom project",
+                "Request target mesh does not exist in this meshroom project.",
                 op,
             )
 
-        return sfm_fp, mesh_fp
+        return sfm_fp, mesh_fp, image_dp
 
-    @staticmethod
+    @classmethod
     def parse_meshroom_file(
+        cls,
         meshroom_ifp,
+        use_workspace_images,
         image_dp,
         image_fp_type,
         suppress_distortion_warnings,
@@ -399,6 +454,7 @@ class MeshroomFileHandler:
         sfm_node_number,
         mesh_node_type,
         mesh_node_number,
+        prepare_node_number,
         op=None,
     ):
         """Parse a :code:`Meshroom` file.
@@ -410,20 +466,32 @@ class MeshroomFileHandler:
 
         ext = os.path.splitext(meshroom_ifp)[1].lower()
         if ext == ".mg":
-            meshroom_ifp, mesh_fp = MeshroomFileHandler.parse_meshrom_mg_file(
+            (
+                meshroom_ifp,
+                mesh_fp,
+                image_idp_workspace,
+            ) = cls.parse_meshrom_mg_file(
                 meshroom_ifp,
                 sfm_node_type,
                 sfm_node_number,
                 mesh_node_type,
                 mesh_node_number,
+                prepare_node_number,
                 op,
             )
+            if (
+                use_workspace_images
+                and image_idp_workspace is not None
+                and os.path.isdir(image_idp_workspace)
+            ):
+                image_dp = image_idp_workspace
+                log_report("INFO", "Using image directory in workspace.", op)
         else:
             assert ext == ".json" or ext == ".sfm"
             mesh_fp = None
 
         if meshroom_ifp is not None:
-            cams, points = MeshroomFileHandler.parse_meshroom_sfm_file(
+            cams, points = cls.parse_meshroom_sfm_file(
                 meshroom_ifp,
                 image_dp,
                 image_fp_type,
@@ -441,4 +509,4 @@ class MeshroomFileHandler:
             points = []
 
         log_report("INFO", "parse_meshroom_file: Done", op)
-        return cams, points, mesh_fp
+        return cams, points, mesh_fp, image_dp

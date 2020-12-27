@@ -221,7 +221,7 @@ def add_cameras(
             continue
 
         if camera.has_undistorted_absolute_fp():
-            image_path = camera.get_undistored_absolute_fp()
+            image_path = camera.get_undistorted_absolute_fp()
         else:
             image_path = camera.get_absolute_fp()
 

@@ -105,7 +105,7 @@ class Camera:
         """Return the absolute file path of the corresponding image."""
         return self._get_absolute_fp(self._relative_fp, self._absolute_fp)
 
-    def get_undistored_absolute_fp(self):
+    def get_undistorted_absolute_fp(self):
         """Return the absolute file path of the undistorted image."""
         if self.image_fp_type == Camera.IMAGE_FP_TYPE_ABSOLUTE:
             assert False  # Not supported for undistorted images
@@ -150,6 +150,13 @@ class Camera:
             if os.path.isfile(fp):
                 has_fp = True
         return has_fp
+
+    def get_undistorted_file_name(self):
+        """Return the file name of the undistorted image."""
+        if self.has_undistorted_absolute_fp():
+            return os.path.basename(self.get_undistorted_absolute_fp())
+        else:
+            return None
 
     def set_calibration(self, calibration_mat, radial_distortion):
         """Set calibration matrix and distortion parameter."""

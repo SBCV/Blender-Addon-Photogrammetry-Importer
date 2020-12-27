@@ -170,6 +170,17 @@ class CameraImporter:
         "scene from the animated camera at the corresponding time step",
         default=True,
     )
+    reorganize_undistorted_images: BoolProperty(
+        name="Reorganize Undistorted Workspace Images",
+        description="Rename the undistorted images according to the original"
+        " image names and write them to a single directory. Certain libraries"
+        " such as Meshroom or MVE rename or move the undistorted images to"
+        " different directories. Thus, the reversal is necessary to use the"
+        " images as background sequence for the animated camera."
+        " WARNING: This will write a copy of the corresponding images to the"
+        " workspace directory",
+        default=True,
+    )
     number_interpolation_frames: IntProperty(
         name="Number of Frames Between two Reconstructed Cameras",
         description="The poses of the animated camera are interpolated",
@@ -244,6 +255,7 @@ class CameraImporter:
         self,
         layout,
         draw_workspace_image_usage=False,
+        reorganize_undistorted_images=False,
         draw_image_fp=True,
         draw_depth_map_import=False,
         draw_image_size=False,
@@ -307,6 +319,8 @@ class CameraImporter:
             anim_box.row().prop(self, "animation_frame_source", expand=True)
             if self.animation_frame_source == "ORIGINAL" or draw_everything:
                 anim_box.prop(self, "add_animated_camera_background_images")
+                if reorganize_undistorted_images or draw_everything:
+                    anim_box.prop(self, "reorganize_undistorted_images")
             if self.animation_frame_source == "ADJUSTED" or draw_everything:
                 anim_box.prop(self, "number_interpolation_frames")
             anim_box.prop(self, "consider_missing_cameras_during_animation")
@@ -436,16 +450,17 @@ class CameraImporter:
 
         if self.add_camera_motion_as_animation:
             add_camera_animation(
-                cameras,
-                parent_collection,
-                self.animation_frame_source,
-                self.add_animated_camera_background_images,
-                self.number_interpolation_frames,
-                self.interpolation_type,
-                self.consider_missing_cameras_during_animation,
-                self.remove_rotation_discontinuities,
-                self.image_dp,
-                self.image_fp_type,
+                cameras=cameras,
+                parent_collection=parent_collection,
+                animation_frame_source=self.animation_frame_source,
+                add_background_images=self.add_animated_camera_background_images,
+                reorganize_undistorted_images=self.reorganize_undistorted_images,
+                number_interpolation_frames=self.number_interpolation_frames,
+                interpolation_type=self.interpolation_type,
+                consider_missing_cameras_during_animation=self.consider_missing_cameras_during_animation,
+                remove_rotation_discontinuities=self.remove_rotation_discontinuities,
+                image_dp=self.image_dp,
+                image_fp_type=self.image_fp_type,
                 op=self,
             )
         return {"FINISHED"}
