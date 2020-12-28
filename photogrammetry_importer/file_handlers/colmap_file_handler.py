@@ -98,8 +98,8 @@ class ColmapFileHandler:
         id_to_col_images,
         image_dp,
         image_fp_type,
-        depth_map_idp,
-        suppress_distortion_warnings,
+        depth_map_idp=None,
+        suppress_distortion_warnings=False,
         op=None,
     ):
         # From photogrammetry_importer\ext\read_write_model.py
@@ -231,8 +231,8 @@ class ColmapFileHandler:
         model_idp,
         image_dp,
         image_fp_type,
-        depth_map_idp,
-        suppress_distortion_warnings,
+        depth_map_idp=None,
+        suppress_distortion_warnings=False,
         op=None,
     ):
         """Parse a :code:`Colmap` model."""
@@ -286,7 +286,7 @@ class ColmapFileHandler:
         use_workspace_images,
         image_dp,
         image_fp_type,
-        suppress_distortion_warnings,
+        suppress_distortion_warnings=False,
         op=None,
     ):
         """Parse a :code:`Colmap` model or a :code:`Colmap` workspace."""
@@ -316,8 +316,8 @@ class ColmapFileHandler:
             image_dp,
             image_fp_type,
             depth_map_idp,
-            suppress_distortion_warnings,
-            op,
+            suppress_distortion_warnings=suppress_distortion_warnings,
+            op=op,
         )
 
         return cameras, points, mesh_ifp

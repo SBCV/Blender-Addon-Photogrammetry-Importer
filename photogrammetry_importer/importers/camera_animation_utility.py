@@ -7,7 +7,7 @@ from mathutils import Matrix
 from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 from photogrammetry_importer.importers.camera_utility import (
-    add_single_camera,
+    add_camera_object,
     compute_principal_point_shift,
     compute_camera_matrix_world,
 )
@@ -364,8 +364,10 @@ def add_camera_animation(
     # The values are adjusted with _add_transformation_animation() and
     # add_camera_intrinsics_animation().
     some_cam = cameras[0]
-    bcamera = add_single_camera(some_cam, "Animated Camera", op)
-    cam_obj = add_obj(bcamera, "Animated Camera", parent_collection)
+    cam_obj = add_camera_object(
+        some_cam, "Animated Camera", parent_collection, copy_matrix_world=False
+    )
+
     cameras_sorted = sorted(
         cameras, key=lambda camera: camera.get_relative_fp()
     )

@@ -42,8 +42,8 @@ def compute_principal_point_shift(camera, relativ_to_largest_extend):
     return shift_x, shift_y
 
 
-def add_single_camera(camera, camera_name, op=None):
-    """Add a camera as Blender object."""
+def _add_camera_data(camera, camera_name):
+    """Add a camera as Blender data entity."""
     bcamera = bpy.data.cameras.new(camera_name)
     if camera.is_panoramic():
         bcamera.type = "PANO"
@@ -54,6 +54,17 @@ def add_single_camera(camera, camera_name, op=None):
         camera, relativ_to_largest_extend=True
     )
     return bcamera
+
+
+def add_camera_object(
+    camera, camera_name, camera_collection, copy_matrix_world=True
+):
+    """Add a camera as Blender object."""
+    bcamera = _add_camera_data(camera, camera_name)
+    camera_object = add_obj(bcamera, camera_name, camera_collection)
+    if copy_matrix_world:
+        camera_object.matrix_world = compute_camera_matrix_world(camera)
+    return camera_object
 
 
 def _color_from_value(val, min_val, max_val):
@@ -211,10 +222,9 @@ def add_cameras(
         # Replace the camera name so it matches the image name (without extension)
         blender_image_name_stem = _get_camera_obj_gui_str(camera)
         camera_name = blender_image_name_stem + "_cam"
-        bcamera = add_single_camera(camera, camera_name, op)
-        camera_object = add_obj(bcamera, camera_name, camera_collection)
-        matrix_world = compute_camera_matrix_world(camera)
-        camera_object.matrix_world = matrix_world
+        camera_object = add_camera_object(
+            camera, camera_name, camera_collection
+        )
         camera_object.scale *= camera_scale
 
         if not add_image_planes and not add_background_images:
