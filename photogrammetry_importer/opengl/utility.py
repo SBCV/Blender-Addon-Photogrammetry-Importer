@@ -113,10 +113,8 @@ def redraw_points(dummy):
                 break
 
 
-def render_opengl_image(image_name, cam, point_size, visible_only=True):
-    """Render the points of the current :class:`DrawManager`."""
-    draw_manager = DrawManager.get_singleton()
-    coords, colors = draw_manager.get_coords_and_colors(visible_only)
+def render_opengl_image(image_name, cam, coords, colors, point_size):
+    """Render the given coordinates with :code:`OpenGL`."""
 
     render = bpy.context.scene.render
 

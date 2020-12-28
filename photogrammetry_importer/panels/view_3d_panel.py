@@ -189,7 +189,9 @@ class SaveOpenGLRenderImageOperator(bpy.types.Operator):
         cam = _get_selected_camera()
         image_name = "OpenGL Render"
         log_report("INFO", "image_name: " + image_name, self)
-        render_opengl_image(image_name, cam, save_point_size)
+        draw_manager = DrawManager.get_singleton()
+        coords, colors = draw_manager.get_coords_and_colors(visible_only=True)
+        render_opengl_image(image_name, cam, coords, colors, save_point_size)
         log_report("INFO", "Save opengl render as image: Done", self)
         return {"FINISHED"}
 
@@ -224,7 +226,9 @@ class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
         image_name = "OpenGL Export"
 
         cam = _get_selected_camera()
-        render_opengl_image(image_name, cam, save_point_size)
+        draw_manager = DrawManager.get_singleton()
+        coords, colors = draw_manager.get_coords_and_colors(visible_only=True)
+        render_opengl_image(image_name, cam, coords, colors, save_point_size)
 
         save_alpha = scene.opengl_panel_settings.save_alpha
         save_image_to_disk(image_name, ofp, save_alpha)
@@ -290,6 +294,8 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
         save_alpha = scene.opengl_panel_settings.save_alpha
         cam = _get_selected_camera()
         indices = self._get_indices(use_camera_keyframes, cam)
+        draw_manager = DrawManager.get_singleton()
+        coords, colors = draw_manager.get_coords_and_colors(visible_only=True)
         for idx in indices:
             bpy.context.scene.frame_set(idx)
             current_frame_fn = str(idx).zfill(5) + ext
@@ -298,7 +304,9 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
             log_report(
                 "INFO", "Output File Path: " + str(current_frame_fp), self
             )
-            render_opengl_image(image_name, cam, save_point_size)
+            render_opengl_image(
+                image_name, cam, coords, colors, save_point_size
+            )
             save_image_to_disk(image_name, current_frame_fp, save_alpha)
 
         log_report("INFO", "Save opengl render as animation: Done", self)
