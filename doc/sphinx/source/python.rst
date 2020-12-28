@@ -16,29 +16,31 @@ According to the `documentation <https://docs.blender.org/api/blender_python_api
 
 Therefore, after installation and activation one can use Python's standard import syntax to import different classes and functions such as: ::
 
-        from photogrammetry_importer.camera import Camera
-        from photogrammetry_importer.file_handler.colmap_file_handler import ColmapFileHandler
-        from photogrammetry_importer.utility.blender_point_utility import add_points_as_particle_system
+        from photogrammetry_importer.types.camera import Camera
+        from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
+        from photogrammetry_importer.importers.point_utility import add_points_as_object_with_particle_system
 
-The following example shows how to add points contained in a :code:`ply` file as a particle system. ::
+The following example shows how to add points contained in a :code:`ply` file as a :code:`particle system`. ::
 
+        import bpy
         from photogrammetry_importer.file_handlers.point_data_file_handler import PointDataFileHandler
-        from photogrammetry_importer.utility.blender_utility import add_collection
-        from photogrammetry_importer.utility.blender_point_utility import add_points_as_particle_system
+        from photogrammetry_importer.blender_utility.object_utility import add_collection
+        from photogrammetry_importer.importers.point_utility import add_points_as_object_with_particle_system
 
-        ifp = r'path\to\Blender-Addon-Photogrammetry-Importer\examples\Example.ply'
+        ifp = 'path/to/Blender-Addon-Photogrammetry-Importer/examples/Example.ply'
         points = PointDataFileHandler.parse_point_data_file(ifp)
-        mesh_type = "CUBE"
-        point_extent = 0.01
-        add_particle_color_emission = True
         reconstruction_collection = add_collection("Reconstruction Collection")
-        add_points_as_particle_system(
+        add_points_as_object_with_particle_system(
                 points,
-                mesh_type,
-                point_extent,
-                add_particle_color_emission,
-                reconstruction_collection
+                mesh_type="CUBE",
+                point_extent=0.01,
+                add_particle_color_emission=True,
+                reconstruction_collection=reconstruction_collection
         )
+        # Optionally, change the shading type to show the particle colors
+        area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
+        space = next(space for space in area.spaces if space.type == 'VIEW_3D')
+        space.shading.type = 'RENDERED'
 
 
 Option 2: Call the appropriate operator registered in bpy.ops.import_scene
