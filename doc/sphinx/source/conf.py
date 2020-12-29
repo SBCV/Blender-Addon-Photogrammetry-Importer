@@ -54,7 +54,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["../../../photogrammetry_importer/ext"]
+# exclude_patterns = ["../../../photogrammetry_importer/ext"]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -89,10 +89,28 @@ autoapi_options = [
     "show-inheritance",
     # "show-module-summary",  # Disables the table at the beginning of a module
 ]
-autoapi_ignore = ["*migrations*", "*/ext/*"]
+autoapi_ignore = ["*migrations*"]
 autoapi_root = "autoapi"
 autoapi_add_toctree_entry = True
 autoapi_keep_files = False
+
+SKIP_PACKAGE_LIST = ["photogrammetry_importer.ext"]
+
+# https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html
+def maybe_skip_member(app, what, name, obj, skip, options):
+    if what == "package" and name in SKIP_PACKAGE_LIST:
+        return True
+    if any([name.startswith(package + ".") for package in SKIP_PACKAGE_LIST]):
+        return True
+    # Handlers should return None to fall back to the default skipping
+    # behaviour of AutoAPI or another attached handler.
+    return None
+
+
+# https://github.com/readthedocs/sphinx-autoapi/blob/40ebbc965fb7229192925758ea1376a2b7fa24d7/tests/python/pyskipexample/conf.py
+def setup(app):
+    app.connect("autoapi-skip-member", maybe_skip_member)
+
 
 # Option 2: sphinx-apidoc
 # https://github.com/readthedocs/readthedocs.org/issues/1139
