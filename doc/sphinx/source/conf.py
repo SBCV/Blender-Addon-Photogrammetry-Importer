@@ -74,72 +74,81 @@ html_static_path = ["_static"]
 # Automatic API Documentation
 
 # Option 1: sphinx-autoapi (recommended)
-extensions.append("autoapi.extension")
-# https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html
-autoapi_type = "python"
-autoapi_dirs = ["../../../photogrammetry_importer"]
-autoapi_template_dir = ""
-autoapi_options = [
-    "members",
-    # "inherited-members",
-    "undoc-members",
-    # "private-members",  # Something like _foo
-    # "special-members",  # Something like __foo__
-    # "imported-members",
-    "show-inheritance",
-    # "show-module-summary",  # Disables the table at the beginning of a module
-]
-autoapi_ignore = ["*migrations*"]
-autoapi_root = "autoapi"
-autoapi_add_toctree_entry = True
-autoapi_keep_files = False
+skip_autoapi_str = os.getenv("skip_photogrammetry_autoapi_doc")
+if skip_autoapi_str is None:
+    skip_autoapi = 0
+else:
+    skip_autoapi = skip_autoapi_str.lower() in ["true", "1"]
 
-SKIP_PACKAGE_LIST = ["photogrammetry_importer.ext"]
+if skip_autoapi:
+    print("Skipping the creation autoapi doc creation!")
+else:
+    extensions.append("autoapi.extension")
+    # https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html
+    autoapi_type = "python"
+    autoapi_dirs = ["../../../photogrammetry_importer"]
+    autoapi_template_dir = ""
+    autoapi_options = [
+        "members",
+        # "inherited-members",
+        "undoc-members",
+        # "private-members",  # Something like _foo
+        # "special-members",  # Something like __foo__
+        # "imported-members",
+        "show-inheritance",
+        # "show-module-summary",  # Disables the table at the beginning of a module
+    ]
+    autoapi_ignore = ["*migrations*"]
+    autoapi_root = "autoapi"
+    autoapi_add_toctree_entry = True
+    autoapi_keep_files = False
 
-# https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html
-def maybe_skip_member(app, what, name, obj, skip, options):
-    if what == "package" and name in SKIP_PACKAGE_LIST:
-        return True
-    if any([name.startswith(package + ".") for package in SKIP_PACKAGE_LIST]):
-        return True
-    # Handlers should return None to fall back to the default skipping
-    # behaviour of AutoAPI or another attached handler.
-    return None
+    SKIP_PACKAGE_LIST = ["photogrammetry_importer.ext"]
+
+    # https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html
+    def maybe_skip_member(app, what, name, obj, skip, options):
+        if what == "package" and name in SKIP_PACKAGE_LIST:
+            return True
+        if any([name.startswith(package + ".") for package in SKIP_PACKAGE_LIST]):
+            return True
+        # Handlers should return None to fall back to the default skipping
+        # behaviour of AutoAPI or another attached handler.
+        return None
 
 
-# https://github.com/readthedocs/sphinx-autoapi/blob/40ebbc965fb7229192925758ea1376a2b7fa24d7/tests/python/pyskipexample/conf.py
-def setup(app):
-    app.connect("autoapi-skip-member", maybe_skip_member)
+    # https://github.com/readthedocs/sphinx-autoapi/blob/40ebbc965fb7229192925758ea1376a2b7fa24d7/tests/python/pyskipexample/conf.py
+    def setup(app):
+        app.connect("autoapi-skip-member", maybe_skip_member)
 
 
-# Option 2: sphinx-apidoc
-# https://github.com/readthedocs/readthedocs.org/issues/1139
-# def run_apidoc(_):
-#     from sphinx.ext.apidoc import main
-#
-#     sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-#     api_doc_odp = os.path.join(
-#         os.path.abspath(os.path.dirname(__file__)), "apidoc"
-#     )
-#     photogrammetry_importer_idp = os.path.abspath(
-#         "../../photogrammetry_importer"
-#     )
-#     if not os.path.isdir(api_doc_odp):
-#         os.mkdir(api_doc_odp)
-#     print("api_doc_odp", api_doc_odp)
-#     print("photogrammetry_importer_idp", photogrammetry_importer_idp)
-#     # This is the same as calling sphinx-apidoc from the command line
-#     main(
-#         [
-#             "--module-first",
-#             "--separate",
-#             "--force",
-#             "-o",
-#             api_doc_odp,
-#             photogrammetry_importer_idp,
-#         ]
-#     )
-#
-#
-# def setup(app):
-#     app.connect("builder-inited", run_apidoc)
+    # Option 2: sphinx-apidoc
+    # https://github.com/readthedocs/readthedocs.org/issues/1139
+    # def run_apidoc(_):
+    #     from sphinx.ext.apidoc import main
+    #
+    #     sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+    #     api_doc_odp = os.path.join(
+    #         os.path.abspath(os.path.dirname(__file__)), "apidoc"
+    #     )
+    #     photogrammetry_importer_idp = os.path.abspath(
+    #         "../../photogrammetry_importer"
+    #     )
+    #     if not os.path.isdir(api_doc_odp):
+    #         os.mkdir(api_doc_odp)
+    #     print("api_doc_odp", api_doc_odp)
+    #     print("photogrammetry_importer_idp", photogrammetry_importer_idp)
+    #     # This is the same as calling sphinx-apidoc from the command line
+    #     main(
+    #         [
+    #             "--module-first",
+    #             "--separate",
+    #             "--force",
+    #             "-o",
+    #             api_doc_odp,
+    #             photogrammetry_importer_idp,
+    #         ]
+    #     )
+    #
+    #
+    # def setup(app):
+    #     app.connect("builder-inited", run_apidoc)
