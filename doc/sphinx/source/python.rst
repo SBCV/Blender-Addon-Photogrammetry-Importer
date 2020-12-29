@@ -20,7 +20,7 @@ Therefore, after installation and activation one can use Python's standard impor
         from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
         from photogrammetry_importer.importers.point_utility import add_points_as_object_with_particle_system
 
-The following example shows how to add points contained in a :code:`ply` file as a :code:`particle system`. ::
+Example 1: Add points contained in a :code:`ply` file as a :code:`particle system`. ::
 
         import bpy
         from photogrammetry_importer.file_handlers.point_data_file_handler import PointDataFileHandler
@@ -41,6 +41,36 @@ The following example shows how to add points contained in a :code:`ply` file as
         area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
         space = next(space for space in area.spaces if space.type == 'VIEW_3D')
         space.shading.type = 'RENDERED'
+
+Example 2: Use the intrinsic and extrinsic parameters of each reconstructed camera to render the corresponding point cloud via an :code:`off screen buffer` to disk. ::
+
+        import os
+        from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
+        from photogrammetry_importer.types.point import Point
+        from photogrammetry_importer.blender_utility.object_utility import add_collection
+        from photogrammetry_importer.importers.camera_utility import add_camera_object
+        from photogrammetry_importer.opengl.utility import render_opengl_image
+        from photogrammetry_importer.blender_utility.image_utility import save_image_to_disk
+
+        model_idp = 'path/to/Blender-Addon-Photogrammetry-Importer/examples_with_images/colmap_example_model_bin'
+        # Make sure you've downloaded the corresponding images (i.e. the sceaux castle dataset)
+        image_idp = 'path/to/Blender-Addon-Photogrammetry-Importer/examples_with_images/images'
+        odp = 'path/to/output'
+
+        cameras, points3D = ColmapFileHandler.parse_colmap_model_folder(model_idp, image_idp, image_fp_type="NAME")
+        coords, colors = Point.split_points(points3D)
+
+        camera_collection = add_collection("Camera Collection")
+        render_img_name = "render_result"
+        for cam in cameras:
+                cam_name = cam.get_file_name()
+                print(f"Camera: {cam_name}")
+                ofp = os.path.join(odp, cam_name)
+
+                camera_object = add_camera_object(cam, cam_name, camera_collection)
+                render_opengl_image(render_img_name, camera_object, coords, colors, point_size=10)
+                save_image_to_disk(render_img_name, ofp, save_alpha=False)
+
 
 
 Option 2: Call the appropriate operator registered in bpy.ops.import_scene
