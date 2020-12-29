@@ -34,7 +34,7 @@ class ImportVisualSfMOperator(
 ):
     """Import a :code:`VisualSfM` NVM file."""
 
-    bl_idname = "import_scene.nvm"
+    bl_idname = "import_scene.visualsfm_nvm"
     bl_label = "Import NVM"
     bl_options = {"PRESET"}
 
