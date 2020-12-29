@@ -84,20 +84,36 @@ In Blender open the :code:`Python Console` and use :code:`Tabulator` to list the
                                 fbx(
                                 gltf(
                                 meshroom_sfm_json(
-                                nvm(
+                                mve_folder(
                                 obj(
                                 open3d_log_json(
                                 openmvg_json(
-                                ply(
+                                opensfm_json(
+                                point_data(
+                                visualsfm_nvm(
                                 x3d(
 
-Or use :code:`Tabulator` with a specific function, e.g. :code:`ply()`, to show the corresponding parameters. ::
+Or use :code:`Tabulator` with a specific function, e.g. :code:`point_data()`, to show the corresponding parameters. ::
 
-        >>> bpy.ops.import_scene.ply(<TABULATOR>
-        >>> bpy.ops.import_scene.ply(
-        ply()
-        bpy.ops.import_scene.ply(import_points=True, draw_points_with_gpu=False, add_points_as_particle_system=True, mesh_type='CUBE', point_extent=0.01, add_particle_color_emission=True, set_particle_color_flag=False, particle_overwrite_color=(0, 1, 0), path_to_transformations="", filepath="", directory="", filter_glob="*.ply")
-        Import a PLY file as point cloud
+        >>> bpy.ops.import_scene.point_data(<TABULATOR>
+        >>> bpy.ops.import_scene.point_data(
+        point_data()
+        bpy.ops.import_scene.point_data(
+                import_points=True,
+                point_cloud_display_sparsity=1,
+                draw_points_with_gpu=True,
+                add_points_to_point_cloud_handle=True,
+                add_points_as_particle_system=False,
+                mesh_type='CUBE',
+                point_extent=0.01,
+                add_particle_color_emission=True,
+                set_particle_color_flag=False,
+                particle_overwrite_color=(0, 1, 0),
+                add_points_as_mesh_oject=False,
+                adjust_clipping_distance=False,
+                filepath="",
+                directory="",
+                filter_glob="*.ply;*.pcd;*.las;*.laz;*.asc;*.pts;*.csv")
 
 
 Python Scripting with Blender
