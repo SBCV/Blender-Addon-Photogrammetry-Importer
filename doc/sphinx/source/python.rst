@@ -27,7 +27,7 @@ Example 1: Add points contained in a :code:`ply` file as a :code:`particle syste
         from photogrammetry_importer.blender_utility.object_utility import add_collection
         from photogrammetry_importer.importers.point_utility import add_points_as_object_with_particle_system
 
-        ifp = 'path/to/Blender-Addon-Photogrammetry-Importer/examples/Example.ply'
+        ifp = "path/to/Blender-Addon-Photogrammetry-Importer/examples/Example.ply"
         points = PointDataFileHandler.parse_point_data_file(ifp)
         reconstruction_collection = add_collection("Reconstruction Collection")
         add_points_as_object_with_particle_system(
@@ -38,9 +38,9 @@ Example 1: Add points contained in a :code:`ply` file as a :code:`particle syste
                 reconstruction_collection=reconstruction_collection
         )
         # Optionally, change the shading type to show the particle colors
-        area = next(area for area in bpy.context.screen.areas if area.type == 'VIEW_3D')
-        space = next(space for space in area.spaces if space.type == 'VIEW_3D')
-        space.shading.type = 'RENDERED'
+        area = next(area for area in bpy.context.screen.areas if area.type == "VIEW_3D")
+        space = next(space for space in area.spaces if space.type == "VIEW_3D")
+        space.shading.type = "RENDERED"
 
 Example 2: Use the intrinsic and extrinsic parameters of each reconstructed camera to render the corresponding point cloud via an :code:`off screen buffer` to disk. ::
 
@@ -52,14 +52,16 @@ Example 2: Use the intrinsic and extrinsic parameters of each reconstructed came
         from photogrammetry_importer.opengl.utility import render_opengl_image
         from photogrammetry_importer.blender_utility.image_utility import save_image_to_disk
 
-        model_idp = 'path/to/Blender-Addon-Photogrammetry-Importer/examples_with_images/colmap_example_model_bin'
         # Make sure you've downloaded the corresponding images (i.e. the sceaux castle dataset)
-        image_idp = 'path/to/Blender-Addon-Photogrammetry-Importer/examples_with_images/images'
-        odp = 'path/to/output'
+        model_idp = "path/to/Blender-Addon-Photogrammetry-Importer/examples/colmap_example_model_bin"
+        image_idp = "path/to/Blender-Addon-Photogrammetry-Importer/examples/images"
+        odp = "path/to/output"
 
+        # Parse the reconstruction
         cameras, points3D = ColmapFileHandler.parse_colmap_model_folder(model_idp, image_idp, image_fp_type="NAME")
         coords, colors = Point.split_points(points3D)
 
+        # Render the point cloud for reach camera
         camera_collection = add_collection("Camera Collection")
         render_img_name = "render_result"
         for cam in cameras:
@@ -70,6 +72,37 @@ Example 2: Use the intrinsic and extrinsic parameters of each reconstructed came
                 camera_object = add_camera_object(cam, cam_name, camera_collection)
                 render_opengl_image(render_img_name, camera_object, coords, colors, point_size=10)
                 save_image_to_disk(render_img_name, ofp, save_alpha=False)
+
+Example 3: Use the animated camera to render the point cloud with :code:`Cycles`. ::
+
+        import os
+        import bpy
+        from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
+        from photogrammetry_importer.blender_utility.object_utility import add_collection
+        from photogrammetry_importer.importers.point_utility import add_points_as_object_with_particle_system
+        from photogrammetry_importer.importers.camera_animation_utility import add_camera_animation
+        from photogrammetry_importer.importers.camera_utility import adjust_render_settings_if_possible
+
+        # Make sure you've downloaded the corresponding images (i.e. the sceaux castle dataset)
+        model_idp = "path/to/Blender-Addon-Photogrammetry-Importer/examples/colmap_example_model_bin"
+        image_idp = "path/to/Blender-Addon-Photogrammetry-Importer/examples/images"
+        odp = "path/to/output"
+
+        # Parse the reconstruction
+        cameras, points3D = ColmapFileHandler.parse_colmap_model_folder(model_idp, image_idp, image_fp_type="NAME")
+
+        # Add the reconstruction results
+        reconstruction_collection = add_collection("Reconstruction Collection")
+        add_points_as_object_with_particle_system(points3D, reconstruction_collection, point_extent=0.02)
+        animated_camera_object = add_camera_animation(cameras, reconstruction_collection)
+
+        # Adjust the render settings and render animation with Cycles
+        adjust_render_settings_if_possible(cameras)
+        bpy.context.scene.render.engine = "CYCLES"
+        bpy.context.scene.cycles.device = "GPU"
+        bpy.context.scene.render.filepath = os.path.join(odp, "")
+        bpy.context.scene.camera = animated_camera_object
+        bpy.ops.render.render(animation=True)
 
 
 
