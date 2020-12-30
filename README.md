@@ -27,7 +27,7 @@ In addition, the addon supports some common point cloud data formats:
 <sup>4</sup> Requires [Pylas](https://pypi.org/project/pylas/) for parsing.
 <sup>5</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
 
-Compatible with Blender 2.80 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279).
+Compatible with Blender 2.80 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/tree/blender279).
 
 ## Getting Started
 - [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
@@ -42,6 +42,7 @@ Compatible with Blender 2.80 onwards. There is an older version of the addon ava
 - [Ensure Camera and Point Alignment](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/alignment.html)
 - [Point Cloud Visualization and Rendering](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/point_cloud.html)
 - [Addon Usage with Python](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/python.html)
+- [Extending the Addon](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/extension.html)
 - [Contribution](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/contribution.html)
 - [Recent features / Changelog](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/changelog.html)
 
@@ -58,22 +59,22 @@ If you use this library for scientific purposes, please consider to cite the fol
 &nbsp;note={to appear}}<br clear="left"/>
 
 ## Example
-This repository contains an example NVM file. The imported result looks as follows.
-![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/import_result.jpg)
-The input images of the NVM file are located here: [https://github.com/openMVG/ImageDataset_SceauxCastle](https://github.com/openMVG/ImageDataset_SceauxCastle).
+This repository contains an example Colmap model. The imported result looks as follows.
+![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/import_result.jpg)
+The input images of the Colmap model are located here: [https://github.com/openMVG/ImageDataset_SceauxCastle](https://github.com/openMVG/ImageDataset_SceauxCastle).
 
 There is an import option that interpolates the reconstructed camera poses to compute a camera animation.
-![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/camera_animation.gif)
+![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/camera_animation.gif)
 
 You can also overlay the (sparse) point cloud with the corresponding mesh - see [Import Data](doc/markdown/import.md). 
-![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/point_cloud_mesh_overlay.jpg)
+![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/point_cloud_mesh_overlay.jpg)
 
 In addition, the addon allows to visualize depth maps (reconstructed with Colmap or MVE) as point clouds.
 <p float="left" align="middle">
-  <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/depth_map_3d_view.jpg" width="400" />
-  <img src="https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/depth_map_from_camera.jpg" width="400" /> 
+  <img src="https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/depth_map_3d_view.jpg" width="400" />
+  <img src="https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/depth_map_from_camera.jpg" width="400" /> 
 </p>
 
 
 The addon offers an option to draw big point clouds with OpenGL to reduce computational requirements. The addon provides a panel to export these OpenGL point clouds renderings - see [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md). 
-![alt text](https://github.com/SBCV/Blender-Import-NVM-Addon/blob/master/doc/images/import_result_opengl.jpg)
+![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/import_result_opengl.jpg)
