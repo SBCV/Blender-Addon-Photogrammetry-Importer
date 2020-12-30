@@ -79,8 +79,9 @@ Getting Started
    alignment
    point_cloud
    python
-   documentation
+   extension
    contribution
+   documentation
    changelog
    autoapi/index
 
