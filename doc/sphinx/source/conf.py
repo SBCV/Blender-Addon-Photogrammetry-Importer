@@ -109,17 +109,17 @@ else:
     def maybe_skip_member(app, what, name, obj, skip, options):
         if what == "package" and name in SKIP_PACKAGE_LIST:
             return True
-        if any([name.startswith(package + ".") for package in SKIP_PACKAGE_LIST]):
+        if any(
+            [name.startswith(package + ".") for package in SKIP_PACKAGE_LIST]
+        ):
             return True
         # Handlers should return None to fall back to the default skipping
         # behaviour of AutoAPI or another attached handler.
         return None
 
-
     # https://github.com/readthedocs/sphinx-autoapi/blob/40ebbc965fb7229192925758ea1376a2b7fa24d7/tests/python/pyskipexample/conf.py
     def setup(app):
         app.connect("autoapi-skip-member", maybe_skip_member)
-
 
     # Option 2: sphinx-apidoc
     # https://github.com/readthedocs/readthedocs.org/issues/1139
