@@ -132,10 +132,10 @@ class PointImporter:
 
                 add_points_as_object_with_particle_system(
                     points,
+                    reconstruction_collection,
                     self.mesh_type,
                     self.point_extent,
                     self.add_particle_color_emission,
-                    reconstruction_collection,
                     particle_overwrite_color,
                     op=self,
                 )

@@ -9,7 +9,10 @@ from bpy.props import (
     FloatVectorProperty,
 )
 
-from photogrammetry_importer.importers.camera_utility import add_cameras
+from photogrammetry_importer.importers.camera_utility import (
+    add_cameras,
+    adjust_render_settings_if_possible,
+)
 from photogrammetry_importer.importers.camera_animation_utility import (
     add_camera_animation,
 )
@@ -380,33 +383,6 @@ class CameraImporter:
             if not camera.has_principal_point():
                 camera.set_principal_point([default_pp_x, default_pp_y])
 
-    @staticmethod
-    def _adjust_render_settings_if_possible(cameras, op=None):
-
-        if len(cameras) == 0:
-            return
-
-        possible = True
-        width = cameras[0].width
-        height = cameras[0].height
-
-        # Check if the cameras have same resolution
-        for cam in cameras:
-            if cam.width != width or cam.height != height:
-                possible = False
-                break
-
-        if possible:
-            bpy.context.scene.render.resolution_x = width
-            bpy.context.scene.render.resolution_y = height
-        else:
-            log_report(
-                "WARNING",
-                "Adjustment of render settings not possible, "
-                + "since the reconstructed cameras show different resolutions.",
-                op,
-            )
-
     def import_photogrammetry_cameras(self, cameras, parent_collection):
         """Import the cameras using the properties of this class."""
         if not self.import_cameras and not self.add_camera_motion_as_animation:
@@ -427,9 +403,7 @@ class CameraImporter:
             )
 
         if self.adjust_render_settings:
-            self.__class__._adjust_render_settings_if_possible(
-                cameras, op=self
-            )
+            adjust_render_settings_if_possible(cameras, op=self)
 
         if self.import_cameras:
             add_cameras(
@@ -457,8 +431,8 @@ class CameraImporter:
                 reorganize_undistorted_images=self.reorganize_undistorted_images,
                 number_interpolation_frames=self.number_interpolation_frames,
                 interpolation_type=self.interpolation_type,
-                consider_missing_cameras_during_animation=self.consider_missing_cameras_during_animation,
                 remove_rotation_discontinuities=self.remove_rotation_discontinuities,
+                consider_missing_cameras_during_animation=self.consider_missing_cameras_during_animation,
                 image_dp=self.image_dp,
                 image_fp_type=self.image_fp_type,
                 op=self,

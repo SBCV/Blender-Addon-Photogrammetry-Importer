@@ -42,6 +42,34 @@ def compute_principal_point_shift(camera, relativ_to_largest_extend):
     return shift_x, shift_y
 
 
+def adjust_render_settings_if_possible(cameras, op=None):
+    """Adjust the render settings according to the camera parameters."""
+
+    if len(cameras) == 0:
+        return
+
+    possible = True
+    width = cameras[0].width
+    height = cameras[0].height
+
+    # Check if the cameras have same resolution
+    for cam in cameras:
+        if cam.width != width or cam.height != height:
+            possible = False
+            break
+
+    if possible:
+        bpy.context.scene.render.resolution_x = width
+        bpy.context.scene.render.resolution_y = height
+    else:
+        log_report(
+            "WARNING",
+            "Adjustment of render settings not possible, "
+            + "since the reconstructed cameras show different resolutions.",
+            op,
+        )
+
+
 def _add_camera_data(camera, camera_name):
     """Add a camera as Blender data entity."""
     bcamera = bpy.data.cameras.new(camera_name)

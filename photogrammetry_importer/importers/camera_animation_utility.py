@@ -331,15 +331,15 @@ def _add_background_image_sequence(
 def add_camera_animation(
     cameras,
     parent_collection,
-    animation_frame_source,
-    add_background_images,
-    reorganize_undistorted_images,
-    number_interpolation_frames,
-    interpolation_type,
-    consider_missing_cameras_during_animation,
-    remove_rotation_discontinuities,
-    image_dp,
-    image_fp_type,
+    animation_frame_source="ORIGINAL",
+    add_background_images=False,
+    reorganize_undistorted_images=False,
+    number_interpolation_frames=0,
+    interpolation_type="LINEAR",
+    remove_rotation_discontinuities=True,
+    consider_missing_cameras_during_animation=False,
+    image_dp=None,
+    image_fp_type=None,
     op=None,
 ):
     """Add an animated camera from a set of reconstructed cameras."""
@@ -356,6 +356,7 @@ def add_camera_animation(
         assert False
 
     if consider_missing_cameras_during_animation:
+        assert image_dp is not None and image_fp_type is not None
         cameras = _enhance_cameras_with_non_reconstructed_cameras(
             cameras, image_dp, image_fp_type, op
         )
@@ -412,3 +413,4 @@ def add_camera_animation(
         )
 
     log_report("INFO", "Adding Camera Animation: Done", op)
+    return cam_obj

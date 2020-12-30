@@ -213,10 +213,10 @@ def _add_particle_system_obj(
 
 def add_points_as_object_with_particle_system(
     points,
-    mesh_type,
-    point_extent,
-    add_particle_color_emission,
     reconstruction_collection,
+    mesh_type="CUBE",
+    point_extent=0.01,
+    add_particle_color_emission=True,
     particle_overwrite_color=None,
     op=None,
 ):
@@ -233,6 +233,7 @@ def add_points_as_object_with_particle_system(
         "Particle System", reconstruction_collection
     )
 
+    point_cloud_obj_list = []
     for i in range(0, len(points), max_number_particles):
 
         particle_obj_name = f"Particle Shape {i}"
@@ -258,12 +259,13 @@ def add_points_as_object_with_particle_system(
             point_cloud_obj_name,
             particle_system_collection,
         )
+        point_cloud_obj_list.append(point_cloud_obj)
 
     bpy.context.view_layer.update()
 
     log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()), op)
     log_report("INFO", "Adding Points as Particle System: Done", op)
-    return point_cloud_obj.name
+    return point_cloud_obj_list
 
 
 def add_points_as_mesh_vertices(points, reconstruction_collection, op=None):
@@ -282,4 +284,4 @@ def add_points_as_mesh_vertices(points, reconstruction_collection, op=None):
 
     log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()), op)
     log_report("INFO", "Adding Points as Mesh: Done", op)
-    return point_cloud_obj.name
+    return point_cloud_obj
