@@ -116,32 +116,34 @@ class OpenGLPanel(bpy.types.Panel):
         row = viz_box.row()
         row.operator(UpdatePointCloudVisualizationOperator.bl_idname)
 
-        write_box = layout.box()
-        write_box.label(
-            text="Select a camera to save / export an OpenGL rendering"
+        write_point_cloud_box = layout.box()
+        write_point_cloud_box.label(
+            text="Select a camera to save or export an OpenGL point cloud"
+            " rendering"
         )
-        row = write_box.row()
+        row = write_point_cloud_box.row()
         row.prop(
             settings,
             "save_point_size",
-            text="OpenGL Save / Export Point Size",
+            text="Point Size of OpenGL Point Cloud",
         )
-        save_box = write_box.box()
-        save_box.label(text="Save results:")
-        row = save_box.row()
+        row.enabled = _get_selected_camera() is not None
+        save_point_cloud_box = write_point_cloud_box.box()
+        save_point_cloud_box.label(text="Save point cloud rendering:")
+        row = save_point_cloud_box.row()
         row.operator(SaveOpenGLRenderImageOperator.bl_idname)
 
-        export_box = write_box.box()
-        export_box.label(text="Export results:")
-        row = export_box.row()
+        export_point_cloud_box = write_point_cloud_box.box()
+        export_point_cloud_box.label(text="Export point cloud rendering:")
+        row = export_point_cloud_box.row()
         row.prop(settings, "file_format", text="File Format")
-        row = export_box.row()
+        row = export_point_cloud_box.row()
         row.prop(settings, "save_alpha", text="Save Alpha Values")
-        row = export_box.row()
+        row = export_point_cloud_box.row()
         row.operator(ExportOpenGLRenderImageOperator.bl_idname)
-        row = export_box.row()
+        row = export_point_cloud_box.row()
         row.prop(settings, "use_camera_keyframes", text="Use Camera Keyframes")
-        row = export_box.row()
+        row = export_point_cloud_box.row()
         row.operator(ExportOpenGLRenderAnimationOperator.bl_idname)
 
 
@@ -200,7 +202,7 @@ class ExportOpenGLRenderImageOperator(bpy.types.Operator, ExportHelper):
     """An Operator to save a rendering of the point cloud to disk."""
 
     bl_idname = "photogrammetry_importer.export_opengl_render_image"
-    bl_label = "Export as Image"
+    bl_label = "Export Point Cloud Rendering as Image"
     bl_description = "Use a single camera to render the point cloud."
 
     # Hide the porperty by using a normal string instad of a string property
@@ -241,7 +243,7 @@ class ExportOpenGLRenderAnimationOperator(bpy.types.Operator, ExportHelper):
     """An Operator to save multiple renderings of the point cloud to disk."""
 
     bl_idname = "photogrammetry_importer.export_opengl_render_animation"
-    bl_label = "Export as Image Sequence"
+    bl_label = "Export Point Cloud Renderings as Image Sequence"
     bl_description = "Use an animated camera to render the point cloud."
 
     # Hide the porperty by using a normal string instad of a string property
