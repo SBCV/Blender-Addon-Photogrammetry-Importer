@@ -59,11 +59,14 @@ If you use this library for scientific purposes, please consider to cite the fol
 &nbsp;note={to appear}}<br clear="left"/>
 
 ## Example
-This repository contains an example Colmap model. The imported result looks as follows.
+This repository contains an example Colmap model. The following image shows the imported camera poses, image planes and point cloud in Blender's 3D view.
 ![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/import_result.jpg)
 The input images of the Colmap model are located here: [https://github.com/openMVG/ImageDataset_SceauxCastle](https://github.com/openMVG/ImageDataset_SceauxCastle).
 
-There is an import option that interpolates the reconstructed camera poses to compute a camera animation.
+The addon computes an animated camera with corresponding background images from the reconstructed camera poses.
+![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/camera_animation_background.gif)
+
+There is also an import option that allows to interpolate the reconstructed camera poses.
 ![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/camera_animation.gif)
 
 You can also overlay the (sparse) point cloud with the corresponding mesh - see [Import Data](doc/markdown/import.md). 
