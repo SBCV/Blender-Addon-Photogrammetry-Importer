@@ -290,7 +290,7 @@ def add_cameras(
             image_plane_name = blender_image_name_stem + "_image_plane"
 
             image_plane_obj = add_camera_image_plane(
-                matrix_world,
+                camera_object.matrix_world,
                 blender_image,
                 camera=camera,
                 name=image_plane_name,
