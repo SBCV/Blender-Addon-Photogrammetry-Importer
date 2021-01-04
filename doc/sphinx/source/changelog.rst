@@ -4,11 +4,22 @@ Recent Features / Changelog
 
 Changelog with most relevant features. Recently added features are listed at the top of this page.
 
+2021
+====
+
+* Added features to export images of the imported reconstructions including cameras, background images, image planes, point clouds and meshes
+
 2020
 ====
 
-* Fixed a bug in the texture coordinate computation of the particle system
-* Added a workaround to circumvent a bug in Blender, which appears only for large point clouds 
+* Reorganized (persistent) addon preferences
+* Added an option to use the undistorted images contained in the workspaces of the Colmap, Meshroom and MVE  
+* Added several python examples that demonstrate the API usage
+* Added vertex colors to the mesh shader nodes to improve the visibility of the corresponding mesh
+* Added background images for the animated camera
+* Added code to automatically generate the API Documentation with autoapi
+* Fixed an incorrect offset in the texture coordinate computation of the particle system
+* Added a workaround to circumvent a bug in Blender, which appears only for large particle systems (T81103)
 * Added GUI elements to install/uninstall the dependencies (Pillow, Pyntcloud)
 * Addon uses now the Pyntcloud library to import PLY, PCD, LAS, ASC, PTS and CSV files
 * Added an option to import depth maps of MVE workspaces
