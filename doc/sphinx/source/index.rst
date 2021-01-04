@@ -113,10 +113,10 @@ There is also an import option that allows to interpolate the reconstructed came
    :scale: 22 %
    :align: center
 
-You can also overlay the (sparse) point cloud with the corresponding mesh - see :doc:`Import Data <./import>`. 
+In addition, the addon allows to import meshes contained in the workspaces of specific libraries. Manually imported meshes can also be aligned with the corresponding reconstruction by following the instructions :doc:`here <./import>`. 
 
-.. image:: ../../images/point_cloud_mesh_overlay.jpg
-   :scale: 32 %
+.. image:: ../../images/mesh_3d_view.jpg
+   :scale: 42 %
    :align: center
 
 The addon offers an option to draw big point clouds with OpenGL to reduce computational requirements. The addon provides a panel to export these OpenGL point clouds renderings - see :doc:`Point Cloud Visualization and Rendering <./point_cloud>`. 
