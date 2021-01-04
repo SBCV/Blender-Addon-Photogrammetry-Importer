@@ -183,8 +183,10 @@ class OpenGLPanel(bpy.types.Panel):
         export_point_cloud_box.label(text="Export point cloud rendering:")
         row = export_point_cloud_box.row()
         row.prop(settings, "render_file_format", text="File Format")
+        row.enabled = selected_cam is not None
         row = export_point_cloud_box.row()
         row.prop(settings, "save_alpha", text="Save Alpha Values")
+        row.enabled = selected_cam is not None
         row = export_point_cloud_box.row()
         row.operator(ExportOpenGLRenderImageOperator.bl_idname)
         row = export_point_cloud_box.row()
