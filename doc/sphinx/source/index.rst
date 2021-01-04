@@ -93,7 +93,7 @@ There is a short `tutorial video <https://www.youtube.com/watch?v=BwwaT2scoP0>`_
 
 Example Results (Shipped with Addon)
 ====================================
-This repository contains an example Colmap model. The imported result looks as follows.
+This repository contains an example Colmap model. The following image shows the imported camera poses, image planes and point cloud in Blender's 3D view.
 
 .. image:: ../../images/import_result.jpg
    :scale: 32 %
@@ -101,7 +101,13 @@ This repository contains an example Colmap model. The imported result looks as f
 
 The input images of the Colmap model are located here: https://github.com/openMVG/ImageDataset_SceauxCastle.
 
-There is an import option that interpolates the reconstructed camera poses to compute a camera animation.
+The addon computes an animated camera with corresponding background images from the reconstructed camera poses.
+
+.. image:: ../../images/camera_animation_background.gif
+   :scale: 33 %
+   :align: center
+
+There is also an import option that allows to interpolate the reconstructed camera poses.
 
 .. image:: ../../images/camera_animation.gif
    :scale: 22 %
