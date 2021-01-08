@@ -34,6 +34,9 @@ class DependencyStatus:
 
     def _get_version_string(self, package_name):
         try:
+            # This does NOT immediately work after installation from Blender's
+            # python using a subprocess. A restart is required to import
+            # "pkg_resources" properly.
             import pkg_resources
 
             version_str = pkg_resources.get_distribution(package_name).version
@@ -45,7 +48,10 @@ class DependencyStatus:
         """Return the installation status of this dependency."""
         if self.installation_status:
             version_str = self._get_version_string(self.package_name)
-            status = f"Installed (Version {version_str})"
+            if version_str != "Unknown":
+                status = f"Installed (Version {version_str})"
+            else:
+                status = "Installed (Restart Blender to show version number)"
         else:
             status = "Not installed"
         return status
@@ -74,6 +80,7 @@ class PipManager:
         try:
             if lazy and self.pip_dependency_status.get_installation_status():
                 import pip
+
                 log_report(
                     "INFO",
                     "Pip already installed. Using existing pip installation"
