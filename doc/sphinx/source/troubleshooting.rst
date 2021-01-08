@@ -3,6 +3,10 @@
 Troubleshooting 
 ***************
 
+Known (Blender) Issues
+======================
+Please see `this issue <https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/issues/26>`_ for an up-to-date list of limitations.
+
 Problems to Activate the Addon
 ==============================
 
