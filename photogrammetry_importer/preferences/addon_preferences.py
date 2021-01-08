@@ -5,6 +5,7 @@ from bpy.props import BoolProperty, EnumProperty
 from photogrammetry_importer.preferences.dependency import (
     InstallOptionalDependenciesOperator,
     UninstallOptionalDependenciesOperator,
+    PipManager,
     OptionalDependencyManager,
 )
 from photogrammetry_importer.blender_utility.logging_utility import log_report
@@ -82,11 +83,21 @@ class AddonPreferences(
         install_dependency_box.operator(
             UninstallOptionalDependenciesOperator.bl_idname, icon="CONSOLE"
         )
+        row = install_dependency_box.row()
+        row.label(text="Pip Installation Status:")
+        pip_manager = PipManager.get_singleton()
+        pip_status_box = install_dependency_box.box()
+        pip_status_box.label(
+            text=f"Pip: {pip_manager.get_installation_status()}"
+        )
+        row = install_dependency_box.row()
+        row.label(text="Dependency Installation Status:")
+        dependency_status_box = install_dependency_box.box()
         dependency_manager = OptionalDependencyManager.get_singleton()
         dependencies = dependency_manager.get_dependencies()
         for dependency in dependencies:
             status = dependency.get_installation_status()
-            install_dependency_box.label(
+            dependency_status_box.label(
                 text=f"{dependency.gui_name}: {status}"
             )
         install_dependency_box.label(

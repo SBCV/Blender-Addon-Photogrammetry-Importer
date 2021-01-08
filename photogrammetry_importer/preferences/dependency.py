@@ -6,8 +6,8 @@ import bpy
 from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
-class OptionalDependency:
-    """Class that describes an optional Python dependency of the addon."""
+class DependencyStatus:
+    """Class that describes the installation status of a Python dependency."""
 
     def __init__(self, gui_name, package_name, import_name):
         # Name shown in the GUI.
@@ -32,55 +32,116 @@ class OptionalDependency:
         module_spec = importlib.util.find_spec(self.import_name)
         self.installation_status = module_spec is not None
 
-    def _install_pip(self, lazy):
+    def _get_version_string(self, package_name):
+        try:
+            import pkg_resources
+
+            version_str = pkg_resources.get_distribution(package_name).version
+        except:
+            version_str = "Unknown"
+        return version_str
+
+    def get_installation_status(self):
+        """Return the installation status of this dependency."""
+        if self.installation_status:
+            version_str = self._get_version_string(self.package_name)
+            status = f"Installed (Version {version_str})"
+        else:
+            status = "Not installed"
+        return status
+
+
+class PipManager:
+    """Class that manages the pip installation."""
+
+    def __init__(self):
+        self.pip_dependency_status = DependencyStatus(
+            gui_name="Pip", package_name="pip", import_name="pip"
+        )
+
+    @classmethod
+    def get_singleton(cls):
+        """Return a singleton of this class."""
+        if hasattr(bpy.types.Object, "photogrammetry_pip_manager"):
+            pip_manager = bpy.types.Object.photogrammetry_pip_manager
+        else:
+            pip_manager = cls()
+            bpy.types.Object.photogrammetry_pip_manager = pip_manager
+        return pip_manager
+
+    @staticmethod
+    def install_pip(lazy, op=None):
         """Install pip."""
         if lazy:
-            module_spec = importlib.util.find_spec("pip")
-            if module_spec is not None:
+            try:
+                check_pip_call = [sys.executable, "-m", "pip", "--version"]
+                result = subprocess.run(
+                    check_pip_call,
+                    stdout=subprocess.PIPE,
+                    check=True,
+                )
+                pip_installation_info = result.stdout.decode("ascii").rstrip()
+                log_report(
+                    "INFO",
+                    "Pip already installed. Using existing pip installation"
+                    + f" ({pip_installation_info})",
+                    op=op,
+                )
                 return
-        try:
-            subprocess.run(
-                [sys.executable, "-m", "pip", "--version"],
-                check=True,
-            )
-        except subprocess.CalledProcessError:
-            import os
-            import ensurepip
+            except subprocess.CalledProcessError:
+                pass
 
-            # https://github.com/robertguetzkow/blender-python-examples/blob/master/add-ons/install-dependencies/install-dependencies.py
-            # Note that ensurepip.bootstrap() calls pip, which adds the
-            # environment variable PIP_REQ_TRACKER. After ensurepip.bootstrap()
-            # finishes execution, the directory is deleted.
-            # However, any subprocesses calling pip will use the environment
-            # variable PIP_REQ_TRACKER (which points to an invalid path).
-            # Thus, we need to remove the invalid environment variable.
-            ensurepip.bootstrap()
-            os.environ.pop("PIP_REQ_TRACKER", None)
+        log_report("INFO", "Installing pip!", op=op)
 
-    def install(self):
+        import os
+        import ensurepip
+
+        # https://github.com/robertguetzkow/blender-python-examples/blob/master/add-ons/install-dependencies/install-dependencies.py
+        # Note that ensurepip.bootstrap() calls pip, which adds the
+        # environment variable PIP_REQ_TRACKER. After ensurepip.bootstrap()
+        # finishes execution, the directory is deleted.
+        # However, any subprocesses calling pip will use the environment
+        # variable PIP_REQ_TRACKER (which points to an invalid path).
+        # Thus, we need to remove the invalid environment variable.
+        ensurepip.bootstrap()
+        os.environ.pop("PIP_REQ_TRACKER", None)
+
+    def get_installation_status(self):
+        """Return the pip installation status."""
+        return self.pip_dependency_status.get_installation_status()
+
+
+class OptionalDependency(DependencyStatus):
+    """Class that describes an optional Python dependency of the addon."""
+
+    def install(self, op=None):
         """Install this dependency."""
-        self._install_pip(lazy=True)
-
+        PipManager.install_pip(lazy=True, op=op)
         # The "--user" option does not work with Blender's Python version.
-        install_command = [
+        dependency_install_command = [
             sys.executable,
             "-m",
             "pip",
             "install",
+            "--no-cache-dir",
             self.package_name,
         ]
-        subprocess.run(install_command, check=False)
+        log_report(
+            "INFO",
+            f"Installing dependency with {dependency_install_command}",
+            op,
+        )
+        subprocess.run(dependency_install_command, check=False)
         try:
             importlib.import_module(self.import_name)
             self.installation_status = True
         except:
             self.installation_status = False
 
-    def uninstall(self):
+    def uninstall(self, op=None):
         """Uninstall this dependency."""
-        self._install_pip(lazy=True)
-
-        uninstall_command = [
+        PipManager.install_pip(lazy=True)
+        dependency_uninstall_command = [
             sys.executable,
             "-m",
             "pip",
@@ -88,31 +149,15 @@ class OptionalDependency:
             "-y",
             self.package_name,
         ]
+        log_report(
+            "INFO",
+            f"Uninstalling dependency with {dependency_uninstall_command}",
+            op,
+        )
         # Although "pip uninstall" may throw an error while uninstalling pillow
         # and lazrs it still removes the corresponding packages.
-        subprocess.run(uninstall_command, check=False)
+        subprocess.run(dependency_uninstall_command, check=False)
         self.installation_status = False
-
-    def _get_version_string(self):
-        module_spec = importlib.util.find_spec("pkg_resources")
-        if module_spec is not None:
-            import pkg_resources
-
-            version_str = pkg_resources.get_distribution(
-                self.package_name
-            ).version
-        else:
-            version_str = "Unknown"
-        return version_str
-
-    def get_installation_status(self):
-        """Return the installation status of this dependency."""
-        if self.installation_status:
-            version_str = self._get_version_string()
-            status = f"Installed (Version {version_str})"
-        else:
-            status = "Not installed"
-        return status
 
 
 class OptionalDependencyManager:
@@ -121,11 +166,15 @@ class OptionalDependencyManager:
     @classmethod
     def get_singleton(cls):
         """Return a singleton of this class."""
-        if hasattr(bpy.types.Object, "dependency_manager"):
-            dependency_manager = bpy.types.Object.dependency_manager
+        if hasattr(bpy.types.Object, "photogrammetry_dependency_manager"):
+            dependency_manager = (
+                bpy.types.Object.photogrammetry_dependency_manager
+            )
         else:
             dependency_manager = cls()
-            bpy.types.Object.dependency_manager = dependency_manager
+            bpy.types.Object.photogrammetry_dependency_manager = (
+                dependency_manager
+            )
         return dependency_manager
 
     def __init__(self):
@@ -146,15 +195,15 @@ class OptionalDependencyManager:
             ),
         )
 
-    def install_dependencies(self):
+    def install_dependencies(self, op=None):
         """Install all (optional) dependencies of this addon."""
         for dependency in self.get_dependencies():
-            dependency.install()
+            dependency.install(op=op)
 
-    def uninstall_dependencies(self):
+    def uninstall_dependencies(self, op=None):
         """Uninstall all (optional) dependencies of this addon."""
         for dependency in self.get_dependencies():
-            dependency.uninstall()
+            dependency.uninstall(op=op)
 
     def get_dependencies(self):
         """Return all (optional) dependencies of this addon."""
@@ -178,7 +227,7 @@ class InstallOptionalDependenciesOperator(bpy.types.Operator):
         """Install all optional dependencies."""
         try:
             dependency_manager = OptionalDependencyManager.get_singleton()
-            dependency_manager.install_dependencies()
+            dependency_manager.install_dependencies(op=self)
         except (subprocess.CalledProcessError, ImportError) as err:
             log_report("ERROR", str(err))
             return {"CANCELLED"}
@@ -200,7 +249,7 @@ class UninstallOptionalDependenciesOperator(bpy.types.Operator):
         """Uninstall all optional dependencies."""
         try:
             dependency_manager = OptionalDependencyManager.get_singleton()
-            dependency_manager.uninstall_dependencies()
+            dependency_manager.uninstall_dependencies(op=self)
         except (subprocess.CalledProcessError, ImportError) as err:
             log_report("ERROR", str(err))
             return {"CANCELLED"}
