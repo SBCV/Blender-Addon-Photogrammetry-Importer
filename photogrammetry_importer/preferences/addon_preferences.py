@@ -49,7 +49,7 @@ class AddonPreferences(
     open3d_importer_bool: BoolProperty(name="Open3D Importer", default=True)
     opensfm_importer_bool: BoolProperty(name="OpenSfM Importer", default=True)
     openmvg_importer_bool: BoolProperty(name="OpenMVG Importer", default=True)
-    ply_importer_bool: BoolProperty(name="PLY Importer", default=True)
+    point_data_importer_bool: BoolProperty(name="Point Data Importer", default=True)
     visualsfm_importer_bool: BoolProperty(
         name="VisualSfM Importer", default=True
     )
@@ -116,7 +116,7 @@ class AddonPreferences(
         importer_box.prop(self, "open3d_importer_bool")
         importer_box.prop(self, "opensfm_importer_bool")
         importer_box.prop(self, "openmvg_importer_bool")
-        importer_box.prop(self, "ply_importer_bool")
+        importer_box.prop(self, "point_data_importer_bool")
         importer_box.prop(self, "visualsfm_importer_bool")
 
         column = split.column()

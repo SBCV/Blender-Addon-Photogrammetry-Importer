@@ -193,7 +193,7 @@ class Registration:
             _openmvg_import_operator_function,
         )
         cls._register_importer(
-            import_prefs.ply_importer_bool,
+            import_prefs.point_data_importer_bool,
             ImportPointDataOperator,
             _point_data_import_operator_function,
         )
