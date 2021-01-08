@@ -69,27 +69,20 @@ class PipManager:
             bpy.types.Object.photogrammetry_pip_manager = pip_manager
         return pip_manager
 
-    @staticmethod
-    def install_pip(lazy, op=None):
+    def install_pip(self, lazy, op=None):
         """Install pip."""
-        if lazy:
-            try:
-                check_pip_call = [sys.executable, "-m", "pip", "--version"]
-                result = subprocess.run(
-                    check_pip_call,
-                    stdout=subprocess.PIPE,
-                    check=True,
-                )
-                pip_installation_info = result.stdout.decode("ascii").rstrip()
+        try:
+            if lazy and self.pip_dependency_status.get_installation_status():
+                import pip
                 log_report(
                     "INFO",
                     "Pip already installed. Using existing pip installation"
-                    + f" ({pip_installation_info})",
+                    + f" ({pip.__version__})",
                     op=op,
                 )
                 return
-            except subprocess.CalledProcessError:
-                pass
+        except:
+            pass
 
         log_report("INFO", "Installing pip!", op=op)
 
@@ -105,6 +98,7 @@ class PipManager:
         # Thus, we need to remove the invalid environment variable.
         ensurepip.bootstrap()
         os.environ.pop("PIP_REQ_TRACKER", None)
+        self.pip_dependency_status.installation_status = True
 
     def get_installation_status(self):
         """Return the pip installation status."""
@@ -114,12 +108,23 @@ class PipManager:
 class OptionalDependency(DependencyStatus):
     """Class that describes an optional Python dependency of the addon."""
 
+    def _get_python_exe_path(self):
+        # https://developer.blender.org/rB6527a14cd2ceaaf529beae522ca594bb250b56c9
+        try:
+            # For Blender 2.80, ..., etc
+            python_exe_fp = bpy.app.binary_path_python
+        except AttributeError:
+            # For Blender 2.92, ..., etc
+            python_exe_fp = sys.executable
+        return python_exe_fp
+
     def install(self, op=None):
         """Install this dependency."""
-        PipManager.install_pip(lazy=True, op=op)
+        pip_manager = PipManager.get_singleton()
+        pip_manager.install_pip(lazy=True, op=op)
         # The "--user" option does not work with Blender's Python version.
         dependency_install_command = [
-            sys.executable,
+            self._get_python_exe_path(),
             "-m",
             "pip",
             "install",
@@ -140,9 +145,10 @@ class OptionalDependency(DependencyStatus):
 
     def uninstall(self, op=None):
         """Uninstall this dependency."""
-        PipManager.install_pip(lazy=True)
+        pip_manager = PipManager.get_singleton()
+        pip_manager.install_pip(lazy=True, op=op)
         dependency_uninstall_command = [
-            sys.executable,
+            self._get_python_exe_path(),
             "-m",
             "pip",
             "uninstall",
