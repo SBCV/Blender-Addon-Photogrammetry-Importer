@@ -48,10 +48,10 @@ class DependencyStatus:
         """Return the installation status of this dependency."""
         if self.installation_status:
             version_str = self._get_version_string(self.package_name)
-            if version_str != "Unknown":
-                status = f"Installed (Version {version_str})"
-            else:
+            if version_str == "Unknown":
                 status = "Installed (Restart Blender to show version number)"
+            else:
+                status = f"Installed (Version {version_str})"
         else:
             status = "Not installed"
         return status
