@@ -49,7 +49,9 @@ class AddonPreferences(
     open3d_importer_bool: BoolProperty(name="Open3D Importer", default=True)
     opensfm_importer_bool: BoolProperty(name="OpenSfM Importer", default=True)
     openmvg_importer_bool: BoolProperty(name="OpenMVG Importer", default=True)
-    point_data_importer_bool: BoolProperty(name="Point Data Importer", default=True)
+    point_data_importer_bool: BoolProperty(
+        name="Point Data Importer", default=True
+    )
     visualsfm_importer_bool: BoolProperty(
         name="VisualSfM Importer", default=True
     )
