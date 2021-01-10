@@ -67,13 +67,14 @@ This addon uses `Pillow <https://pypi.org/project/Pillow/>`_ to read the (missin
 Option 1: Installation using the GUI (recommended)
 --------------------------------------------------
 
-Requires Blender 2.83.5 or newer.
+Requires Blender 2.83.5 or newer. **Administrator privileges might be required to install the dependencies (dependending on the location of the Blender installation directory).**
 
-.. image:: ../../images/install_dependencies_annotations.jpg
+.. image:: ../../images/install_dependencies_annotations.png
    :scale: 75 %
    :align: center
 
-Dependending on the location of the Blender installation directory administrator privileges might be required to install the dependencies. 
+Clicking on :code:`Download and Install Optional Dependencies` installs :code:`pip` (if not already present) and uses the :code:`pip` executable to install the actual dependencies.
+Start :code:`Blender` from the command line to see the installation progress and potential error messages.
 
 Option 2: Installation using the command line
 ---------------------------------------------
