@@ -32,7 +32,7 @@ bl_info = {
     "author": "Sebastian Bullinger",
     "version": (2, 0, 0),
     "blender": (2, 80, 0),
-    "location": "File / Import and File/Export",
+    "location": "File/Import and File/Export",
     "warning": "",
     "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/",
     "tracker_url": "https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/issues",
