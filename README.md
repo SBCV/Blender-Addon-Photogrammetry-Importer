@@ -1,4 +1,4 @@
-# Blender-Addon-Photogrammetry-Importer
+# Blender-Photogrammetry-Importer
 This repository contains a Blender addon to import reconstruction results of several libraries.
 
 Supported libraries (data formats):
