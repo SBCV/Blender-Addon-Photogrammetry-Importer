@@ -154,4 +154,6 @@ Python Scripting with Blender
 
 `VS Code <https://code.visualstudio.com>`_ with this `extension <https://marketplace.visualstudio.com/items?itemName=JacquesLucke.blender-development>`_ has many advantages over Blender's built-in text editor. `Here <https://www.youtube.com/watch?v=q06-hER7Y1Q>`_ is an introduction / tutorial video.
 
+Note: When using `VS Code` to start Blender with a specific addon for the first time, it is sometimes necessary to run the command twice (i.e. within VS Code run `ctrl+shift+p / Blender: Start / path_to_Blender_executable`, then close Blender, then run `ctrl+shift+p / Blender: Start / path_to_Blender_executable` again).
+
 
