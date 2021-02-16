@@ -241,7 +241,9 @@ def add_points_as_object_with_particle_system(
         point_cloud_obj_name = f"Particle Point Cloud {i}"
 
         points_subset = points[i : i + max_number_particles]
-        coords, colors = Point.split_points(points_subset)
+        coords, colors = Point.split_points(
+            points_subset, normalize_colors=True
+        )
 
         particle_obj = _add_particle_obj(
             colors,

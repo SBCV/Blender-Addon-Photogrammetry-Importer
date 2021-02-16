@@ -46,7 +46,7 @@ def draw_points(
     """Draw points using OpenGL."""
     log_report("INFO", "Add particle draw handlers", op)
 
-    coords, colors = Point.split_points(points)
+    coords, colors = Point.split_points(points, normalize_colors=True)
     object_anchor_handle = _draw_coords_with_color(
         coords,
         colors,
