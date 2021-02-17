@@ -54,7 +54,7 @@ Note: The second input :code:`Value` in the :code:`Divide` node represents the n
 * Advantage: Contains color information, which can be rendered using Cycles. 
 * Disadvantage: High computational costs for visualization / rendering, i.e. limited to medium-sized point clouds.
 
-Sometimes Blender draws boundaries around the particles of the point cloud. In oder to improve the visualization of the point cloud one can disable :code:`Extras` under :code:`Overlays` in the :code:`3D view`. The following image shows the corresponding options. 
+Sometimes Blender draws boundaries around the particles of the point cloud. In order to improve the visualization of the point cloud one can disable :code:`Extras` under :code:`Overlays` in the :code:`3D view`. The following image shows the corresponding options. 
 
 .. image:: ../../images/disable_object_extras_overlay_annotation.jpg
    :scale: 45 %
