@@ -11,7 +11,7 @@ Delete any Previous Version of the Addon
 - **THEN, CLOSE BLENDER**
 - Reopen Blender and follow the installation instructions below
 
-Without removal of previos versions errors may appear during activation or Blender may not reflect the latest changes of the addon. 
+Without removal of previous versions errors may appear during activation or Blender may not reflect the latest changes of the addon. 
 
 
 Download the Addon for Blender 2.80 (or newer)
