@@ -12,7 +12,7 @@ In Blender use :code:`File/Import/<Import Function>` to import the corresponding
    :scale: 75 %
    :align: center
 
-For each camera one can add the corresponding image plane. Pillow is required to read the images from disc. Use the import dialog to adjust the :code:`image path`. By default the addon searches for the images in the in the folder where the reconstruction file is located. **This addon uses the node system of Cycles to visualize the image planes. Thus, the addon switches automatically to Cycles, if image planes are added.**
+For each camera one can add the corresponding image plane. Pillow is required to read the images from disc. Use the import dialog to adjust the :code:`image path`. By default the addon searches for the images in the folder where the reconstruction file is located. **This addon uses the node system of Cycles to visualize the image planes. Thus, the addon switches automatically to Cycles, if image planes are added.**
 
 There is an option to represent the point cloud with a particle system. This allows you to render the point cloud. A single texture is used to store the color of all particles. **The color of the points / textures of the images are visible, if "Cycles Render" is selected and the 3D view is set to "Material".** Eevee does not (yet) support :code:`particle info` nodes. (Checkout the `manual <https://docs.blender.org/manual/es/dev/render/eevee/materials/nodes_support.html>`_ for more information.) Thus, it is currently **not possible** to render point clouds with individual particle colors **in Eevee**.
 
