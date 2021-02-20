@@ -93,7 +93,7 @@ def redraw_points(dummy):
         log_report(
             "INFO",
             "Checking scene for missing point cloud draw handlers",
-            dummy,
+            op=None,
         )
         for obj in bpy.data.objects:
             if "particle_coords" in obj and "particle_colors" in obj:
@@ -103,7 +103,7 @@ def redraw_points(dummy):
                 draw_manager = DrawManager.get_singleton()
                 draw_manager.register_points_draw_callback(obj, coords, colors)
                 viz_point_size = (
-                    bpy.context.scene.opengl_panel_viz_settings.viz_point_size
+                    bpy.context.scene.opengl_panel_settings.viz_point_size
                 )
                 draw_manager.set_point_size(viz_point_size)
 
