@@ -327,6 +327,7 @@ def add_cameras(
         depth_map_world_coords = camera.convert_depth_map_to_world_coords(
             depth_map_display_sparsity=depth_map_display_sparsity
         )
+        depth_map_world_coords = depth_map_world_coords.tolist()
 
         if use_default_depth_map_color:
             color = depth_map_default_color
@@ -337,8 +338,7 @@ def add_cameras(
 
         depth_map_anchor_handle = draw_coords(
             depth_map_world_coords,
-            # TODO Setting this to true causes an error message
-            add_points_to_point_cloud_handle=False,
+            add_points_to_point_cloud_handle=True,
             reconstruction_collection=depth_map_collection,
             object_anchor_handle_name=_get_camera_obj_gui_str(camera)
             + "_depth_point_cloud",
