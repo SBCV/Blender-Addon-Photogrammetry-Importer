@@ -177,7 +177,7 @@ class _DrawCallBackHandler:
                 #     self._draw_handler_handle, "WINDOW"
                 # )
                 # Note:
-                # Not removing the _draw_handler_handle is not that bad since,
+                # Not removing the _draw_handler_handle is not that bad, since
                 # a) after removing the point cloud anchor the
                 # "_draw_points_callback" becomes very cheap
                 # b) closing Blender frees the _draw_handler_handle and it
