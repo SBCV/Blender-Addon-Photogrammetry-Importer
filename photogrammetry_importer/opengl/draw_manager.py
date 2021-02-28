@@ -166,13 +166,22 @@ class _DrawCallBackHandler:
                     self._batch_cached.draw(self._shader)
 
         else:
-            log_report(
-                "INFO", "Removing draw handler of deleted point cloud handle"
-            )
             if self._draw_handler_handle is not None:
-                bpy.types.SpaceView3D.draw_handler_remove(
-                    self._draw_handler_handle, "WINDOW"
-                )
+                # log_report(
+                #     "INFO",
+                #     "Removing draw handler of deleted point cloud handle",
+                # )
+                # Using bpy.types.SpaceView3D.draw_handler_remove causes
+                # Blender to crash (frequently).
+                # bpy.types.SpaceView3D.draw_handler_remove(
+                #     self._draw_handler_handle, "WINDOW"
+                # )
+                # Note:
+                # Not removing the _draw_handler_handle is not that bad since,
+                # a) after removing the point cloud anchor the
+                # "_draw_points_callback" becomes very cheap
+                # b) closing Blender frees the _draw_handler_handle and it
+                # is not restored even if the Blend file is reloaded from disk
                 self._draw_handler_handle = None
                 self._batch_cached = None
                 draw_manager.delete_anchor(object_anchor)
