@@ -87,6 +87,12 @@ class PointImporter:
         "vertex positions.",
         default=False,
     )
+    add_color_as_custom_property: BoolProperty(
+        name="Add Colors as Custom Property",
+        description="Use a custom property (named colors) to store the point "
+        "cloud colors.",
+        default=True,
+    )
 
     def draw_point_options(self, layout, draw_everything=False):
         """Draw point import options."""
@@ -109,6 +115,8 @@ class PointImporter:
                     particle_box.prop(self, "particle_overwrite_color")
             mesh_box = point_box.box()
             mesh_box.prop(self, "add_points_as_mesh_oject")
+            if self.add_points_as_mesh_oject:
+                mesh_box.prop(self, "add_color_as_custom_property")
 
     def import_photogrammetry_points(self, points, reconstruction_collection):
         """Import a point cloud using the properties of this class."""
@@ -144,5 +152,6 @@ class PointImporter:
                 add_points_as_mesh_vertices(
                     points,
                     reconstruction_collection,
+                    self.add_color_as_custom_property,
                     op=self,
                 )

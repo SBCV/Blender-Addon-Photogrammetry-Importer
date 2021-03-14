@@ -270,7 +270,12 @@ def add_points_as_object_with_particle_system(
     return point_cloud_obj_list
 
 
-def add_points_as_mesh_vertices(points, reconstruction_collection, op=None):
+def add_points_as_mesh_vertices(
+    points,
+    reconstruction_collection,
+    add_color_as_custom_property=True,
+    op=None,
+):
     """Add a point cloud as mesh."""
     log_report("INFO", "Adding Points as Mesh: ...", op)
     stop_watch = StopWatch()
@@ -278,11 +283,13 @@ def add_points_as_mesh_vertices(points, reconstruction_collection, op=None):
     point_cloud_mesh = bpy.data.meshes.new(point_cloud_obj_name)
     point_cloud_mesh.update()
     point_cloud_mesh.validate()
-    point_world_coordinates = [tuple(point.coord) for point in points]
-    point_cloud_mesh.from_pydata(point_world_coordinates, [], [])
+    coords, colors = Point.split_points(points, normalize_colors=False)
+    point_cloud_mesh.from_pydata(coords, [], [])
     point_cloud_obj = add_obj(
         point_cloud_mesh, point_cloud_obj_name, reconstruction_collection
     )
+    if add_color_as_custom_property:
+        point_cloud_obj["colors"] = colors
 
     log_report("INFO", "Duration: " + str(stop_watch.get_elapsed_time()), op)
     log_report("INFO", "Adding Points as Mesh: Done", op)
