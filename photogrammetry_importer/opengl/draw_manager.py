@@ -16,8 +16,8 @@ def _compute_transformed_coords(object_anchor_matrix_world, positions):
     ones_arr = np.ones((pos_arr.shape[0], 1))
     pos_hom_arr = np.hstack((pos_arr, ones_arr))
 
-    # Transpose the matrix with the coordinates,
-    # so they can be transformed with a single matrix multiplication
+    # Transpose the matrix to transform the coordinates 
+    # with a single matrix multiplication
     pos_hom_arr_transposed = np.transpose(pos_hom_arr)
     transf_pos_hom_transposed_arr = np.matmul(
         object_anchor_matrix_world, pos_hom_arr_transposed
