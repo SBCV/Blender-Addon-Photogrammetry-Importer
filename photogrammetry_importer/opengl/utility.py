@@ -15,6 +15,7 @@ from photogrammetry_importer.blender_utility.logging_utility import log_report
 def _draw_coords_with_color(
     coords,
     colors,
+    point_size,
     add_points_to_point_cloud_handle,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Point Cloud",
@@ -27,11 +28,12 @@ def _draw_coords_with_color(
     if add_points_to_point_cloud_handle:
         object_anchor_handle["particle_coords"] = coords
         object_anchor_handle["particle_colors"] = colors
+        object_anchor_handle["point_size"] = point_size
         bpy.context.scene["contains_opengl_point_clouds"] = True
 
     draw_manager = DrawManager.get_singleton()
     draw_manager.register_points_draw_callback(
-        object_anchor_handle, coords, colors
+        object_anchor_handle, coords, colors, point_size
     )
     return object_anchor_handle
 
@@ -39,6 +41,7 @@ def _draw_coords_with_color(
 def draw_points(
     points,
     add_points_to_point_cloud_handle,
+    point_size,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Point Cloud",
     op=None,
@@ -50,6 +53,7 @@ def draw_points(
     object_anchor_handle = _draw_coords_with_color(
         coords,
         colors,
+        point_size,
         add_points_to_point_cloud_handle,
         reconstruction_collection,
         object_anchor_handle_name,
@@ -60,6 +64,7 @@ def draw_points(
 
 def draw_coords(
     coords,
+    point_size,
     add_points_to_point_cloud_handle,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Coord Point Cloud",
@@ -74,6 +79,7 @@ def draw_coords(
     object_anchor_handle = _draw_coords_with_color(
         coords,
         colors,
+        point_size,
         add_points_to_point_cloud_handle,
         reconstruction_collection,
         object_anchor_handle_name,
@@ -96,16 +102,19 @@ def redraw_points(dummy):
             op=None,
         )
         for obj in bpy.data.objects:
-            if "particle_coords" in obj and "particle_colors" in obj:
+            if (
+                "particle_coords" in obj
+                and "particle_colors" in obj
+                and "point_size" in obj
+            ):
                 coords = obj["particle_coords"]
                 colors = obj["particle_colors"]
+                point_size = obj["point_size"]
 
                 draw_manager = DrawManager.get_singleton()
-                draw_manager.register_points_draw_callback(obj, coords, colors)
-                viz_point_size = (
-                    bpy.context.scene.opengl_panel_settings.viz_point_size
+                draw_manager.register_points_draw_callback(
+                    obj, coords, colors, point_size
                 )
-                draw_manager.set_point_size(viz_point_size)
 
         for area in bpy.context.screen.areas:
             if area.type == "VIEW_3D":

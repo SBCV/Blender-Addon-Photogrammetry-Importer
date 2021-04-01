@@ -27,6 +27,7 @@ class PointImporter:
         default=1,
         min=1,
     )
+    # Option 1: Draw Points with GPU
     draw_points_with_gpu: BoolProperty(
         name="Draw Points in the 3D View with OpenGL.",
         description="Draw Points in the 3D View. Allows to visualize point "
@@ -40,6 +41,13 @@ class PointImporter:
         "after saving and reloading the blend file.",
         default=True,
     )
+    point_size: IntProperty(
+        name="Initial Point Size",
+        description="Initial Point Size",
+        default=5,
+    )
+
+    # Option 2: Add Points as Particle System
     add_points_as_particle_system: BoolProperty(
         name="Add Points as Particle System",
         description="Use a particle system to represent vertex positions with "
@@ -81,6 +89,8 @@ class PointImporter:
         min=0.0,
         max=1.0,
     )
+
+    # Option 3: Add Points as Mesh Object
     add_points_as_mesh_oject: BoolProperty(
         name="Add Points as Mesh Object",
         description="Use a mesh object to represent the point cloud with the "
@@ -104,6 +114,7 @@ class PointImporter:
             opengl_box.prop(self, "draw_points_with_gpu")
             if self.draw_points_with_gpu or draw_everything:
                 opengl_box.prop(self, "add_points_to_point_cloud_handle")
+                opengl_box.prop(self, "point_size")
             particle_box = point_box.box()
             particle_box.prop(self, "add_points_as_particle_system")
             if self.add_points_as_particle_system or draw_everything:
@@ -128,6 +139,7 @@ class PointImporter:
                 draw_points(
                     points,
                     self.add_points_to_point_cloud_handle,
+                    self.point_size,
                     reconstruction_collection,
                     op=self,
                 )

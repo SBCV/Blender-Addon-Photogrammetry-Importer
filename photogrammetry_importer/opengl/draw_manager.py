@@ -16,7 +16,7 @@ def _compute_transformed_coords(object_anchor_matrix_world, positions):
     ones_arr = np.ones((pos_arr.shape[0], 1))
     pos_hom_arr = np.hstack((pos_arr, ones_arr))
 
-    # Transpose the matrix to transform the coordinates 
+    # Transpose the matrix to transform the coordinates
     # with a single matrix multiplication
     pos_hom_arr_transposed = np.transpose(pos_hom_arr)
     transf_pos_hom_transposed_arr = np.matmul(
@@ -34,7 +34,7 @@ class DrawManager:
     """Class that allows to represent point clouds with OpenGL in Blender."""
 
     def __init__(self):
-        self._draw_callback_handler_list = []
+        self._anchor_to_draw_callback_handler = {}
         self._anchor_to_point_coords = {}
         self._anchor_to_point_colors = {}
 
@@ -48,14 +48,17 @@ class DrawManager:
             bpy.types.Object.current_draw_manager = draw_manger
         return draw_manger
 
-    def register_points_draw_callback(self, object_anchor, coords, colors):
+    def register_points_draw_callback(
+        self, object_anchor, coords, colors, point_size
+    ):
         """Register a callback to draw a point cloud."""
         draw_callback_handler = _DrawCallBackHandler()
         draw_callback_handler.register_points_draw_callback(
-            self, object_anchor, coords, colors
+            self, object_anchor, coords, colors, point_size
         )
-        self._draw_callback_handler_list.append(draw_callback_handler)
-
+        self._anchor_to_draw_callback_handler[
+            object_anchor
+        ] = draw_callback_handler
         self._anchor_to_point_coords[object_anchor] = coords
         self._anchor_to_point_colors[object_anchor] = colors
 
@@ -85,11 +88,11 @@ class DrawManager:
         """Delete the anchor used to control the pose of the point cloud."""
         del self._anchor_to_point_coords[object_anchor]
         del self._anchor_to_point_colors[object_anchor]
+        # del self._anchor_to_draw_callback_handler[object_anchor]
 
-    def set_point_size(self, point_size):
-        """Set the point size used to render the point cloud."""
-        for draw_back_handler in self._draw_callback_handler_list:
-            draw_back_handler.set_point_size(point_size)
+    def get_draw_callback_handler(self, object_anchor):
+        """Get the draw callback handler corresponding to the object anchor."""
+        return self._anchor_to_draw_callback_handler[object_anchor]
 
 
 class _DrawCallBackHandler:
@@ -187,9 +190,10 @@ class _DrawCallBackHandler:
                 draw_manager.delete_anchor(object_anchor)
 
     def register_points_draw_callback(
-        self, draw_manager, object_anchor, positions, colors
+        self, draw_manager, object_anchor, positions, colors, point_size
     ):
         """Register a callback to draw a point cloud."""
+        self.set_point_size(point_size)
         args = (draw_manager, object_anchor, positions, colors)
         self._draw_handler_handle = bpy.types.SpaceView3D.draw_handler_add(
             self._draw_points_callback, args, "WINDOW", "POST_VIEW"

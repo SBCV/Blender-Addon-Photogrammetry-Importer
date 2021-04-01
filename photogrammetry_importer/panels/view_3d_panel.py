@@ -19,6 +19,7 @@ from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.opengl.draw_manager import DrawManager
 from photogrammetry_importer.blender_utility.logging_utility import log_report
 from photogrammetry_importer.blender_utility.retrieval_utility import (
+    get_selected_empty,
     get_selected_camera,
 )
 
@@ -26,10 +27,31 @@ from photogrammetry_importer.blender_utility.retrieval_utility import (
 class OpenGLPanelSettings(bpy.types.PropertyGroup):
     """Class that defines the properties of the OpenGL panel in the 3D view."""
 
+    # https://docs.blender.org/api/current/bpy.props.html#getter-setter-example
+    def get_viz_point_size(self):
+        point_cloud_anchor = get_selected_empty()
+        if point_cloud_anchor is not None:
+            if "point_size" in point_cloud_anchor:
+                return point_cloud_anchor["point_size"]
+        return 1
+
+    def set_viz_point_size(self, value):
+        point_cloud_anchor = get_selected_empty()
+        if point_cloud_anchor is not None:
+            point_cloud_anchor["point_size"] = value
+
+            draw_manager = DrawManager.get_singleton()
+            draw_back_handler = draw_manager.get_draw_callback_handler(
+                point_cloud_anchor
+            )
+            draw_back_handler.set_point_size(value)
+
     viz_point_size: IntProperty(
         name="Point Size",
         description="OpenGL visualization point size.",
-        default=10,
+        get=get_viz_point_size,
+        set=set_viz_point_size,
+        min=1,
     )
     only_3d_view: BoolProperty(
         name="Export Only 3D View",
@@ -94,7 +116,6 @@ class OpenGLPanel(bpy.types.Panel):
             type=OpenGLPanelSettings
         )
 
-        bpy.utils.register_class(UpdatePointCloudVisualizationOperator)
         bpy.utils.register_class(ExportScreenshotImageOperator)
         bpy.utils.register_class(ExportScreenshotAnimationOperator)
         bpy.utils.register_class(SaveOpenGLRenderImageOperator)
@@ -107,7 +128,6 @@ class OpenGLPanel(bpy.types.Panel):
         bpy.utils.unregister_class(OpenGLPanelSettings)
         del bpy.types.Scene.opengl_panel_settings
 
-        bpy.utils.unregister_class(UpdatePointCloudVisualizationOperator)
         bpy.utils.unregister_class(ExportScreenshotImageOperator)
         bpy.utils.unregister_class(ExportScreenshotAnimationOperator)
         bpy.utils.unregister_class(SaveOpenGLRenderImageOperator)
@@ -118,18 +138,24 @@ class OpenGLPanel(bpy.types.Panel):
         """Draw the panel with corrresponding properties and operators."""
         settings = context.scene.opengl_panel_settings
         layout = self.layout
+        selected_empty = get_selected_empty()
         selected_cam = get_selected_camera()
 
         viz_box = layout.box()
-        viz_box.label(text="Visualization")
+        viz_box.label(
+            text="Select a point cloud anchor (i.e. the correspinding empty)"
+            " to adjust the point size."
+        )
+        anchor_selected = (
+            selected_empty is not None and "point_size" in selected_empty
+        )
         row = viz_box.row()
         row.prop(
             settings,
             "viz_point_size",
             text="OpenGL Visualization Point Size",
         )
-        row = viz_box.row()
-        row.operator(UpdatePointCloudVisualizationOperator.bl_idname)
+        row.enabled = anchor_selected
 
         export_screenshot_box = layout.box()
         export_screenshot_box.label(
@@ -201,27 +227,3 @@ class OpenGLPanel(bpy.types.Panel):
         )
         row = export_point_cloud_box.row()
         row.operator(ExportOpenGLRenderAnimationOperator.bl_idname)
-
-
-class UpdatePointCloudVisualizationOperator(bpy.types.Operator):
-    """Operator to update the point cloud visualization in the 3D view."""
-
-    bl_idname = "photogrammetry_importer.update_point_cloud_viz"
-    bl_label = "Update Visualization"
-    bl_description = "Update Visualization"
-
-    @classmethod
-    def poll(cls, context):
-        """Return the availability status of the operator."""
-        return True
-
-    def execute(self, context):
-        """Update the visualization of the point cloud in the 3D view."""
-        draw_manager = DrawManager.get_singleton()
-        viz_point_size = context.scene.opengl_panel_settings.viz_point_size
-        draw_manager.set_point_size(viz_point_size)
-        for area in bpy.context.screen.areas:
-            if area.type == "VIEW_3D":
-                area.tag_redraw()
-                break
-        return {"FINISHED"}

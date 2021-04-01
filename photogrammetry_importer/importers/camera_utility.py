@@ -182,6 +182,7 @@ def add_cameras(
     camera_scale=1.0,
     image_plane_transparency=0.5,
     add_image_plane_emission=True,
+    depth_map_point_size=1,
     use_default_depth_map_color=False,
     depth_map_default_color=(1.0, 0.0, 0.0),
     depth_map_display_sparsity=10,
@@ -338,6 +339,7 @@ def add_cameras(
 
         depth_map_anchor_handle = draw_coords(
             depth_map_world_coords,
+            point_size=depth_map_point_size,
             add_points_to_point_cloud_handle=True,
             reconstruction_collection=depth_map_collection,
             object_anchor_handle_name=_get_camera_obj_gui_str(camera)
