@@ -6,7 +6,7 @@ Changelog with most relevant features. Recently added features are listed at the
 
 2021
 ====
-
+* Made point sizes of point clouds and depth maps (drawn with OpenGL) persistent
 * Changed the usage of draw handlers to avoid potential crashes when deleting the point cloud anchor objects
 * Made depth maps persistent (i.e. the corresponding information is stored in the blend file)
 * Added features to export images of the imported reconstructions including cameras, background images, image planes, point clouds and meshes
