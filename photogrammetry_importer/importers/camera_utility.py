@@ -339,12 +339,12 @@ def add_cameras(
 
         depth_map_anchor_handle = draw_coords(
             depth_map_world_coords,
+            color=color,
             point_size=depth_map_point_size,
             add_points_to_point_cloud_handle=True,
             reconstruction_collection=depth_map_collection,
             object_anchor_handle_name=_get_camera_obj_gui_str(camera)
             + "_depth_point_cloud",
-            color=color,
             op=op,
         )
 

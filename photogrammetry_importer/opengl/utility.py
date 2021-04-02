@@ -40,8 +40,8 @@ def _draw_coords_with_color(
 
 def draw_points(
     points,
-    add_points_to_point_cloud_handle,
     point_size,
+    add_points_to_point_cloud_handle,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Point Cloud",
     op=None,
@@ -64,11 +64,11 @@ def draw_points(
 
 def draw_coords(
     coords,
-    point_size,
-    add_points_to_point_cloud_handle,
+    color=(0, 0, 255, 1.0),
+    point_size=1,
+    add_points_to_point_cloud_handle=True,
     reconstruction_collection=None,
     object_anchor_handle_name="OpenGL Coord Point Cloud",
-    color=(0, 0, 255, 1.0),
     op=None,
 ):
     """Draw coordinates using OpenGL."""

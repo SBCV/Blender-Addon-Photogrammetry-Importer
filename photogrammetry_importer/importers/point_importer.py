@@ -138,8 +138,8 @@ class PointImporter:
             if self.draw_points_with_gpu:
                 draw_points(
                     points,
-                    self.add_points_to_point_cloud_handle,
                     self.point_size,
+                    self.add_points_to_point_cloud_handle,
                     reconstruction_collection,
                     op=self,
                 )
