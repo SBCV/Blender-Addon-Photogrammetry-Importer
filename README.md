@@ -60,24 +60,24 @@ If you use this library for scientific purposes, please consider to cite the fol
 
 ## Example
 This repository contains an example Colmap model. The following image shows the imported camera poses, image planes and point cloud in Blender's 3D view.
-![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/import_result.jpg)
+![alt text](doc/images/import_result.jpg)
 The input images of the Colmap model are located here: [https://github.com/openMVG/ImageDataset_SceauxCastle](https://github.com/openMVG/ImageDataset_SceauxCastle).
 
 The addon computes an animated camera with corresponding background images from the reconstructed camera poses.
-![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/camera_animation_background.gif)
+![alt text](doc/images/camera_animation_background.gif)
 
 There is also an import option that allows to interpolate the reconstructed camera poses.
-![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/camera_animation.gif)
+![alt text](doc/images/camera_animation.gif)
 
 In addition, the addon allows to import meshes contained in the workspaces of specific libraries. Manually imported meshes can also be aligned with the corresponding reconstruction by following the instructions [here](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/import.html#meshes). 
-![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/mesh_3d_view.jpg)
+![alt text](doc/images/mesh_3d_view.jpg)
 
 In addition, the addon allows to visualize depth maps (reconstructed with Colmap or MVE) as point clouds.
 <p float="left" align="middle">
-  <img src="https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/depth_map_3d_view.jpg" width="400" />
-  <img src="https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/depth_map_from_camera.jpg" width="400" /> 
+  <img src="doc/images/depth_map_3d_view.jpg" width="400" />
+  <img src="doc/images/depth_map_from_camera.jpg" width="400" /> 
 </p>
 
 
 The addon offers an option to draw big point clouds with OpenGL to reduce computational requirements. The addon provides a panel to export these OpenGL point clouds renderings - see [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md). 
-![alt text](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/import_result_opengl.jpg)
+![alt text](doc/images/import_result_opengl.jpg)
