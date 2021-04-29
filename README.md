@@ -74,8 +74,8 @@ In addition, the addon allows to import meshes contained in the workspaces of sp
 
 In addition, the addon allows to visualize depth maps (reconstructed with Colmap or MVE) as point clouds.
 <p float="left" align="middle">
-  <img src="doc/images/depth_map_3d_view.jpg" width="400" />
-  <img src="doc/images/depth_map_from_camera.jpg" width="400" /> 
+  <img src="doc/images/depth_map_3d_view.jpg" width="48%" />
+  <img src="doc/images/depth_map_from_camera.jpg" width="48%" /> 
 </p>
 
 
