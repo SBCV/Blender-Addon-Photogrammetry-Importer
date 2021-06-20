@@ -103,7 +103,7 @@ class OpenMVGJSONFileHandler:
                         Camera.panoramic_type_equirectangular
                     )
                     # create some dummy values
-                    focal_length = 0
+                    focal_length = 1
                     cx = camera.width / 2
                     cy = camera.height / 2
                 else:
@@ -231,9 +231,8 @@ class OpenMVGJSONFileHandler:
                     )  # y has index 1
 
                     current_image = view_index_to_image[view_index]
-                    current_r, current_g, current_b = current_image.getpixel(
-                        (x_json_file, y_json_file)
-                    )
+                    pix = current_image.getpixel((x_json_file, y_json_file))
+                    current_r, current_g, current_b = pix[0], pix[1], pix[2]
                     r += current_r
                     g += current_g
                     b += current_b
