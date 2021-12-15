@@ -149,16 +149,16 @@ class OptionalDependency(DependencyStatus):
         except ImportError as import_error:
             self.installation_status = False
             log_report(
-                "WARNING", "===========================================", op
+                "ERROR", "===========================================", op
             )
             log_report(
-                "WARNING",
+                "ERROR",
                 f"INSTALLATION of DEPENDENCY {self.import_name} FAILED!",
                 op,
             )
-            log_report("WARNING", f"Reason: {import_error}", op)
+            log_report("ERROR", f"Reason: {import_error}", op)
             log_report(
-                "WARNING", "===========================================", op
+                "ERROR", "===========================================", op
             )
 
     def uninstall(self, op=None):
