@@ -193,6 +193,11 @@ class OptionalDependencyManager:
     def __init__(self):
         self.dependencies = (
             OptionalDependency(
+                gui_name="Setuptools",
+                package_name="setuptools",
+                import_name="setuptools",
+            ),
+            OptionalDependency(
                 gui_name="Pillow", package_name="pillow", import_name="PIL"
             ),
             OptionalDependency(
