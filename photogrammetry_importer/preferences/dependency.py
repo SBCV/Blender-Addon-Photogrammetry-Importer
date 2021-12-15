@@ -49,7 +49,7 @@ class DependencyStatus:
         if self.installation_status:
             version_str = self._get_version_string(self.package_name)
             if version_str == "Unknown":
-                status = "Installed (Restart Blender to show version number)"
+                status = "Installed (Install setuptools to show version number)"
             else:
                 status = f"Installed (Version {version_str})"
         else:
