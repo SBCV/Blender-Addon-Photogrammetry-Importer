@@ -27,8 +27,7 @@ class DependencyStatus:
         not longer be used to determine the installation status. Restart
         Blender to clear the current Python session.
         """
-        if self.installation_status:
-            assert False
+        assert not self.installation_status
         module_spec = importlib.util.find_spec(self.import_name)
         self.installation_status = module_spec is not None
 
