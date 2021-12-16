@@ -172,12 +172,16 @@ class OptionalDependency(DependencyStatus):
         pip_manager = PipManager.get_singleton()
         pip_manager.install_pip(lazy=True, op=op)
         add_command_line_sys_path()
+        # https://pip.pypa.io/en/latest/cli/pip_install/#install-user
         # The "--user" option does not work with Blender's Python version.
         dependency_install_command = [
             self._get_python_exe_path(),
             "-m",
             "pip",
             "install",
+            # https://pip.pypa.io/en/latest/cli/pip/?highlight=no-cache-dir#cmdoption-isolated
+            # "--isolated",
+            # https://pip.pypa.io/en/latest/cli/pip/?highlight=no-cache-dir#cmdoption-no-cache-dir
             "--no-cache-dir",
             self.package_name,
         ]
