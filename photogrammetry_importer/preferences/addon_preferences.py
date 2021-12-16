@@ -77,6 +77,37 @@ class AddonPreferences(
         bpy.utils.unregister_class(ResetImportOptionsOperator)
         bpy.utils.unregister_class(UpdateImporterExporterOperator)
 
+    @staticmethod
+    def _get_installation_status_str(installation_status):
+        if installation_status:
+            status = "Installed"
+        else:
+            status = "Not installed"
+        return status
+
+    @staticmethod
+    def _get_package_info_str(
+        info_str,
+        installation_status,
+        setuptools_missing_str="",
+        removed_in_current_sesssion_str="",
+    ):
+        if installation_status:
+            if info_str is None:
+                # In this case the info_str could not been determined, since
+                # the setuptools package is missing
+                info_str = setuptools_missing_str
+        else:
+            if info_str is None:
+                # In this case the module has not been removed in the
+                # current Blender session
+                info_str = ""
+            else:
+                # In this case the module was previously installed and has
+                # been removed in the current Blender session
+                info_str = removed_in_current_sesssion_str
+        return info_str
+
     def _draw_dependencies(self, install_dependency_box):
         install_dependency_box.label(text="Dependencies:")
         install_dependency_box.operator(
@@ -87,21 +118,72 @@ class AddonPreferences(
         )
         row = install_dependency_box.row()
         row.label(text="Pip Installation Status:")
+        setuptools_missing_str = "Install setuptools (and restart Blender) to show version and location"
+        removed_in_current_sesssion_str = (
+            "(Restart Blender to clear imported module)"
+        )
+
         pip_manager = PipManager.get_singleton()
         pip_status_box = install_dependency_box.box()
-        pip_status_box.label(
-            text=f"Pip: {pip_manager.get_installation_status()}"
+        pip_status_box_split = pip_status_box.split()
+        pip_status_box_1 = pip_status_box_split.column()
+        pip_status_box_2 = pip_status_box_split.column()
+        pip_status_box_3 = pip_status_box_split.column()
+        pip_status_box_4 = pip_status_box_split.column()
+
+        pip_installation_status = (
+            pip_manager.pip_dependency_status.installation_status
         )
+        pip_installation_status_str = self._get_installation_status_str(
+            pip_installation_status
+        )
+        version_str, location_str = pip_manager.get_package_info()
+        version_str = self._get_package_info_str(
+            version_str, pip_installation_status, setuptools_missing_str
+        )
+        location_str = self._get_package_info_str(
+            location_str, pip_installation_status
+        )
+
+        pip_status_box_1.label(text="Pip")
+        pip_status_box_2.label(text=f"{pip_installation_status_str}")
+        pip_status_box_3.label(text=f"{version_str}")
+        pip_status_box_4.label(text=f"{location_str}")
+
         row = install_dependency_box.row()
         row.label(text="Dependency Installation Status:")
         dependency_status_box = install_dependency_box.box()
+        dependency_status_box_split = dependency_status_box.split()
+        dependency_status_box_column_1 = dependency_status_box_split.column()
+        dependency_status_box_column_2 = dependency_status_box_split.column()
+        dependency_status_box_column_3 = dependency_status_box_split.column()
+        dependency_status_box_column_4 = dependency_status_box_split.column()
+
         dependency_manager = OptionalDependencyManager.get_singleton()
         dependencies = dependency_manager.get_dependencies()
         for dependency in dependencies:
-            status = dependency.get_installation_status()
-            dependency_status_box.label(
-                text=f"{dependency.gui_name}: {status}"
+            dependency_installation_status = dependency.installation_status
+            dependency_installation_status_str = self._get_installation_status_str(
+                dependency_installation_status
             )
+            version_str, location_str = dependency.get_package_info()
+            version_str = self._get_package_info_str(
+                version_str,
+                dependency_installation_status,
+                setuptools_missing_str,
+                removed_in_current_sesssion_str,
+            )
+            location_str = self._get_package_info_str(
+                location_str, dependency_installation_status
+            )
+
+            dependency_status_box_column_1.label(text=f"{dependency.gui_name}")
+            dependency_status_box_column_2.label(
+                text=f"{dependency_installation_status_str}"
+            )
+            dependency_status_box_column_3.label(text=f"{version_str}")
+            dependency_status_box_column_4.label(text=f"{location_str}")
+
         install_dependency_box.label(
             text="After uninstalling the dependencies one must restart Blender"
             " to clear the references to the module within Blender."

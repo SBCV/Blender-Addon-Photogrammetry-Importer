@@ -64,8 +64,12 @@ from photogrammetry_importer.registration.registration import Registration
 
 from photogrammetry_importer.panels.view_3d_panel import OpenGLPanel
 from photogrammetry_importer.opengl.utility import redraw_points
+from photogrammetry_importer.preferences.dependency import (
+    add_command_line_sys_path_if_necessary,
+)
 
 bpy.app.handlers.load_post.append(redraw_points)
+bpy.app.handlers.load_post.append(add_command_line_sys_path_if_necessary)
 
 
 def register():

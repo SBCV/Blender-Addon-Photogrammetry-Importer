@@ -1,9 +1,55 @@
+import os
 import sys
 import subprocess
+from subprocess import PIPE
+import copy
+import json
 import importlib
 from collections import defaultdict
 import bpy
+from bpy.app.handlers import persistent
 from photogrammetry_importer.blender_utility.logging_utility import log_report
+
+
+def add_command_line_sys_path():
+    """Function that adds sys.path of the command line to Blender's sys.path"""
+    script_str = "import sys; import json; pickled_str = json.dumps(sys.path); print(pickled_str)"
+    result = subprocess.run(
+        [sys.executable, "-c", script_str],
+        stdout=PIPE,
+        stderr=PIPE,
+    )
+    command_line_sys_paths = json.loads(result.stdout)
+    blender_sys_paths = copy.deepcopy(sys.path)
+
+    for command_line_sys_path in command_line_sys_paths:
+        if command_line_sys_path not in blender_sys_paths:
+            if command_line_sys_path != "":
+                log_report(
+                    "INFO", f"Add missing sys.path: {command_line_sys_path}"
+                )
+                sys.path.append(command_line_sys_path)
+
+
+@persistent
+def add_command_line_sys_path_if_necessary(dummy):
+    """Function that extends Blender's sys.path if necessary"""
+
+    dependency_manager = OptionalDependencyManager.get_singleton()
+    dependencies = dependency_manager.get_dependencies()
+    installed = any(
+        dependency.installation_status for dependency in dependencies
+    )
+    if installed:
+        log_report(
+            "INFO", "Found installed dependencies. Going to adjust sys.path."
+        )
+        add_command_line_sys_path()
+    else:
+        log_report(
+            "INFO",
+            "Found no installed dependencies. Not going to adjust sys.path.",
+        )
 
 
 class DependencyStatus:
@@ -31,29 +77,26 @@ class DependencyStatus:
         module_spec = importlib.util.find_spec(self.import_name)
         self.installation_status = module_spec is not None
 
-    def _get_version_string(self, package_name):
+    def get_package_info(self):
         try:
             # This does NOT immediately work after installation from Blender's
             # python using a subprocess. A restart is required to import
             # "pkg_resources" properly.
             import pkg_resources
 
-            version_str = pkg_resources.get_distribution(package_name).version
-        except:
-            version_str = "Unknown"
-        return version_str
-
-    def get_installation_status(self):
-        """Return the installation status of this dependency."""
-        if self.installation_status:
-            version_str = self._get_version_string(self.package_name)
-            if version_str == "Unknown":
-                status = "Installed (Install setuptools (and restart Blender) to show version number)"
-            else:
-                status = f"Installed (Version {version_str})"
-        else:
-            status = "Not installed"
-        return status
+            # https://github.com/pypa/setuptools/blob/9f1822ee910df3df930a98ab99f66d18bb70659b/pkg_resources/__init__.py#L2574
+            dist_info_distribution = pkg_resources.get_distribution(
+                self.package_name
+            )
+            version_str = dist_info_distribution.version
+            location_str = os.path.join(
+                dist_info_distribution.location,
+                dist_info_distribution.project_name,
+            )
+        except Exception as e:
+            version_str = None
+            location_str = None
+        return version_str, location_str
 
 
 class PipManager:
@@ -106,9 +149,9 @@ class PipManager:
         os.environ.pop("PIP_REQ_TRACKER", None)
         self.pip_dependency_status.installation_status = True
 
-    def get_installation_status(self):
+    def get_package_info(self):
         """Return the pip installation status."""
-        return self.pip_dependency_status.get_installation_status()
+        return self.pip_dependency_status.get_package_info()
 
 
 class OptionalDependency(DependencyStatus):
@@ -128,6 +171,7 @@ class OptionalDependency(DependencyStatus):
         """Install this dependency."""
         pip_manager = PipManager.get_singleton()
         pip_manager.install_pip(lazy=True, op=op)
+        add_command_line_sys_path()
         # The "--user" option does not work with Blender's Python version.
         dependency_install_command = [
             self._get_python_exe_path(),
