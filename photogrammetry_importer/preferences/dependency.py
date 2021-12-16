@@ -77,7 +77,7 @@ class PipManager:
     def install_pip(self, lazy, op=None):
         """Install pip."""
         try:
-            if lazy and self.pip_dependency_status.get_installation_status():
+            if lazy and self.pip_dependency_status.installation_status:
                 import pip
 
                 log_report(
