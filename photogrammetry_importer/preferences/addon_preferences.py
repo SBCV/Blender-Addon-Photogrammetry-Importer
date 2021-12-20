@@ -1,6 +1,7 @@
 import os
 import bpy
-from bpy.props import BoolProperty, EnumProperty
+import json
+from bpy.props import BoolProperty, EnumProperty, StringProperty
 
 from photogrammetry_importer.preferences.dependency import (
     InstallOptionalDependenciesOperator,
@@ -9,6 +10,7 @@ from photogrammetry_importer.preferences.dependency import (
     OptionalDependencyManager,
 )
 from photogrammetry_importer.blender_utility.logging_utility import log_report
+from photogrammetry_importer.utility.ui_utility import add_multi_line_label
 from photogrammetry_importer.importers.camera_importer import CameraImporter
 from photogrammetry_importer.importers.point_importer import PointImporter
 from photogrammetry_importer.importers.mesh_importer import MeshImporter
@@ -59,6 +61,10 @@ class AddonPreferences(
     colmap_exporter_bool: BoolProperty(name="Colmap Exporter", default=True)
     visualsfm_exporter_bool: BoolProperty(
         name="VisualSfM Exporter", default=True
+    )
+    # Management of system paths
+    sys_path_list_str: StringProperty(
+        name="System Path List Decoded String", default="None"
     )
 
     @classmethod
@@ -163,8 +169,10 @@ class AddonPreferences(
         dependencies = dependency_manager.get_dependencies()
         for dependency in dependencies:
             dependency_installation_status = dependency.installation_status
-            dependency_installation_status_str = self._get_installation_status_str(
-                dependency_installation_status
+            dependency_installation_status_str = (
+                self._get_installation_status_str(
+                    dependency_installation_status
+                )
             )
             version_str, location_str = dependency.get_package_info()
             version_str = self._get_package_info_str(
@@ -184,10 +192,30 @@ class AddonPreferences(
             dependency_status_box_column_3.label(text=f"{version_str}")
             dependency_status_box_column_4.label(text=f"{location_str}")
 
-        install_dependency_box.label(
+        dependency_status_box.label(
             text="After uninstalling the dependencies one must restart Blender"
             " to clear the references to the module within Blender."
         )
+
+        sys_paths_box = install_dependency_box.box()
+        dependency_description = (
+            "Note: When importing the installed dependencies, potentially not"
+            " all required modules may be found - since Blender modifies the"
+            " path available in sys.path. To prevent this, the addon will add"
+            " the missing system paths (i.e. the paths that have been"
+            " available during installation of the dependencies) to Blender's"
+            " sys.path."
+        )
+        add_multi_line_label(sys_paths_box, dependency_description)
+
+        row = sys_paths_box.row()
+        row.label(text="Added paths:")
+
+        sys_paths_lines_box = sys_paths_box.box()
+        addon_name = _get_addon_name()
+        prefs = bpy.context.preferences.addons[addon_name].preferences
+        for entry in json.loads(prefs.sys_path_list_str):
+            sys_paths_lines_box.label(text=f"{entry}")
 
     def _draw_importer_exporter(self, importer_exporter_box):
         importer_exporter_box.label(text="Active Importers / Exporters:")

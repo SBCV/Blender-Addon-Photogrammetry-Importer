@@ -11,6 +11,10 @@ from bpy.app.handlers import persistent
 from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
+def _get_addon_name():
+    return __name__.split(".")[0]
+
+
 def add_command_line_sys_path():
     """Function that adds sys.path of the command line to Blender's sys.path"""
     script_str = "import sys; import json; pickled_str = json.dumps(sys.path); print(pickled_str)"
@@ -22,6 +26,7 @@ def add_command_line_sys_path():
     command_line_sys_paths = json.loads(result.stdout)
     blender_sys_paths = copy.deepcopy(sys.path)
 
+    additional_system_paths = []
     for command_line_sys_path in command_line_sys_paths:
         if command_line_sys_path not in blender_sys_paths:
             if command_line_sys_path != "":
@@ -29,6 +34,12 @@ def add_command_line_sys_path():
                     "INFO", f"Add missing sys.path: {command_line_sys_path}"
                 )
                 sys.path.append(command_line_sys_path)
+                additional_system_paths.append(command_line_sys_path)
+
+    if len(additional_system_paths) > 0:
+        addon_name = _get_addon_name()
+        prefs = bpy.context.preferences.addons[addon_name].preferences
+        prefs.sys_path_list_str = json.dumps(additional_system_paths)
 
 
 @persistent
