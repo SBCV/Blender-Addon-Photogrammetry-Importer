@@ -64,7 +64,7 @@ class AddonPreferences(
     )
     # Management of system paths
     sys_path_list_str: StringProperty(
-        name="System Path List Decoded String", default="None"
+        name="System Path List Decoded String", default="[]"
     )
 
     @classmethod
@@ -204,8 +204,14 @@ class AddonPreferences(
         sys_paths_box = install_dependency_box.box()
         addon_name = _get_addon_name()
         prefs = bpy.context.preferences.addons[addon_name].preferences
-        for entry in json.loads(prefs.sys_path_list_str):
-            sys_paths_box.label(text=f"{entry}")
+        try:
+            if prefs.sys_path_list_str != "[]":
+                for entry in json.loads(prefs.sys_path_list_str):
+                    sys_paths_box.label(text=f"{entry}")
+            else:
+                sys_paths_box.label(text="None")
+        except json.decoder.JSONDecodeError as e:
+            sys_paths_box.label(text="Error: Could not parse paths!")
 
         sys_paths_description_box = sys_paths_box.box()
         dependency_description = (

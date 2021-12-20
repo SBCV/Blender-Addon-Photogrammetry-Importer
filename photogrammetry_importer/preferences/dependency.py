@@ -15,8 +15,8 @@ def _get_addon_name():
     return __name__.split(".")[0]
 
 
-def add_command_line_sys_path():
-    """Function that adds sys.path of the command line to Blender's sys.path"""
+def get_additional_command_line_sys_path():
+    """Function that retrieves additional sys.path of the command line"""
     script_str = "import sys; import json; pickled_str = json.dumps(sys.path); print(pickled_str)"
     result = subprocess.run(
         [sys.executable, "-c", script_str],
@@ -33,13 +33,30 @@ def add_command_line_sys_path():
                 log_report(
                     "INFO", f"Add missing sys.path: {command_line_sys_path}"
                 )
-                sys.path.append(command_line_sys_path)
                 additional_system_paths.append(command_line_sys_path)
+    return additional_system_paths
+
+
+def add_command_line_sys_path():
+    """Function that adds sys.path of the command line to Blender's sys.path"""
+    additional_system_paths = get_additional_command_line_sys_path()
+    for additional_sys_path in additional_system_paths:
+        sys.path.append(additional_sys_path)
 
     if len(additional_system_paths) > 0:
         addon_name = _get_addon_name()
         prefs = bpy.context.preferences.addons[addon_name].preferences
         prefs.sys_path_list_str = json.dumps(additional_system_paths)
+
+
+def remove_command_line_sys_path():
+    """Function that removes additional paths in Blender's sys.path"""
+    addon_name = _get_addon_name()
+    prefs = bpy.context.preferences.addons[addon_name].preferences
+    additional_system_paths = json.loads(prefs.sys_path_list_str)
+    for additional_sys_path in additional_system_paths:
+        sys.path.remove(additional_sys_path)
+    prefs.sys_path_list_str =  "[]"
 
 
 @persistent
@@ -240,6 +257,7 @@ class OptionalDependency(DependencyStatus):
         # Although "pip uninstall" may throw an error while uninstalling pillow
         # and lazrs it still removes the corresponding packages.
         subprocess.run(dependency_uninstall_command, check=False)
+        remove_command_line_sys_path()
         self.installation_status = False
 
 
