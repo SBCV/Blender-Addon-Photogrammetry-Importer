@@ -192,12 +192,22 @@ class AddonPreferences(
             dependency_status_box_column_3.label(text=f"{version_str}")
             dependency_status_box_column_4.label(text=f"{location_str}")
 
-        dependency_status_box.label(
-            text="After uninstalling the dependencies one must restart Blender"
-            " to clear the references to the module within Blender."
+        dependency_status_description_box = dependency_status_box.box()
+        dependency_status_description_box.label(
+            text="Note: After uninstalling the dependencies one must restart"
+            " Blender to clear the references to the module within Blender."
         )
 
+        row = install_dependency_box.row()
+        row.label(text="Added system paths:")
+
         sys_paths_box = install_dependency_box.box()
+        addon_name = _get_addon_name()
+        prefs = bpy.context.preferences.addons[addon_name].preferences
+        for entry in json.loads(prefs.sys_path_list_str):
+            sys_paths_box.label(text=f"{entry}")
+
+        sys_paths_description_box = sys_paths_box.box()
         dependency_description = (
             "Note: When importing the installed dependencies, potentially not"
             " all required modules may be found - since Blender modifies the"
@@ -206,16 +216,7 @@ class AddonPreferences(
             " available during installation of the dependencies) to Blender's"
             " sys.path."
         )
-        add_multi_line_label(sys_paths_box, dependency_description)
-
-        row = sys_paths_box.row()
-        row.label(text="Added paths:")
-
-        sys_paths_lines_box = sys_paths_box.box()
-        addon_name = _get_addon_name()
-        prefs = bpy.context.preferences.addons[addon_name].preferences
-        for entry in json.loads(prefs.sys_path_list_str):
-            sys_paths_lines_box.label(text=f"{entry}")
+        add_multi_line_label(sys_paths_description_box, dependency_description)
 
     def _draw_importer_exporter(self, importer_exporter_box):
         importer_exporter_box.label(text="Active Importers / Exporters:")
