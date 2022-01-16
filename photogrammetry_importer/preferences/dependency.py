@@ -15,11 +15,22 @@ def _get_addon_name():
     return __name__.split(".")[0]
 
 
+def _get_python_exe_path():
+    # https://developer.blender.org/rB6527a14cd2ceaaf529beae522ca594bb250b56c9
+    try:
+        # For Blender 2.80, ..., etc
+        python_exe_fp = bpy.app.binary_path_python
+    except AttributeError:
+        # For Blender 2.92, ..., etc
+        python_exe_fp = sys.executable
+    return python_exe_fp
+
+
 def get_additional_command_line_sys_path():
     """Function that retrieves additional sys.path of the command line"""
     script_str = "import sys; import json; pickled_str = json.dumps(sys.path); print(pickled_str)"
     result = subprocess.run(
-        [sys.executable, "-c", script_str],
+        [_get_python_exe_path(), "-c", script_str],
         stdout=PIPE,
         stderr=PIPE,
     )
@@ -56,7 +67,7 @@ def remove_command_line_sys_path():
     additional_system_paths = json.loads(prefs.sys_path_list_str)
     for additional_sys_path in additional_system_paths:
         sys.path.remove(additional_sys_path)
-    prefs.sys_path_list_str =  "[]"
+    prefs.sys_path_list_str = "[]"
 
 
 @persistent
@@ -185,16 +196,6 @@ class PipManager:
 class OptionalDependency(DependencyStatus):
     """Class that describes an optional Python dependency of the addon."""
 
-    def _get_python_exe_path(self):
-        # https://developer.blender.org/rB6527a14cd2ceaaf529beae522ca594bb250b56c9
-        try:
-            # For Blender 2.80, ..., etc
-            python_exe_fp = bpy.app.binary_path_python
-        except AttributeError:
-            # For Blender 2.92, ..., etc
-            python_exe_fp = sys.executable
-        return python_exe_fp
-
     def install(self, op=None):
         """Install this dependency."""
         pip_manager = PipManager.get_singleton()
@@ -203,7 +204,7 @@ class OptionalDependency(DependencyStatus):
         # https://pip.pypa.io/en/latest/cli/pip_install/#install-user
         # The "--user" option does not work with Blender's Python version.
         dependency_install_command = [
-            self._get_python_exe_path(),
+            _get_python_exe_path(),
             "-m",
             "pip",
             "install",
@@ -242,7 +243,7 @@ class OptionalDependency(DependencyStatus):
         pip_manager = PipManager.get_singleton()
         pip_manager.install_pip(lazy=True, op=op)
         dependency_uninstall_command = [
-            self._get_python_exe_path(),
+            _get_python_exe_path(),
             "-m",
             "pip",
             "uninstall",
