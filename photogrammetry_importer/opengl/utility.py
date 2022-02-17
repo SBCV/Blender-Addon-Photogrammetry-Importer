@@ -1,5 +1,4 @@
 import bpy
-import bgl
 import gpu
 from bpy.app.handlers import persistent
 from mathutils import Matrix
@@ -140,6 +139,9 @@ def render_opengl_image(image_name, cam, coords, colors, point_size):
         gpu.state.depth_mask_set(True)
         gpu.state.depth_test_set('LESS_EQUAL')
 
+        frame_buffer = gpu.state.active_framebuffer_get()
+        frame_buffer.clear(color=(0.0, 0.0, 0.0, 0.0))
+
         view_matrix = cam.matrix_world.inverted()
         projection_matrix = cam.calc_matrix_camera(
             bpy.context.evaluated_depsgraph_get(), x=width, y=height
@@ -156,15 +158,12 @@ def render_opengl_image(image_name, cam, coords, colors, point_size):
         )
         batch.draw(shader)
 
-        buffer = bgl.Buffer(bgl.GL_BYTE, width * height * 4)
-        bgl.glReadPixels(
-            0, 0, width, height, bgl.GL_RGBA, bgl.GL_UNSIGNED_BYTE, buffer
-        )
+        buffer = frame_buffer.read_color(0, 0, width, height, 4, 0, 'UBYTE')
 
     offscreen.free()
 
     image = _create_image_lazy(image_name, width, height)
-    _copy_buffer_to_pixel(buffer, image)
+    _copy_buffer_to_pixel(buffer, image, width, height)
 
 
 def _create_image_lazy(image_name, width, height):
@@ -177,22 +176,24 @@ def _create_image_lazy(image_name, width, height):
     return image
 
 
-def _copy_buffer_to_pixel(buffer, image):
+def _copy_buffer_to_pixel(buffer, image, width, height):
 
     # According to
     #   https://developer.blender.org/D2734
     #   https://docs.blender.org/api/current/gpu.html#copy-offscreen-rendering-result-back-to-ram
     # the buffer protocol is currently not implemented for
-    # bgl.Buffer and bpy.types.Image.pixels
+    # gpu.types.Buffer and bpy.types.Image.pixels
     # (this makes the extraction very slow)
 
     # # from photogrammetry_importer.utility.timing_utility import StopWatch
     # Option 1 (faster)
     # sw = StopWatch()
+    buffer.dimensions = width * height * 4
     image.pixels = [v / 255 for v in buffer]
     # log_report('INFO', 'sw.get_elapsed_time(): ' + str(sw.get_elapsed_time()))
 
     # Option 2 (slower)
     # sw = StopWatch()
+    # buffer.dimensions = width * height * 4
     # image.pixels = (np.asarray(buffer, dtype=np.uint8) / 255).tolist()
     # log_report('INFO', 'sw.get_elapsed_time(): ' + str(sw.get_elapsed_time()))
