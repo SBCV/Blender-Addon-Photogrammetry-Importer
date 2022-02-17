@@ -140,7 +140,7 @@ def render_opengl_image(image_name, cam, coords, colors, point_size):
         gpu.state.depth_test_set('LESS_EQUAL')
 
         frame_buffer = gpu.state.active_framebuffer_get()
-        frame_buffer.clear(color=(0.0, 0.0, 0.0, 0.0))
+        frame_buffer.clear(color=(0.0, 0.0, 0.0, 1.0), depth=1.0)
 
         view_matrix = cam.matrix_world.inverted()
         projection_matrix = cam.calc_matrix_camera(
