@@ -136,10 +136,9 @@ def render_opengl_image(image_name, cam, coords, colors, point_size):
     offscreen = gpu.types.GPUOffScreen(width, height)
     with offscreen.bind():
 
-        bgl.glPointSize(point_size)
-        bgl.glEnable(bgl.GL_DEPTH_TEST)
-        # bgl.glClear(bgl.GL_COLOR_BUFFER_BIT)
-        # bgl.glClear(bgl.GL_DEPTH_BUFFER_BIT)
+        gpu.state.point_size_set(point_size)
+        gpu.state.depth_mask_set(True)
+        gpu.state.depth_test_set('LESS_EQUAL')
 
         view_matrix = cam.matrix_world.inverted()
         projection_matrix = cam.calc_matrix_camera(

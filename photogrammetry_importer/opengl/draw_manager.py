@@ -1,7 +1,6 @@
 import numpy as np
 import atexit
 import bpy
-import bgl
 import gpu
 from gpu_extras.batch import batch_for_shader
 from photogrammetry_importer.blender_utility.logging_utility import log_report
@@ -162,9 +161,9 @@ class _DrawCallBackHandler:
                         )
 
                     self._shader.bind()
-                    bgl.glPointSize(self._point_size)
-                    bgl.glEnable(bgl.GL_DEPTH_TEST)
-                    bgl.glDepthMask(bgl.GL_TRUE)
+                    gpu.state.point_size_set(self._point_size)
+                    gpu.state.depth_mask_set(True)
+                    gpu.state.depth_test_set('LESS_EQUAL')
 
                     self._batch_cached.draw(self._shader)
 
