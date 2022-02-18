@@ -4,8 +4,14 @@ Recent Features / Changelog
 
 Changelog with most relevant features. Recently added features are listed at the top of this page.
 
+2022
+====
+* Replacing the bgl module with the gpu module to fix the offscreen rendering of point clouds under windows
+* Fix the dependency installation for Blender 2.8 - 2.91 of the newly introduced dependency manager
+
 2021
 ====
+* Improve management of dependency installation and corresponding GUI options
 * Made point sizes of point clouds and depth maps (drawn with OpenGL) persistent
 * Changed the usage of draw handlers to avoid potential crashes when deleting the point cloud anchor objects
 * Made depth maps persistent (i.e. the corresponding information is stored in the blend file)
