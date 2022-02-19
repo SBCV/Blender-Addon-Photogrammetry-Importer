@@ -136,6 +136,9 @@ def render_opengl_image(image_name, cam, coords, colors, point_size):
     with offscreen.bind():
 
         gpu.state.point_size_set(point_size)
+        
+        previous_depth_mask_value = gpu.state.depth_mask_get()
+        previous_depth_test_value = gpu.state.depth_test_get()
         gpu.state.depth_mask_set(True)
         gpu.state.depth_test_set('LESS_EQUAL')
 
@@ -157,6 +160,9 @@ def render_opengl_image(image_name, cam, coords, colors, point_size):
             shader, "POINTS", {"pos": coords, "color": colors}
         )
         batch.draw(shader)
+        
+        gpu.state.depth_mask_set(previous_depth_mask_value)
+        gpu.state.depth_test_set(previous_depth_test_value)
 
         buffer = frame_buffer.read_color(0, 0, width, height, 4, 0, 'UBYTE')
 
