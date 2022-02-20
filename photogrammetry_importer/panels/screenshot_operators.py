@@ -54,9 +54,10 @@ class ExportScreenshotImageOperator(bpy.types.Operator, ExportHelper):
             bpy.context.scene.camera = selected_cam
             area_3d.spaces[0].region_3d.view_perspective = "CAMERA"
             _update_ui(context)
-        bpy.ops.screen.screenshot(
-            filepath=ofp, full=full_screenshot, check_existing=False
-        )
+        if full_screenshot:
+            bpy.ops.screen.screenshot(filepath=ofp, check_existing=False)
+        else:
+            bpy.ops.screen.screenshot_area(filepath=ofp, check_existing=False)
 
         # Restore previous settings
         area_3d.spaces[0].region_3d.view_perspective = previous_perspective
