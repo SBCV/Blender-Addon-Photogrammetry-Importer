@@ -27,7 +27,7 @@ In addition, the addon supports some common point cloud data formats:
 <sup>4</sup> Requires [Pylas](https://pypi.org/project/pylas/) for parsing.
 <sup>5</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
 
-Compatible with Blender 2.80 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the [2.79 branch](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/tree/blender279).
+**The current version is compatible with Blender 3.0 onwards**. For older Blender versions you might find a suitable release [here](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/releases). 
 
 ## Getting Started
 - [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
