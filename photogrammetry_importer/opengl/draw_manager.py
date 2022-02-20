@@ -162,10 +162,16 @@ class _DrawCallBackHandler:
 
                     self._shader.bind()
                     gpu.state.point_size_set(self._point_size)
+
+                    previous_depth_mask_value = gpu.state.depth_mask_get()
+                    previous_depth_test_value = gpu.state.depth_test_get()
                     gpu.state.depth_mask_set(True)
                     gpu.state.depth_test_set('LESS_EQUAL')
 
                     self._batch_cached.draw(self._shader)
+                    
+                    gpu.state.depth_mask_set(previous_depth_mask_value)
+                    gpu.state.depth_test_set(previous_depth_test_value)
 
         else:
             if self._draw_handler_handle is not None:
