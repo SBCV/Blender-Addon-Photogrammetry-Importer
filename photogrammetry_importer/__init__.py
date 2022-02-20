@@ -30,7 +30,7 @@ bl_info = {
     # Do not break this line, otherwise the addon can not be activated!
     "description": "Allows to import and export photogrammetry results (cameras, points and meshes).",
     "author": "Sebastian Bullinger",
-    "version": (2, 0, 0),
+    "version": (3, 0, 0),
     "blender": (3, 0, 0),
     "location": "File/Import and File/Export",
     "warning": "",
