@@ -31,7 +31,7 @@ bl_info = {
     "description": "Allows to import and export photogrammetry results (cameras, points and meshes).",
     "author": "Sebastian Bullinger",
     "version": (2, 0, 0),
-    "blender": (2, 80, 0),
+    "blender": (3, 0, 0),
     "location": "File/Import and File/Export",
     "warning": "",
     "wiki_url": "https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/",
