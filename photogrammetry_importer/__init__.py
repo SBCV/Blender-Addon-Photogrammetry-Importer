@@ -68,6 +68,14 @@ from photogrammetry_importer.preferences.dependency import (
     add_command_line_sys_path_if_necessary,
 )
 
+if bpy.app.version < bl_info["blender"]:
+    log_report(
+        "WARNING",
+        f"Detected Blender version {bpy.app.version} is older than required"
+        f" the required Blender version {bl_info['blender']}. This might lead"
+        " to potential bugs!",
+    )
+
 bpy.app.handlers.load_post.append(redraw_points)
 bpy.app.handlers.load_post.append(add_command_line_sys_path_if_necessary)
 
