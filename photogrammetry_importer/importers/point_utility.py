@@ -273,6 +273,7 @@ def add_points_as_object_with_particle_system(
 def add_points_as_mesh_vertices(
     points,
     reconstruction_collection,
+    add_mesh_to_point_geometry_nodes=True,
     add_color_as_custom_property=True,
     op=None,
 ):
@@ -288,6 +289,29 @@ def add_points_as_mesh_vertices(
     point_cloud_obj = add_obj(
         point_cloud_mesh, point_cloud_obj_name, reconstruction_collection
     )
+    if add_mesh_to_point_geometry_nodes:
+        # Only visible if cycles is activated
+        bpy.context.scene.render.engine = "CYCLES"
+
+        geometry_nodes = point_cloud_obj.modifiers.new(
+            "GeometryNodes", "NODES"
+        )
+        # The group_input and the group_output nodes are created by default
+        group_input = geometry_nodes.node_group.nodes["Group Input"]
+        group_output = geometry_nodes.node_group.nodes["Group Output"]
+
+        # Note: To determine the name required for new(...), create the
+        # corresponding node with the gui and print the value of "bl_rna".
+        mesh_to_points = geometry_nodes.node_group.nodes.new(
+            "GeometryNodeMeshToPoints"
+        )
+        geometry_nodes.node_group.links.new(
+            group_input.outputs["Geometry"], mesh_to_points.inputs["Mesh"]
+        )
+        geometry_nodes.node_group.links.new(
+            mesh_to_points.outputs["Points"], group_output.inputs["Geometry"]
+        )
+
     if add_color_as_custom_property:
         point_cloud_obj["colors"] = colors
 

@@ -97,6 +97,11 @@ class PointImporter:
         "vertex positions.",
         default=False,
     )
+    add_mesh_to_point_geometry_nodes: BoolProperty(
+        name="Add Mesh to Point Geometry Node",
+        description="Add a Mesh to Point in Geometry Nodes.",
+        default=True,
+    )
     add_color_as_custom_property: BoolProperty(
         name="Add Colors as Custom Property",
         description="Use a custom property (named colors) to store the point "
@@ -127,6 +132,7 @@ class PointImporter:
             mesh_box = point_box.box()
             mesh_box.prop(self, "add_points_as_mesh_oject")
             if self.add_points_as_mesh_oject:
+                mesh_box.prop(self, "add_mesh_to_point_geometry_nodes")
                 mesh_box.prop(self, "add_color_as_custom_property")
 
     def import_photogrammetry_points(self, points, reconstruction_collection):
@@ -164,6 +170,7 @@ class PointImporter:
                 add_points_as_mesh_vertices(
                     points,
                     reconstruction_collection,
+                    self.add_mesh_to_point_geometry_nodes,
                     self.add_color_as_custom_property,
                     op=self,
                 )
