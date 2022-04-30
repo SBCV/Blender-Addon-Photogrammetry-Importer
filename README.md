@@ -51,12 +51,15 @@ If you use this library for scientific purposes, please consider to cite the fol
 
 <a href="https://arxiv.org/pdf/2012.01044.pdf"><img class="image" align="left" width="150px" src="https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/blob/master/doc/images/paper_preview0p15.png"></a>
 <a href="https://doi.org/10.5220/0010319801060112">[paper]</a>&nbsp;&nbsp;<a href="https://arxiv.org/abs/2012.01044">[arxiv]</a><br>
-@article{PhotogrammetryForModeling2021,<br>
-&nbsp;title={A Photogrammetry-based Framework to Facilitate Image-based Modeling and Automatic Camera Tracking},<br>
-&nbsp;author={Bullinger, Sebastian and Bodensteiner, Christoph and Arens, Michael},<br>
-&nbsp;booktitle={International Conference on Computer Graphics Theory and Applications},<br>
-&nbsp;year={2021}<br>
-}<br clear="left"/>
+```bibtex
+@article{PhotogrammetryForModeling2021,
+title={A Photogrammetry-based Framework to Facilitate Image-based Modeling and Automatic Camera Tracking},
+author={Bullinger, Sebastian and Bodensteiner, Christoph and Arens, Michael},
+booktitle={International Conference on Computer Graphics Theory and Applications},
+year={2021}
+}
+```
+<br clear="left"/>
 
 ## Example
 This repository contains an example Colmap model. The following image shows the imported camera poses, image planes and point cloud in Blender's 3D view.
