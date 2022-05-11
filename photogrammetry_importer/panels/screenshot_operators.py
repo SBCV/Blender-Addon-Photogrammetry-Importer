@@ -134,11 +134,16 @@ class ExportScreenshotAnimationOperator(bpy.types.Operator, ExportHelper):
             log_report(
                 "INFO", "Output File Path: " + str(current_frame_fp), self
             )
-            bpy.ops.screen.screenshot(
-                filepath=current_frame_fp,
-                full=full_screenshot,
-                check_existing=False,
-            )
+            if full_screenshot:
+                bpy.ops.screen.screenshot(
+                    filepath=current_frame_fp,
+                    check_existing=False,
+                )
+            else:
+                bpy.ops.screen.screenshot_area(
+                    filepath=current_frame_fp,
+                    check_existing=False,
+                )
 
         # Restore previous settings
         # Option 1
