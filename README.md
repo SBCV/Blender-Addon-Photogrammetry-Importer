@@ -1,6 +1,12 @@
 # Blender-Photogrammetry-Importer
 This repository contains a Blender addon to import reconstruction results of several libraries.
 
+## Compatibility
+
+The latest release of the addon is currently compatible with **Blender 3.1.2 onwards**. For older Blender versions you might find a suitable release [here](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/releases). 
+
+## Supported Reconstruction Libraries and Point Cloud Data Formats
+
 Supported libraries (data formats):
 
 - [x] [Agisoft Metashape](https://www.agisoft.com/) (VisualSfM NVM) <sup>1</sup>
@@ -26,8 +32,6 @@ In addition, the addon supports some common point cloud data formats:
 <sup>3</sup> Requires [Pyntcloud](https://pypi.org/project/pyntcloud/) for parsing.
 <sup>4</sup> Requires [Pylas](https://pypi.org/project/pylas/) for parsing.
 <sup>5</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
-
-**The current version is compatible with Blender 3.0 onwards**. For older Blender versions you might find a suitable release [here](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/releases). 
 
 ## Getting Started
 - [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
