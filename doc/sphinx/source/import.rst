@@ -21,9 +21,12 @@ VisualSfM
 The addon automatically looks for the fixed calibration line in the NVM file (i.e. :code:`NVM_V3 FixedK fx cx fy cy r`  (first line)).
 Without the fixed calibration line the addon assumes that the principal point is at the image center. NVM files contain no information about the size of the images. Use the import dialog to adjust the :code:`image path` to automatically read the image size from disc or set the default :code:`width` and :code:`height` values.
 
+.. role:: strike
+    :class: strike
+
 OpenMVG JSON
 ============
-The OpenMVG :code:`JSON` files contain no color information. The addon uses the input images (if provided) to compute the color of the triangulated 3D points - this computation requires the optional Pillow dependency.
+The OpenMVG :code:`JSON` files contain no color information. If you want to import a point cloud with color information, you might want to use the :code:`openMVG_main_ComputeSfM_DataColor` tool (see  `this link <https://openmvg.readthedocs.io/en/latest/software/SfM/ComputeSfM_DataColor/>`_) and import the corresponding :code:`*.ply` file.
 
 Meshroom
 ========
