@@ -154,95 +154,19 @@ class OpenMVGJSONFileHandler:
     @staticmethod
     def _parse_points(json_data, view_index_to_absolute_fp=None, op=None):
 
-        compute_color = True
-        try:
-            from PIL import Image, ImageFile
-
-            ImageFile.LOAD_TRUNCATED_IMAGES = True
-        except ImportError:
-            log_report(
-                "WARNING",
-                "Can not compute point cloud color information, since Pillow"
-                + " is not installed.",
-                op,
-            )
-            compute_color = False
-
-        if view_index_to_absolute_fp is None:
-            log_report(
-                "WARNING",
-                "Can not compute point cloud color information, since path to"
-                + " images is not correctly set.",
-                op,
-            )
-            compute_color = False
-
-        if compute_color:
-            log_report(
-                "INFO",
-                "Try to collect color information from files (this might take"
-                + " a while)",
-                op,
-            )
-            view_index_to_image = {}
-            for view_index, absolute_fp in view_index_to_absolute_fp.items():
-                if os.path.isfile(absolute_fp):
-                    pil_image = Image.open(absolute_fp)
-                    view_index_to_image[view_index] = pil_image
-                else:
-                    log_report(
-                        "WARNING",
-                        "Can not compute point cloud color information, since"
-                        + " image file path is incorrect.",
-                        op,
-                    )
-                    compute_color = False
-                    break
-
-        if compute_color:
-            log_report(
-                "INFO",
-                "Compute color information from files (this might take a"
-                + "  while)",
-                op,
-            )
+        # Note: Blender 3.1.2 comes with Python 3.10, which is compatible to
+        #  Pillow >= 9.0 and Pillow 8.3.2 - 8.4.
+        #  However, when reading JPG images WITHIN Blender 3.1.2
+        #   - and Pillow >= 9.0, then Blender crashes
+        #   - and Pillow 8.3.2 - 8.4, then only black pixels are returned
+        #  Thus, we drop color computation for now.
+        #  Interestingly, reading PNG images works without any problems.
+        #  If you need
 
         points = []
         structure = json_data["structure"]
         for json_point in structure:
-
             r = g = b = 0
-
-            # Color information can only be computed if input files are
-            # provided
-            if compute_color:
-                for observation in json_point["value"]["observations"]:
-                    view_index = int(observation["key"])
-
-                    # REMARK: The order of ndarray.shape (height, width) is
-                    # complimentary to pillow's image.size (width, height).
-                    # Therefore: x_openmvg_file == x_image == y_ndarray
-                    # and y_openmvg_file == y_image == x_ndarray
-                    x_json_file = float(
-                        observation["value"]["x"][0]
-                    )  # x has index 0
-                    y_json_file = float(
-                        observation["value"]["x"][1]
-                    )  # y has index 1
-
-                    current_image = view_index_to_image[view_index]
-                    pix = current_image.getpixel((x_json_file, y_json_file))
-                    current_r, current_g, current_b = pix[0], pix[1], pix[2]
-                    r += current_r
-                    g += current_g
-                    b += current_b
-
-                # normalize the rgb values
-                amount_observations = len(json_point["value"]["observations"])
-                r /= amount_observations
-                g /= amount_observations
-                b /= amount_observations
-
             custom_point = Point(
                 coord=np.array(json_point["value"]["X"], dtype=float),
                 color=np.array([r, g, b], dtype=int),
