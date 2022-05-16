@@ -156,12 +156,17 @@ class OpenMVGJSONFileHandler:
 
         # Note: Blender 3.1.2 comes with Python 3.10, which is compatible to
         #  Pillow >= 9.0 and Pillow 8.3.2 - 8.4.
-        #  However, when reading JPG images WITHIN Blender 3.1.2
-        #   - and Pillow >= 9.0, then Blender crashes
-        #   - and Pillow 8.3.2 - 8.4, then only black pixels are returned
+        #  However:
+        #   - When reading *.JPG images with Pillow >= 9.0 WITHIN Blender
+        #     3.1.2, then Blender crashes.
+        #   - When reading *.JPG images with Pillow 8.3.2 - 8.4 WITHIN Blender
+        #     3.1.2, then only black pixels are returned.
         #  Thus, we drop color computation for now.
         #  Interestingly, reading PNG images works without any problems.
-        #  If you need
+        #
+        #  If you want to visualize the point cloud colors, you may use:
+        #  https://openmvg.readthedocs.io/en/latest/software/SfM/ComputeSfM_DataColor/
+        #  and import the corresponding *.ply file.
 
         points = []
         structure = json_data["structure"]
