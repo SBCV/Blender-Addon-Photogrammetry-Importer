@@ -1,4 +1,5 @@
 from collections import namedtuple
+import numpy as np
 
 
 class Point(namedtuple("Point", ["coord", "color", "id", "scalars"])):
@@ -45,3 +46,25 @@ class Point(namedtuple("Point", ["coord", "color", "id", "scalars"])):
             )
             for idx, (coord, color) in enumerate(zip(coords, colors))
         ]
+
+    @staticmethod
+    def _compute_centroid_coord(points):
+        centroid = np.array(
+            sum([point.coord for point in points]) / float(len(points)),
+            dtype=float,
+        )
+        return centroid
+
+    @staticmethod
+    def get_centered_points(points):
+        centroid_coord = Point._compute_centroid_coord(points)
+        mean_free_points = []
+        for point in points:
+            mean_free_point = Point(
+                coord=point.coord - centroid_coord,
+                color=point.color,
+                id=point.id,
+                scalars=point.scalars,
+            )
+            mean_free_points.append(mean_free_point)
+        return mean_free_points

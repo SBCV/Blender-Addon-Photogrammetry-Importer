@@ -12,6 +12,7 @@ from photogrammetry_importer.importers.point_utility import (
     add_points_as_mesh_vertices,
     add_points_as_object_with_particle_system,
 )
+from photogrammetry_importer.types.point import Point
 
 
 class PointImporter:
@@ -26,6 +27,12 @@ class PointImporter:
         "means that every n-th point in the point cloud is added",
         default=1,
         min=1,
+    )
+    center_points: BoolProperty(
+        name="Center Data Around Origin",
+        description="Center data by subtracting the centroid. Useful for las/"
+        "laz files, which contain usually large offsets.",
+        default=False,
     )
     # Option 1: Draw Points with GPU
     draw_points_with_gpu: BoolProperty(
@@ -114,6 +121,7 @@ class PointImporter:
         point_box = layout.box()
         point_box.prop(self, "import_points")
         point_box.prop(self, "point_cloud_display_sparsity")
+        point_box.prop(self, "center_points")
         if self.import_points or draw_everything:
             opengl_box = point_box.box()
             opengl_box.prop(self, "draw_points_with_gpu")
@@ -140,6 +148,9 @@ class PointImporter:
         if self.import_points:
             if self.point_cloud_display_sparsity > 1:
                 points = points[:: self.point_cloud_display_sparsity]
+
+            if self.center_points:
+                points = Point.get_centered_points(points)
 
             if self.draw_points_with_gpu:
                 draw_points(
