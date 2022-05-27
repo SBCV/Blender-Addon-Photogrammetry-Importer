@@ -6,6 +6,9 @@ Changelog with most relevant features. Recently added features are listed at the
 
 2022
 ====
+* Replace pylas with laspy (>= 2.0)
+* Add an option to center points around the origin (useful for laz/las files)
+* Remove the point color computation for OpenMVG json files, due to a bug in pillow caused by the blender python environment
 * Adjust the screenshot rendering functionality according to api changes of Blender 3.0
 * Replacing the bgl module with the gpu module to fix the offscreen rendering of point clouds under windows
 * Fix the dependency installation for Blender 2.8 - 2.91 of the newly introduced dependency manager
