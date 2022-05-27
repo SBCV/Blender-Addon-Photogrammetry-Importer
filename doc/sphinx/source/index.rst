@@ -47,7 +47,7 @@ In addition, the addon supports some common point cloud data formats:
    - `Simple ASCII point files <https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O>`_ (ASC, PTS, CSV) :sup:`3`
 
 | :sup:`1` Requires :code:`pillow` to read image sizes from disk. :sup:`2` Requires :code:`pillow` for point color computation.
-| :sup:`3` Requires :code:`pyntcloud` for parsing. :sup:`4` Requires :code:`pylas` for parsing. :sup:`5` Requires :code:`lazrs` for parsing.
+| :sup:`3` Requires :code:`pyntcloud` for parsing. :sup:`4` Requires :code:`laspy` for parsing. :sup:`5` Requires :code:`lazrs` for parsing.
 
 Compatible with Blender 2.8.0 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the `2.79 branch <https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279>`_.
 

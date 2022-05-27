@@ -186,7 +186,7 @@ class PointDataFileHandler:
         Supported file formats are: :code:`.ply`, :code:`.pcd`, :code:`.las`,
         :code:`.laz`, :code:`.asc`, :code:`.pts` and :code:`.csv`.
 
-        Relies on the :code:`pyntcloud`, the :code:`pylas` and/or the
+        Relies on the :code:`pyntcloud`, the :code:`laspy` and/or the
         :code:`lazrs` library to parse the different file formats.
         """
 

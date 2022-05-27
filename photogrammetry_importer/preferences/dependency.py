@@ -293,7 +293,7 @@ class OptionalDependencyManager:
                 gui_name="Lazrs", package_name="lazrs", import_name="lazrs"
             ),
             OptionalDependency(
-                gui_name="Pylas", package_name="pylas", import_name="pylas"
+                gui_name="Laspy", package_name="laspy", import_name="laspy"
             ),
             OptionalDependency(
                 gui_name="Pyntcloud",
