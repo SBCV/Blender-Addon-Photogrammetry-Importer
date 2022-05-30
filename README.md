@@ -30,7 +30,7 @@ In addition, the addon supports some common point cloud data formats:
 <sup>1</sup> Requires [Pillow](https://pypi.org/project/Pillow/) to read image sizes from disk.
 <sup>2</sup> Requires Pillow for point color computation.\
 <sup>3</sup> Requires [Pyntcloud](https://pypi.org/project/pyntcloud/) for parsing.
-<sup>4</sup> Requires [Pylas](https://pypi.org/project/pylas/) for parsing.
+<sup>4</sup> Requires [Laspy](https://pypi.org/project/laspy/) for parsing.
 <sup>5</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
 
 ## Getting Started
