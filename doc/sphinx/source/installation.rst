@@ -37,11 +37,13 @@ The final structure must look as follows:
 
 	photogrammetry_importer.zip /
 	    photogrammetry_importer /
+	        blender_utility
 	        ext
 	        file_handler
 	        ...
 	        __init__.py
 
+For convenience the repository contains a script (:code:`create_blender_addon_zip.sh` for Linux, :code:`create_blender_addon_zip.bat` for Windows) that creates the required :code:`photogrammetry_importer.zip` file. Run the script without parameters (e.g. :code:`./create_blender_addon_zip.sh`).
 
 Install the Addon
 =================
