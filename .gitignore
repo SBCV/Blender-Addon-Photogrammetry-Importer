@@ -13,6 +13,7 @@ photogrammetry_importer.zip
 /examples_with_images/*
 /examples_with_fountain_images/*
 /examples_without_images/*
+/examples/meshroom/*
 /photogrammetry_importer/.vscode/*
 /.vscode/.ropeproject/config.py
 /.vscode/.ropeproject/objectdb
