@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # #################################################################
-# Run this bat file (without parameters) to create a Blender add-on 
+# Run this sh file (without parameters) to create a Blender add-on 
 # (photogrammetry_importer.zip), which can be installed in Blender.
 # #################################################################
 
