@@ -109,6 +109,16 @@ class PointImporter:
         description="Add a Mesh to Point in Geometry Nodes.",
         default=True,
     )
+    point_radius: FloatProperty(
+        name="Initial Point Radius",
+        description="Initial point radius (can be changed in GUI)",
+        default=0.05,
+    )
+    point_subdivisions: IntProperty(
+        name="Initial Point Subdivisions",
+        description="Initial point subdivisions (can be changed in GUI)",
+        default=1,
+    )
     add_color_as_custom_property: BoolProperty(
         name="Add Colors as Custom Property",
         description="Use a custom property (named colors) to store the point "
@@ -141,6 +151,8 @@ class PointImporter:
             mesh_box.prop(self, "add_points_as_mesh_oject")
             if self.add_points_as_mesh_oject:
                 mesh_box.prop(self, "add_mesh_to_point_geometry_nodes")
+                mesh_box.prop(self, "point_radius")
+                mesh_box.prop(self, "point_subdivisions")
                 mesh_box.prop(self, "add_color_as_custom_property")
 
     def import_photogrammetry_points(self, points, reconstruction_collection):
@@ -182,6 +194,8 @@ class PointImporter:
                     points,
                     reconstruction_collection,
                     self.add_mesh_to_point_geometry_nodes,
+                    self.point_radius,
+                    self.point_subdivisions,
                     self.add_color_as_custom_property,
                     op=self,
                 )

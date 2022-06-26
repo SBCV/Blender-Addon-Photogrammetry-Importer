@@ -273,6 +273,8 @@ def add_points_as_mesh_vertices(
     points,
     reconstruction_collection,
     add_mesh_to_point_geometry_nodes=True,
+    point_radius=0.05,
+    point_subdivisions=1,
     add_color_as_custom_property=True,
     op=None,
 ):
@@ -313,8 +315,8 @@ def add_points_as_mesh_vertices(
             "NodeSocketIntUnsigned", "Point Subdivisions"
         )  # Input_4
         geometry_nodes["Input_2"] = get_color_from_attribute("point_color")
-        geometry_nodes["Input_3"] = 0.02
-        geometry_nodes["Input_4"] = 1
+        geometry_nodes["Input_3"] = point_radius
+        geometry_nodes["Input_4"] = point_subdivisions
 
         # Note: To determine the name required for new(...), create the
         # corresponding node with the gui and print the value of "bl_rna".
