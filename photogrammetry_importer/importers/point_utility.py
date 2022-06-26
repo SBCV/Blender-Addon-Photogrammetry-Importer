@@ -299,7 +299,7 @@ def add_points_as_mesh_vertices(
         point_cloud_mesh.attributes.new(
             name="point_color", type="FLOAT_COLOR", domain="POINT"
         )
-        add_colors_to_vertices(point_cloud_mesh, colors, "point_color")
+        _add_colors_to_vertices(point_cloud_mesh, colors, "point_color")
 
         geometry_nodes = point_cloud_obj.modifiers.new(
             "GeometryNodes", "NODES"
@@ -318,7 +318,7 @@ def add_points_as_mesh_vertices(
         geometry_nodes.node_group.inputs.new(
             "NodeSocketIntUnsigned", "Point Subdivisions"
         )  # Input_4
-        geometry_nodes["Input_2"] = get_color_from_attribute("point_color")
+        geometry_nodes["Input_2"] = _get_color_from_attribute("point_color")
         geometry_nodes["Input_3"] = point_radius
         geometry_nodes["Input_4"] = point_subdivisions
 
@@ -384,7 +384,7 @@ def add_points_as_mesh_vertices(
     return point_cloud_obj
 
 
-def add_colors_to_vertices(mesh, colors, attribute_name):
+def _add_colors_to_vertices(mesh, colors, attribute_name):
     """Add a color attribute to each vertex of mesh."""
     if len(mesh.vertices) != len(colors):
         raise ValueError(
@@ -398,7 +398,7 @@ def add_colors_to_vertices(mesh, colors, attribute_name):
     )
 
 
-def get_color_from_attribute(attribute_name):
+def _get_color_from_attribute(attribute_name):
     """Create a material that obtains its color from the specified attribute."""
     material = bpy.data.materials.new("color")
     material.use_nodes = True
