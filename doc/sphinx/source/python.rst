@@ -18,24 +18,25 @@ Therefore, after installation and activation one can use Python's standard impor
 
         from photogrammetry_importer.types.camera import Camera
         from photogrammetry_importer.file_handlers.colmap_file_handler import ColmapFileHandler
-        from photogrammetry_importer.importers.point_utility import add_points_as_object_with_particle_system
+        from photogrammetry_importer.importers.point_utility import add_points_as_mesh_vertices
 
 Example 1: Add points contained in a :code:`ply` file as a :code:`particle system`. ::
 
         import bpy
         from photogrammetry_importer.file_handlers.point_data_file_handler import PointDataFileHandler
         from photogrammetry_importer.blender_utility.object_utility import add_collection
-        from photogrammetry_importer.importers.point_utility import add_points_as_object_with_particle_system
+        from photogrammetry_importer.importers.point_utility import add_points_as_mesh_vertices
 
         ifp = "path/to/Blender-Addon-Photogrammetry-Importer/examples/Example.ply"
         points = PointDataFileHandler.parse_point_data_file(ifp)
         reconstruction_collection = add_collection("Reconstruction Collection")
-        add_points_as_object_with_particle_system(
+        add_points_as_mesh_vertices(
                 points,
-                mesh_type="CUBE",
-                point_extent=0.01,
-                add_particle_color_emission=True,
-                reconstruction_collection=reconstruction_collection
+                reconstruction_collection=reconstruction_collection,
+                add_mesh_to_point_geometry_nodes=True,
+                point_radius=0.05,
+                point_subdivisions=1,
+                add_color_as_custom_property=True,
         )
         # Optionally, change the shading type to show the particle colors
         area = next(area for area in bpy.context.screen.areas if area.type == "VIEW_3D")
