@@ -219,7 +219,11 @@ def add_points_as_object_with_particle_system(
     particle_overwrite_color=None,
     op=None,
 ):
-    """Add a point cloud as particle system."""
+    """Add a point cloud as particle system.
+
+    This method is deprecated. It is recommended to use
+    :code:`add_points_as_mesh_vertices()` instead.
+    """
     log_report("INFO", "Adding Points as Particle System: ...", op)
     stop_watch = StopWatch()
 
