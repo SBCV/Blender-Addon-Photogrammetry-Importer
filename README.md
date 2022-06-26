@@ -15,23 +15,22 @@ Supported libraries (data formats):
 - [x] [MVE](https://github.com/simonfuhrmann/mve) (Workspaces) <sup>1</sup>
 - [x] [Open3D](http://www.open3d.org/) (JSON, LOG, PLY) <sup>1</sup>
 - [x] [OpenSfM](https://github.com/mapillary/OpenSfM) (JSON)
-- [x] [OpenMVG](https://github.com/openMVG/openMVG) (JSON, NVM, PLY) <sup>2</sup>
+- [x] [OpenMVG](https://github.com/openMVG/openMVG) (JSON, NVM, PLY)
 - [x] [Regard3D](https://www.regard3d.org/) (OpenMVG JSON)
 - [x] [VisualSFM](http://ccwu.me/vsfm/) (NVM) <sup>1</sup>
 
 In addition, the addon supports some common point cloud data formats:
 
-- [x] [Polygon files](http://paulbourke.net/dataformats/ply/) (PLY) <sup>3</sup>
-- [x] [Point Cloud Library files](https://github.com/PointCloudLibrary/pcl) (PCD) <sup>3</sup>
-- [x] [LASer files](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) (LAS) <sup>3,4</sup>
-- [x] [LASzip files](https://laszip.org/) (LAZ) <sup>3,4,5</sup>
-- [x] [Simple ASCII point files](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O) (ASC, PTS, CSV) <sup>3</sup>
+- [x] [Polygon files](http://paulbourke.net/dataformats/ply/) (PLY) <sup>2</sup>
+- [x] [Point Cloud Library files](https://github.com/PointCloudLibrary/pcl) (PCD) <sup>2</sup>
+- [x] [LASer files](https://www.asprs.org/divisions-committees/lidar-division/laser-las-file-format-exchange-activities) (LAS) <sup>2,3</sup>
+- [x] [LASzip files](https://laszip.org/) (LAZ) <sup>2,3,4</sup>
+- [x] [Simple ASCII point files](https://www.cloudcompare.org/doc/wiki/index.php?title=FILE_I/O) (ASC, PTS, CSV) <sup>2</sup>
 
 <sup>1</sup> Requires [Pillow](https://pypi.org/project/Pillow/) to read image sizes from disk.
-<sup>2</sup> Requires Pillow for point color computation.\
-<sup>3</sup> Requires [Pyntcloud](https://pypi.org/project/pyntcloud/) for parsing.
-<sup>4</sup> Requires [Laspy](https://pypi.org/project/laspy/) for parsing.
-<sup>5</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
+<sup>2</sup> Requires [Pyntcloud](https://pypi.org/project/pyntcloud/) for parsing.
+<sup>3</sup> Requires [Laspy](https://pypi.org/project/laspy/) for parsing.
+<sup>4</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
 
 ## Getting Started
 - [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
