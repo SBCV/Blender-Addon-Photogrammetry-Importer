@@ -2,11 +2,10 @@
 Visualization and Rendering
 ***************************
 
-Currently, this addon supports the following 3 point cloud visualization options:
+Currently, this addon supports the following two point cloud visualization options:
 
-* Representing the points with vertices of a Blender object
-* Visualizing the points with OpenGL (default)
-* Representing the points with a Blender particle system
+* Representing the points with a mesh object (using Blender's Geometry Nodes)
+* Visualizing the points with OpenGL
 
 
 .. image:: ../../images/import_point_options.png
@@ -15,20 +14,27 @@ Currently, this addon supports the following 3 point cloud visualization options
 
 Each option has different advantages / disadvantages.
 
-Option 1: Representing the points with vertices of a Blender object
-===================================================================
+Option 1: Representing the Points with a Mesh Object (using Blender's Geometry Nodes)
+=====================================================================================
 
-If selected, the addon adds a blender object with a vertex for each point in the point cloud. 
+If selected, the addon adds a blender object with a vertex for each point in the point cloud. The option :code:`Add Geometry Nodes` create several geometry nodes (see image below) that allow to render the point cloud with Eevee or Cycles.
 
-* Advantage: Low computational costs for visualization / rendering. 
-* Disadvantage: Contains no color information.
+.. image:: ../../images/geometry_nodes.png
+   :scale: 45 %
+   :align: center
+
+The :code:`point radius` and the :code:`point subdivision` can be adjusted after import using the :code:`Properties editor` (:code:`Shift + F7`).
+
+.. image:: ../../images/geometry_nodes_options.png
+   :scale: 100 %
+   :align: center
 
 Option 2: Visualizing and rendering the points with OpenGL
 ==========================================================
 
 If selected, the point cloud is shown in the Viewport using Blender's OpenGL API. That means, there is **no** Blender object representing the points in the point cloud. The pose (i.e. rotation and translation) of the object can be changed by adjusting the corresponding "anchor" (i.e. a Blender :code:`empty` object).
 
-* Advantage: Allows to show huge point clouds in the viewport - including color information. 
+* Advantage: Low computational costs for visualization.
 * Disadvantage: It is not possible to render these points with the render functions provided by Blender. However, this addon provides a panel to save/export OpenGL renderings of the points using an offscreen buffer or Blender's screenshot operator (see image below).
 
 .. image:: ../../images/opengl_panel_export.png
@@ -62,31 +68,5 @@ To ensure that the reconstruction results are not occluded by Blender panels go 
 After adjusting these options the viewport looks as follows.
 
 .. image:: ../../images/viewport_cleaned_annotations.jpeg
-   :scale: 45 %
-   :align: center
-
-
-Option 3: Representing the points with a particle system 
-========================================================
-
-If selected, the point cloud is represented with two objects.
-
-* One object associated with a particle system, which represents the structure of the point cloud. 
-* One object that defines the shape of the particles.
-
-The color of the particles is defined by a single material as shown in the image below.
-
-.. image:: ../../images/particle_system_material.jpg
-   :scale: 45 %
-   :align: center
-
-Note: The second input :code:`Value` in the :code:`Divide` node represents the number of particles in the point cloud.  
-
-* Advantage: Contains color information, which can be rendered using Cycles. 
-* Disadvantage: High computational costs for visualization / rendering, i.e. limited to medium-sized point clouds.
-
-Sometimes Blender draws boundaries around the particles of the point cloud. In order to improve the visualization of the point cloud one can disable :code:`Extras` under :code:`Overlays` in the :code:`3D view`. The following image shows the corresponding options. 
-
-.. image:: ../../images/disable_object_extras_overlay_annotation.jpg
    :scale: 45 %
    :align: center
