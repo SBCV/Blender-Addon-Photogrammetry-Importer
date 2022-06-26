@@ -62,18 +62,19 @@ class PointImporter:
         default=False,
     )
     add_mesh_to_point_geometry_nodes: BoolProperty(
-        name="Add Mesh to Point Geometry Node",
-        description="Add a Mesh to Point in Geometry Nodes.",
+        name="Add Geometry Nodes",
+        description="Add Geometry Nodes to allow rendering of the point cloud "
+        "with Blender's built-in renderers (Eevee / Cycles).",
         default=True,
     )
     point_radius: FloatProperty(
         name="Initial Point Radius",
-        description="Initial point radius (can be changed in GUI)",
+        description="Initial point radius (can be changed in GUI).",
         default=0.05,
     )
     point_subdivisions: IntProperty(
         name="Initial Point Subdivisions",
-        description="Initial point subdivisions (can be changed in GUI)",
+        description="Initial point subdivisions (can be changed in GUI).",
         default=1,
     )
     add_color_as_custom_property: BoolProperty(
