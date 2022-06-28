@@ -34,7 +34,6 @@ In addition, the addon supports some common point cloud data formats:
 
 ## Getting Started
 - [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
-- [Tutorial Video](https://www.youtube.com/watch?v=BwwaT2scoP0) 
 - [Installation Instructions](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html)
 - [Troubleshooting](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/troubleshooting.html)
 - [Customize Import/Export Options](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/customize.html)
