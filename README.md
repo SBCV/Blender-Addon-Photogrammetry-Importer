@@ -77,12 +77,13 @@ There is also an import option that allows to interpolate the reconstructed came
 In addition, the addon allows to import meshes contained in the workspaces of specific libraries. Manually imported meshes can also be aligned with the corresponding reconstruction by following the instructions [here](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/import.html#meshes). 
 ![alt text](doc/images/mesh_3d_view.jpg)
 
+The addon offers two options to point clouds (OpenGL and Geometry Nodes). The addon provides different panels to adjust the appearance and to render these point clouds - see [Point Cloud Visualization and Rendering](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/point_cloud.html). The following images shows an example represented with OpenGL (top) and Geometry Nodes (bottom). 
+
+![alt text](doc/images/import_result_opengl.jpg)
+![alt text](doc/images/import_result_geometry_nodes.jpg)
+
 In addition, the addon allows to visualize depth maps (reconstructed with Colmap or MVE) as point clouds.
 <p float="left" align="middle">
   <img src="doc/images/depth_map_3d_view.jpg" width="48%" />
   <img src="doc/images/depth_map_from_camera.jpg" width="48%" /> 
 </p>
-
-
-The addon offers an option to draw big point clouds with OpenGL to reduce computational requirements. The addon provides a panel to export these OpenGL point clouds renderings - see [Point Cloud Visualization and Rendering](doc/markdown/point_cloud.md). 
-![alt text](doc/images/import_result_opengl.jpg)
