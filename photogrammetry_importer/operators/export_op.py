@@ -123,8 +123,9 @@ class ExportOperator(bpy.types.Operator):
                 camera_index += 1
 
             else:
+                obj_points = []
+                # Option 1: Mesh Object
                 if obj.data is not None:
-                    obj_points = []
                     for vert in obj.data.vertices:
                         coord_world = obj.matrix_world @ vert.co
                         obj_points.append(
@@ -135,7 +136,27 @@ class ExportOperator(bpy.types.Operator):
                                 scalars=[],
                             )
                         )
-
+                        point_index += 1
+                    points += obj_points
+                # Option 2: Empty with OpenGL information
+                elif (
+                    "particle_coords" in obj
+                    and "particle_colors" in obj
+                    and "point_size" in obj
+                ):
+                    coords = obj["particle_coords"]
+                    colors = obj["particle_colors"]
+                    for coord, color in zip(coords, colors):
+                        coord_world = coord
+                        scaled_color = [round(value * 255) for value in color]
+                        obj_points.append(
+                            Point(
+                                coord=coord_world,
+                                color=scaled_color[:3],
+                                id=point_index,
+                                scalars=[],
+                            )
+                        )
                         point_index += 1
                     points += obj_points
         log_report(
