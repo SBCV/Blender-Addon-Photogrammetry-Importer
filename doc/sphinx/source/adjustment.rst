@@ -23,8 +23,8 @@ Adjust the Scale of Cameras after Importing
    :scale: 50 %
    :align: center
 
-Adjust the Scale of Points (Visualized with OpenGL) after Importing
-===================================================================
+Adjust the Scale of OpenGL Points Drawn in the 3D View (After Importing)
+========================================================================
 
 The size of the points in the OpenGL point cloud can be defined using the panel in the 3D view.
 
@@ -32,19 +32,12 @@ The size of the points in the OpenGL point cloud can be defined using the panel 
    :scale: 75 %
    :align: center
 
-Adjust the Scale of Points (Added with a Particle System) after Importing
-=========================================================================
+Adjust the Scale/Shape of Geometry Node Points of a Mesh Object (After Importing)
+=================================================================================
 
-For each imported point cloud two objects are created. The first object :code:`Point Cloud` represents the structure of the point cloud and the second object :code:`Particle Shape` defines the shape of the points in the point cloud. 
+The input of the Geometry Nodes (i.e. :code:`point radius` and the :code:`point subdivision`) can be adjusted using the :code:`Properties` editor (:code:`Shift + F7`).
 
-1.) Select the object :code:`Particle Shape`.
 
-.. image:: ../../images/select_particle_shape.jpg
-   :scale: 50 %
-   :align: center
-
-2.) Scale the object, i.e. press :code:`s` and move the mouse or press :code:`s` and enter the scaling factor.
-
-.. image:: ../../images/scaled_points.jpg
+.. image:: ../../images/geometry_nodes_with_options_annotations.jpg
    :scale: 50 %
    :align: center
