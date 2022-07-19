@@ -273,6 +273,19 @@ def add_points_as_object_with_particle_system(
     return point_cloud_obj_list
 
 
+def create_geometry_nodes_node_group():
+    """Create a new node group for a geometry nodes modifier."""
+    node_group = bpy.data.node_groups.new("GeometryNodes", "GeometryNodeTree")
+    input_node = node_group.nodes.new("NodeGroupInput")
+    input_node.outputs.new("NodeSocketGeometry", "Geometry")
+    output_node = node_group.nodes.new("NodeGroupOutput")
+    output_node.inputs.new("NodeSocketGeometry", "Geometry")
+    node_group.links.new(
+        input_node.outputs["Geometry"], output_node.inputs["Geometry"]
+    )
+    return node_group
+
+
 def add_points_as_mesh_vertices(
     points,
     reconstruction_collection,
@@ -304,6 +317,11 @@ def add_points_as_mesh_vertices(
         geometry_nodes = point_cloud_obj.modifiers.new(
             "GeometryNodes", "NODES"
         )
+
+        # https://blender.stackexchange.com/questions/249763/python-geometry-node-trees
+        if not geometry_nodes.node_group:
+            geometry_nodes.node_group = create_geometry_nodes_node_group()
+
         # The group_input and the group_output nodes are created by default
         group_input = geometry_nodes.node_group.nodes["Group Input"]
         group_output = geometry_nodes.node_group.nodes["Group Output"]
