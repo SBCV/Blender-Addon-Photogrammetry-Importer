@@ -9,6 +9,7 @@ from collections import defaultdict
 import bpy
 from bpy.app.handlers import persistent
 from photogrammetry_importer.blender_utility.logging_utility import log_report
+from bpy.props import StringProperty
 
 
 def _get_addon_name():
@@ -66,7 +67,8 @@ def remove_command_line_sys_path():
     prefs = bpy.context.preferences.addons[addon_name].preferences
     additional_system_paths = json.loads(prefs.sys_path_list_str)
     for additional_sys_path in additional_system_paths:
-        sys.path.remove(additional_sys_path)
+        if additional_sys_path in sys.path:
+            sys.path.remove(additional_sys_path)
     prefs.sys_path_list_str = "[]"
 
 
@@ -238,7 +240,7 @@ class OptionalDependency(DependencyStatus):
                 "ERROR", "===========================================", op
             )
 
-    def uninstall(self, op=None):
+    def uninstall(self, remove_sys_path=True, op=None):
         """Uninstall this dependency."""
         pip_manager = PipManager.get_singleton()
         pip_manager.install_pip(lazy=True, op=op)
@@ -258,7 +260,8 @@ class OptionalDependency(DependencyStatus):
         # Although "pip uninstall" may throw an error while uninstalling pillow
         # and lazrs it still removes the corresponding packages.
         subprocess.run(dependency_uninstall_command, check=False)
-        remove_command_line_sys_path()
+        if remove_sys_path:
+            remove_command_line_sys_path()
         self.installation_status = False
 
 
@@ -302,15 +305,35 @@ class OptionalDependencyManager:
             ),
         )
 
-    def install_dependencies(self, op=None):
+    def install_dependencies(self, dependency_package_name="", op=None):
         """Install all (optional) dependencies of this addon."""
         for dependency in self.get_dependencies():
-            dependency.install(op=op)
+            install = False
+            if dependency_package_name == "":
+                install = True
+            elif dependency.package_name == dependency_package_name:
+                install = True
+            if install:
+                dependency.install(op=op)
 
-    def uninstall_dependencies(self, op=None):
+    def uninstall_dependencies(self, dependency_package_name="", op=None):
         """Uninstall all (optional) dependencies of this addon."""
         for dependency in self.get_dependencies():
-            dependency.uninstall(op=op)
+            uninstall = False
+            if dependency_package_name == "":
+                uninstall = True
+            elif dependency.package_name == dependency_package_name:
+                uninstall = True
+            if uninstall:
+                dependency.uninstall(remove_sys_path=False, op=op)
+        some_dependencies_installed = any(
+            [
+                dependency.installation_status
+                for dependency in self.get_dependencies()
+            ]
+        )
+        if not some_dependencies_installed:
+            remove_command_line_sys_path()
 
     def get_dependencies(self):
         """Return all (optional) dependencies of this addon."""
@@ -321,7 +344,7 @@ class InstallOptionalDependenciesOperator(bpy.types.Operator):
     """Operator to install all (optional) dependencies of this addon."""
 
     bl_idname = "photogrammetry_importer.install_dependencies"
-    bl_label = "Download and Install Optional Dependencies (be patient!)"
+    bl_label = "Download and Install ALL Optional Dependencies (be patient!)"
     bl_description = (
         "Download and install the optional dependencies (Python packages). "
         "Depending on the installation folder, Blender may have to be started "
@@ -329,12 +352,19 @@ class InstallOptionalDependenciesOperator(bpy.types.Operator):
         "Start Blender from the console to see the progress."
     )
     bl_options = {"REGISTER"}
+    dependency_package_name: StringProperty(
+        name="Dependency Package Name",
+        description="Target dependency package to be installed.",
+        default="",
+    )
 
     def execute(self, context):
         """Install all optional dependencies."""
         try:
             dependency_manager = OptionalDependencyManager.get_singleton()
-            dependency_manager.install_dependencies(op=self)
+            dependency_manager.install_dependencies(
+                dependency_package_name=self.dependency_package_name, op=self
+            )
         except (subprocess.CalledProcessError, ImportError) as err:
             log_report("ERROR", str(err))
             return {"CANCELLED"}
@@ -345,18 +375,25 @@ class UninstallOptionalDependenciesOperator(bpy.types.Operator):
     """Operator to uninstall all (optional) dependencies of this addon."""
 
     bl_idname = "photogrammetry_importer.uninstall_dependencies"
-    bl_label = "Uninstall Optional Dependencies"
+    bl_label = "Remove ALL Optional Dependencies"
     bl_description = (
         "Uninstall optional dependencies. Blender may have to be started with "
         "administrator privileges in order to remove the dependencies"
     )
     bl_options = {"REGISTER"}
+    dependency_package_name: StringProperty(
+        name="Dependency Package Name",
+        description="Target dependency package to be removed.",
+        default="",
+    )
 
     def execute(self, context):
         """Uninstall all optional dependencies."""
         try:
             dependency_manager = OptionalDependencyManager.get_singleton()
-            dependency_manager.uninstall_dependencies(op=self)
+            dependency_manager.uninstall_dependencies(
+                dependency_package_name=self.dependency_package_name, op=self
+            )
         except (subprocess.CalledProcessError, ImportError) as err:
             log_report("ERROR", str(err))
             return {"CANCELLED"}

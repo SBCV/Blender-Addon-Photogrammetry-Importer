@@ -114,14 +114,80 @@ class AddonPreferences(
                 info_str = removed_in_current_sesssion_str
         return info_str
 
+    def _draw_dependency(
+        self,
+        dependency,
+        setuptools_missing_str,
+        removed_in_current_sesssion_str,
+        dependencies_status_box,
+    ):
+        dependency_installation_status = dependency.installation_status
+        dependency_installation_status_str = self._get_installation_status_str(
+            dependency_installation_status
+        )
+        version_str, location_str = dependency.get_package_info()
+        version_str = self._get_package_info_str(
+            version_str,
+            dependency_installation_status,
+            setuptools_missing_str,
+            removed_in_current_sesssion_str,
+        )
+        location_str = self._get_package_info_str(
+            location_str, dependency_installation_status
+        )
+
+        dependency_status_box = dependencies_status_box.box()
+
+        # https://blender.stackexchange.com/questions/51256/how-to-create-uilist-with-auto-aligned-three-columns
+        #  This layout approach splits the remainder of the row (recursively).
+        name_column = dependency_status_box.split(factor=0.1)
+        name_column.label(text=f"{dependency.gui_name}")
+        status_column = name_column.split(factor=0.1)
+        status_column.label(text=f"{dependency_installation_status_str}")
+        verson_location_column = status_column.split()
+        version_location_str = f"{version_str}"
+        if location_str != "":
+            # Blender does not support tabs "\t"
+            version_location_str += f"    ({location_str})"
+        verson_location_column.label(text=version_location_str)
+
+        # This layout approach adds more columns than required to enforce left
+        #  alignment of buttons.
+        column_flow_layout = dependency_status_box.column_flow(columns=5)
+        package_name = dependency.package_name
+        # Add operator to first column
+        install_dependency_props = column_flow_layout.operator(
+            InstallOptionalDependenciesOperator.bl_idname,
+            text=f"Install {dependency.gui_name}",
+            icon="CONSOLE",
+        )
+        install_dependency_props.dependency_package_name = package_name
+        # Add operator to second column
+        install_dependency_props = column_flow_layout.operator(
+            UninstallOptionalDependenciesOperator.bl_idname,
+            text=f"Remove {dependency.gui_name}",
+            icon="CONSOLE",
+        )
+        install_dependency_props.dependency_package_name = package_name
+
     def _draw_dependencies(self, install_dependency_box):
         install_dependency_box.label(text="Dependencies:")
-        install_dependency_box.operator(
+        install_dependency_button_box = install_dependency_box.column_flow(
+            columns=2
+        )
+        install_dependency_props = install_dependency_button_box.operator(
             InstallOptionalDependenciesOperator.bl_idname, icon="CONSOLE"
         )
-        install_dependency_box.operator(
+        install_dependency_props.dependency_package_name = ""
+
+        remove_dependency_button_box = install_dependency_box.column_flow(
+            columns=2
+        )
+        uninstall_dependency_props = remove_dependency_button_box.operator(
             UninstallOptionalDependenciesOperator.bl_idname, icon="CONSOLE"
         )
+        uninstall_dependency_props.dependency_package_name = ""
+
         row = install_dependency_box.row()
         row.label(text="Pip Installation Status:")
         setuptools_missing_str = "Install setuptools (and restart Blender) to show version and location"
@@ -158,41 +224,19 @@ class AddonPreferences(
 
         row = install_dependency_box.row()
         row.label(text="Dependency Installation Status:")
-        dependency_status_box = install_dependency_box.box()
-        dependency_status_box_split = dependency_status_box.split()
-        dependency_status_box_column_1 = dependency_status_box_split.column()
-        dependency_status_box_column_2 = dependency_status_box_split.column()
-        dependency_status_box_column_3 = dependency_status_box_split.column()
-        dependency_status_box_column_4 = dependency_status_box_split.column()
+        dependencies_status_box = install_dependency_box.box()
 
         dependency_manager = OptionalDependencyManager.get_singleton()
         dependencies = dependency_manager.get_dependencies()
         for dependency in dependencies:
-            dependency_installation_status = dependency.installation_status
-            dependency_installation_status_str = (
-                self._get_installation_status_str(
-                    dependency_installation_status
-                )
-            )
-            version_str, location_str = dependency.get_package_info()
-            version_str = self._get_package_info_str(
-                version_str,
-                dependency_installation_status,
+            self._draw_dependency(
+                dependency,
                 setuptools_missing_str,
                 removed_in_current_sesssion_str,
-            )
-            location_str = self._get_package_info_str(
-                location_str, dependency_installation_status
+                dependencies_status_box,
             )
 
-            dependency_status_box_column_1.label(text=f"{dependency.gui_name}")
-            dependency_status_box_column_2.label(
-                text=f"{dependency_installation_status_str}"
-            )
-            dependency_status_box_column_3.label(text=f"{version_str}")
-            dependency_status_box_column_4.label(text=f"{location_str}")
-
-        dependency_status_description_box = dependency_status_box.box()
+        dependency_status_description_box = dependencies_status_box.box()
         dependency_status_description_box.label(
             text="Note: After uninstalling the dependencies one must restart"
             " Blender to clear the references to the module within Blender."
