@@ -78,6 +78,8 @@ Requires Blender 2.83.5 or newer. **Administrator privileges might be required t
 Clicking on :code:`Download and Install Optional Dependencies` installs :code:`pip` (if not already present) and uses the :code:`pip` executable to install the actual dependencies.
 Start :code:`Blender` from the command line to see the installation progress and potential error messages.
 
+Note: If you experience problems while *updating* the dependencies, try a fresh Blender installation.
+
 Note: If you use `VSCode <https://code.visualstudio.com/>`_ with `Blender VSCode <https://github.com/JacquesLucke/blender_vscode>`_ to run this addon, the installation of laspy will fail. In this case you need to install it manually (see below).
 
 Option 2: Installation using the command line
