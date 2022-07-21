@@ -6,6 +6,8 @@ Changelog with most relevant features. Recently added features are listed at the
 
 2022
 ====
+* Fix geometry node creation for Blender 3.2.1
+* Fix the point exporter for OpenGL point clouds
 * Remove the particle system based point cloud representation method (because of the new point clound representation option based on geometry nodes).
 * Add particle colors to geometry nodes (Thanks to @Linusnie)
 * Add a new point cloud representation method based on geometry nodes. Allows to render the point coud with Eevee and Cycles.
