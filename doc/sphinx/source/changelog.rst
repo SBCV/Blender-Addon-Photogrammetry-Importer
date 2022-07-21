@@ -7,10 +7,11 @@ Changelog with most relevant features. Recently added features are listed at the
 2022
 ====
 * Fix geometry node creation for Blender 3.2.1
+* Add support for installation and removal of individual dependencies
 * Fix the point exporter for OpenGL point clouds
-* Remove the particle system based point cloud representation method (because of the new point clound representation option based on geometry nodes).
+* Remove the particle system based point cloud representation method (because of the new point clound representation option based on geometry nodes)
 * Add particle colors to geometry nodes (Thanks to @Linusnie)
-* Add a new point cloud representation method based on geometry nodes. Allows to render the point coud with Eevee and Cycles.
+* Add a new point cloud representation method based on geometry nodes. Allows to render the point coud with Eevee and Cycles
 * Replace pylas with laspy (>= 2.0)
 * Add an option to center points around the origin (useful for laz/las files)
 * Remove the point color computation for OpenMVG json files, due to a bug in pillow caused by the blender python environment
