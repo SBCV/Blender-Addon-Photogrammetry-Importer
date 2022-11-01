@@ -43,7 +43,7 @@ class PointDataFileHandler:
         return lines_as_tup
 
     @staticmethod
-    def _guess_data_semantics_from_tuple(data_tuple):
+    def _guess_data_semantics_from_tuple(data_tuple, op):
         data_semantics = _DataSemantics()
         data_semantics.num_data_entries = len(data_tuple)
         # Data must start with subsequent float values
@@ -96,7 +96,15 @@ class PointDataFileHandler:
             data_semantics.b_idx = idx + 2
             data_semantics.pseudo_color = True
             break
-        assert data_semantics.is_initialized()
+        if not data_semantics.is_initialized():
+            msg = "Could not guess data semantics from tuple."
+            msg += " Consider to add a header to your input file to define position, colors, etc. \n"
+            msg += "For example: \n"
+            msg += "//X Y Z Rf Gf Bf Intensity\n"
+            msg += "or: \n"
+            msg += "//X Y Z R G B Intensity"
+            log_report("ERROR", msg, op)
+            assert False
         return data_semantics
 
     @staticmethod
@@ -160,7 +168,7 @@ class PointDataFileHandler:
                 )
                 data_semantics = (
                     PointDataFileHandler._guess_data_semantics_from_tuple(
-                        lines_as_tuples[0]
+                        lines_as_tuples[0], op
                     )
                 )
             return data_semantics
