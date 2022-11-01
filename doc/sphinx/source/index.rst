@@ -49,7 +49,8 @@ In addition, the addon supports some common point cloud data formats:
 | :sup:`1` Requires :code:`pillow` to read image sizes from disk. :sup:`2` Requires :code:`pillow` for point color computation.
 | :sup:`3` Requires :code:`pyntcloud` for parsing. :sup:`4` Requires :code:`laspy` for parsing. :sup:`5` Requires :code:`lazrs` for parsing.
 
-Compatible with Blender 2.8.0 onwards. There is an older version of the addon available for Blender 2.79 that allows to import NVM files - see the `2.79 branch <https://github.com/SBCV/Blender-Import-NVM-Addon/tree/blender279>`_.
+The latest release of the addon is currently compatible with Blender 3.1.2 onwards. 
+For older Blender versions you might find a suitable release `here <https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/releases>`_.
 
 Getting Started
 ===============
