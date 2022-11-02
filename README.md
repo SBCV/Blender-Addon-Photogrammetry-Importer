@@ -33,7 +33,7 @@ In addition, the addon supports some common point cloud data formats:
 <sup>4</sup> Requires [Lazrs](https://pypi.org/project/lazrs/) for parsing.
 
 ## Getting Started
-- [Documentation](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest) 
+- [Documentation](https://blender-photogrammetry-importer.readthedocs.io/en/latest) 
 - [Installation Instructions](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html)
 - [Troubleshooting](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/troubleshooting.html)
 - [Customize Import/Export Options](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/customize.html)
