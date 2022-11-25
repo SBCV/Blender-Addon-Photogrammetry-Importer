@@ -34,19 +34,19 @@ In addition, the addon supports some common point cloud data formats:
 
 ## Getting Started
 - [Documentation](https://blender-photogrammetry-importer.readthedocs.io/en/latest) 
-- [Installation Instructions](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/installation.html)
-- [Troubleshooting](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/troubleshooting.html)
-- [Customize Import/Export Options](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/customize.html)
-- [Examples](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/examples.html)
-- [Import Data](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/import.html)
-- [Export Data](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/export.html)
-- [Adjust Results (Scale Cameras and Points)](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/adjustment.html)
-- [Ensure Camera and Point Alignment](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/alignment.html)
-- [Point Cloud Visualization and Rendering](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/point_cloud.html)
-- [Addon Usage with Python](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/python.html)
-- [Extending the Addon](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/extension.html)
-- [Contribution](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/contribution.html)
-- [Recent features / Changelog](https://blender-addon-photogrammetry-importer.readthedocs.io/en/latest/changelog.html)
+- [Installation Instructions](https://blender-photogrammetry-importer.readthedocs.io/en/latest/installation.html)
+- [Troubleshooting](https://blender-photogrammetry-importer.readthedocs.io/en/latest/troubleshooting.html)
+- [Customize Import/Export Options](https://blender-photogrammetry-importer.readthedocs.io/en/latest/customize.html)
+- [Examples](https://blender-photogrammetry-importer.readthedocs.io/en/latest/examples.html)
+- [Import Data](https://blender-photogrammetry-importer.readthedocs.io/en/latest/import.html)
+- [Export Data](https://blender-photogrammetry-importer.readthedocs.io/en/latest/export.html)
+- [Adjust Results (Scale Cameras and Points)](https://blender-photogrammetry-importer.readthedocs.io/en/latest/adjustment.html)
+- [Ensure Camera and Point Alignment](https://blender-photogrammetry-importer.readthedocs.io/en/latest/alignment.html)
+- [Point Cloud Visualization and Rendering](https://blender-photogrammetry-importer.readthedocs.io/en/latest/point_cloud.html)
+- [Addon Usage with Python](https://blender-photogrammetry-importer.readthedocs.io/en/latest/python.html)
+- [Extending the Addon](https://blender-photogrammetry-importer.readthedocs.io/en/latest/extension.html)
+- [Contribution](https://blender-photogrammetry-importer.readthedocs.io/en/latest/contribution.html)
+- [Recent features / Changelog](https://blender-photogrammetry-importer.readthedocs.io/en/latest/changelog.html)
 
 ## Paper
 If you use this library for scientific purposes, please consider to cite the following paper.
