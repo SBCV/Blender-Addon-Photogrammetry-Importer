@@ -92,7 +92,7 @@ class MeshroomFileHandler:
                 intrinsics, "intrinsicId", id_intrinsic
             )
 
-            focal_length = float(intrinsic_params["pxFocalLength"])
+            focal_length = float(intrinsic_params["focalLength"])
             cx = float(intrinsic_params["principalPoint"][0])
             cy = float(intrinsic_params["principalPoint"][1])
 
