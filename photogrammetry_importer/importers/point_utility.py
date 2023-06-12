@@ -277,9 +277,13 @@ def create_geometry_nodes_node_group():
     """Create a new node group for a geometry nodes modifier."""
     node_group = bpy.data.node_groups.new("GeometryNodes", "GeometryNodeTree")
     input_node = node_group.nodes.new("NodeGroupInput")
-    input_node.outputs.new("NodeSocketGeometry", "Geometry")
     output_node = node_group.nodes.new("NodeGroupOutput")
-    output_node.inputs.new("NodeSocketGeometry", "Geometry")
+
+    # input_node must be created before calling node_group.inputs
+    node_group.inputs.new("NodeSocketGeometry", "Geometry")
+    # output_node must be created before calling node_group.outputs
+    node_group.outputs.new("NodeSocketGeometry", "Geometry")
+
     node_group.links.new(
         input_node.outputs["Geometry"], output_node.inputs["Geometry"]
     )
