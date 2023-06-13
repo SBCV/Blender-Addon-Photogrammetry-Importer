@@ -161,8 +161,12 @@ class MeshroomFileHandler:
                 # Principal point (in pixel) relative to the image center
                 width_px = float(intrinsic_params["width"])
                 height_px = float(intrinsic_params["height"])
-                cx_px_rel_to_center = float(intrinsic_params["principalPoint"][0])
-                cy_px_rel_to_center = float(intrinsic_params["principalPoint"][1])
+                cx_px_rel_to_center = float(
+                    intrinsic_params["principalPoint"][0]
+                )
+                cy_px_rel_to_center = float(
+                    intrinsic_params["principalPoint"][1]
+                )
                 cx_px = width_px / 2 + cx_px_rel_to_center
                 cy_px = height_px / 2 + cy_px_rel_to_center
             else:
