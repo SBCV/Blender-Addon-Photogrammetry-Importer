@@ -370,7 +370,7 @@ def add_camera_animation(
     )
 
     cameras_sorted = sorted(
-        cameras, key=lambda camera: camera.get_relative_fp()
+        cameras, key=lambda camera: int(''.join(filter(str.isdigit, camera.get_relative_fp())))
     )
 
     transformations_sorted = []
