@@ -53,6 +53,10 @@ class MeshroomFileHandler:
             )
             return cams, image_index_to_camera_index
 
+        alicevision_sfm_data_version = tuple(
+            [int(val) for val in json_data["version"]]
+        )
+
         views = json_data["views"]  # is a list of dicts (view)
         intrinsics = json_data["intrinsics"]  # is a list of dicts (intrinsic)
         extrinsics = json_data["poses"]  # is a list of dicts (extrinsic)
@@ -92,14 +96,79 @@ class MeshroomFileHandler:
                 intrinsics, "intrinsicId", id_intrinsic
             )
 
-            try:
-                focal_length = float(intrinsic_params["focalLength"])
-            except KeyError:
-                # Legacy file format
-                focal_length = float(intrinsic_params["pxFocalLength"])
+            # https://github.com/alicevision/Meshroom/blob/develop/meshroom/nodes/aliceVision/CameraInit.py
+            #
+            # CameraInit.py Version 5.0
+            #   https://github.com/alicevision/Meshroom/commit/5ab6ed8e5259d49b393dfa74197494b856dd082e
+            #       - Aug 13, 2021
+            #       - focal length is now split on x and y
+            #       - sfmData version: None
+            # CameraInit.py Version 6.0
+            #   https://github.com/alicevision/Meshroom/commit/61308eb211472c772b2253ca4081f3d8060f3fab
+            #       - Aug 19, 2021
+            #       - sfmData version: 1.2.1
+            #       - Principal Point is now relative to the image center
+            #         (and not relative to the top-left image corner)
+            # CameraInit.py Version 7.0
+            #   https://github.com/alicevision/Meshroom/commit/655dad9959657301fe5e5cfd539b2d05c1f70a4d
+            #       - Mar 25, 2022
+            #       - sfmData version: 1.2.2
+            #       - parameters use focal in mm
+            # CameraInit.py Version 8.0
+            #    https://github.com/alicevision/Meshroom/commit/95bb93b4bf7fdd54906ecf5f00279de4e78a62c4
+            #       - Sep 15, 2022
+            #       - sfmData version: 1.2.2
+            #       - No semantic changes
+            # CameraInit.py Version 9.0
+            #   https://github.com/alicevision/Meshroom/commit/5b331fc13935a6630dd47aa66fccf6296069272f
+            #       - Jan 22, 2023
+            #       - sfmData version: 1.2.2
+            #       - No semantic changes
 
-            cx = float(intrinsic_params["principalPoint"][0])
-            cy = float(intrinsic_params["principalPoint"][1])
+            # https://github.com/alicevision/AliceVision/tree/develop/src/aliceVision/sfmDataIO/compatibilityData
+            #   scene_v1.2.0.json
+            #   scene_v1.2.1.json
+            #   scene_v1.2.2.json
+            #   scene_v1.2.3.json
+            #   scene_v1.2.4.json
+
+            if alicevision_sfm_data_version >= (1, 2, 4):
+                raise NotImplementedError
+
+            if alicevision_sfm_data_version >= (1, 2, 2):
+                # Focal lenght in mm
+                focal_length_x_mm = float(intrinsic_params["focalLength"])
+                pixel_ratio = float(intrinsic_params["pixelRatio"])
+                focal_length_y_mm = pixel_ratio * focal_length_x_mm
+
+                width_px = float(intrinsic_params["width"])
+                height_px = float(intrinsic_params["height"])
+                width_mm = float(intrinsic_params["sensorWidth"])
+                height_mm = float(intrinsic_params["sensorHeight"])
+
+                focal_length_x_px = focal_length_x_mm / width_mm * width_px
+                focal_length_y_px = focal_length_y_mm / height_mm * height_px
+            elif alicevision_sfm_data_version >= (1, 2, 0):
+                # Focal lenght x and y in pixel
+                focal_length_x_px = float(intrinsic_params["pxFocalLength"][0])
+                focal_length_y_px = float(intrinsic_params["pxFocalLength"][1])
+            else:
+                # Focal lenght in pixel
+                focal_length_x_px = float(intrinsic_params["pxFocalLength"])
+                focal_length_y_px = focal_length_x_px
+
+            if alicevision_sfm_data_version >= (1, 2, 1):
+                # Principal point (in pixel) relative to the image center
+                width_px = float(intrinsic_params["width"])
+                height_px = float(intrinsic_params["height"])
+                cx_px_rel_to_center = float(intrinsic_params["principalPoint"][0])
+                cy_px_rel_to_center = float(intrinsic_params["principalPoint"][1])
+                cx_px = width_px / 2 + cx_px_rel_to_center
+                cy_px = height_px / 2 + cy_px_rel_to_center
+            else:
+                # Principal point (in pixel) relative to the top-left image corner
+                cx_px = float(intrinsic_params["principalPoint"][0])
+                cy_px = float(intrinsic_params["principalPoint"][1])
 
             if (
                 "distortionParams" in intrinsic_params
@@ -118,7 +187,11 @@ class MeshroomFileHandler:
                 )
 
             camera_calibration_matrix = np.array(
-                [[focal_length, 0, cx], [0, focal_length, cy], [0, 0, 1]]
+                [
+                    [focal_length_x_px, 0, cx_px],
+                    [0, focal_length_y_px, cy_px],
+                    [0, 0, 1],
+                ]
             )
 
             camera.set_calibration(
