@@ -504,7 +504,7 @@ class MeshroomFileHandler:
         else:
             log_report(
                 "INFO",
-                "Request target SfM result does not exist in this meshroom"
+                "Requested target SfM result does not exist in this meshroom"
                 " project.",
                 op,
             )
