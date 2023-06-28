@@ -44,6 +44,7 @@ In addition, the addon supports some common point cloud data formats:
 - [Ensure Camera and Point Alignment](https://blender-photogrammetry-importer.readthedocs.io/en/latest/alignment.html)
 - [Point Cloud Visualization and Rendering](https://blender-photogrammetry-importer.readthedocs.io/en/latest/point_cloud.html)
 - [Addon Usage with Python](https://blender-photogrammetry-importer.readthedocs.io/en/latest/python.html)
+- [Read and Apply Calibration/Transformation Matrices](https://github.com/SBCV/Blender-Matrix-World-Addon)
 - [Extending the Addon](https://blender-photogrammetry-importer.readthedocs.io/en/latest/extension.html)
 - [Contribution](https://blender-photogrammetry-importer.readthedocs.io/en/latest/contribution.html)
 - [Recent features / Changelog](https://blender-photogrammetry-importer.readthedocs.io/en/latest/changelog.html)
