@@ -124,6 +124,11 @@ class MeshroomFileHandler:
             #       - Jan 22, 2023
             #       - sfmData version: 1.2.2
             #       - No semantic changes
+            # CameraInit.py Version 9.0
+            #   https://github.com/alicevision/Meshroom/commit/56f77e2d52f943006227644359a5c2f14180a3bf
+            #       - Jun 28, 2023
+            #       - sfmData version: 1.2.5
+            #       - No semantic changes
 
             # https://github.com/alicevision/AliceVision/tree/develop/src/aliceVision/sfmDataIO/compatibilityData
             #   scene_v1.2.0.json
@@ -132,8 +137,10 @@ class MeshroomFileHandler:
             #   scene_v1.2.3.json
             #   scene_v1.2.4.json
 
-            if alicevision_sfm_data_version >= (1, 2, 4):
-                raise NotImplementedError
+            if alicevision_sfm_data_version >= (1, 2, 6):
+                raise NotImplementedError(
+                    f"support for alicevision sfm data version: {alicevision_sfm_data_version}"
+                )
 
             if alicevision_sfm_data_version >= (1, 2, 2):
                 # Focal lenght in mm
