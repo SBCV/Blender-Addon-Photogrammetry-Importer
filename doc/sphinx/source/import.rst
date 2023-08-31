@@ -40,7 +40,7 @@ However, one can add a :code:`ConvertSfMFormat` node in Meshroom (see image belo
 In addition to :code:`*.SfM` / :code:`*.json` files the addon allows to import :code:`*.mg` files, which allows to also import corresponding meshes.
 The addon prioritizes the output of recently added nodes (e.g. :code:`ConvertSfMFormat3` has a higher priority than :code:`ConvertSfMFormat`).
 For importing meshes the addon uses the following prioritization: first the output of :code:`Texturing`, then the output of :code:`Meshfiltering` and finally the output of :code:`Meshing`.
-Do not forget to save your project (i.e. the :code:`*.mg` file), since the addon uses this file to determine available reconstruction results.
+**After adding the nodes (e.g.** :code:`ConvertSfMFormat` **), do not forget to save your project (i.e. the** :code:`*.mg` **file),** since the addon uses this file to determine available reconstruction results.
 
 In order to import the original images corresponding to the :code:`*.mg` file, one can set the import option :code:`Image File Path Type` of the Blender-Addon to :code:`Absolute Path`.
 To import the undistorted :code:`*.exr` images set :code:`Image File Path Type` to :code:`File Name` and set :code:`Image Directory` to the folder with the :code:`*.exr` files.
