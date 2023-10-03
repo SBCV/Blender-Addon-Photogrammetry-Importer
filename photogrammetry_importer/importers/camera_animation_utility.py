@@ -289,6 +289,7 @@ def _add_background_image_sequence(
     camera_data = bpy.data.objects[cam_obj.name].data
     camera_data.show_background_images = True
     bg_img = camera_data.background_images.new()
+    bg_img.frame_method = "CROP"
 
     first_cam = cameras_sorted[0]
     if (

@@ -279,6 +279,7 @@ def add_cameras(
             camera_data.show_background_images = True
             background_image = camera_data.background_images.new()
             background_image.image = blender_image
+            background_image.frame_method = "CROP"
 
         if add_image_planes and not camera.is_panoramic():
             # Group image plane and camera:
