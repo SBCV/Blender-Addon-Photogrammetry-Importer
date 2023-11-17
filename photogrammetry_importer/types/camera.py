@@ -292,6 +292,12 @@ class Camera:
 
     def set_4x4_cam_to_world_mat(self, cam_to_world_mat, check_rotation=True):
         """Set the extrinsic parameters."""
+
+        # This matrix can be used to convert points given in camera coordinates
+        # into points given in world coordinates
+        # M = [R^T    c]
+        #     [0      1]
+
         self.set_rotation_with_rotation_mat(
             cam_to_world_mat[0:3, 0:3].transpose(),
             check_rotation=check_rotation,
