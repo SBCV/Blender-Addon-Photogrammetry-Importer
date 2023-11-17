@@ -134,7 +134,7 @@ def invert_y_and_z_axis(input_matrix_or_vector):
     return output_matrix_or_vector
 
 
-def _get_world_matrix_from_translation_vec(translation_vec, rotation):
+def _get_world_matrix_from_translation_and_rotation(translation_vec, rotation):
     translation_vec_hom_coord = Vector(translation_vec).to_4d()
     world_matrix = Matrix()
     for row in range(3):
@@ -164,7 +164,7 @@ def compute_camera_matrix_world(camera, convert_coordinate_system=True):
         # i.e. invert the x and y axis.
         rotation_mat = invert_y_and_z_axis(rotation_mat)
         translation_vec = invert_y_and_z_axis(translation_vec)
-    return _get_world_matrix_from_translation_vec(
+    return _get_world_matrix_from_translation_and_rotation(
         translation_vec, rotation_mat
     )
 
