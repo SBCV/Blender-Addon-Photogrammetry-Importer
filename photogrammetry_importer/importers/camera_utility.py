@@ -135,22 +135,22 @@ def invert_y_and_z_axis(input_matrix_or_vector):
 
 
 def _get_world_matrix_from_translation_vec(translation_vec, rotation):
-    t = Vector(translation_vec).to_4d()
-    camera_rotation = Matrix()
+    translation_vec_hom_coord = Vector(translation_vec).to_4d()
+    world_matrix = Matrix()
     for row in range(3):
-        camera_rotation[row][0:3] = rotation[row]
+        world_matrix[row][0:3] = rotation[row]
 
-    camera_rotation.transpose()  # = Inverse rotation
+    world_matrix.transpose()  # = Inverse rotation
 
     # Camera position in world coordinates
-    camera_center = -(camera_rotation @ t)
-    camera_center[3] = 1.0
+    camera_center_hom_coord = -(world_matrix @ translation_vec_hom_coord)
+    camera_center_hom_coord[3] = 1.0
 
-    camera_rotation = camera_rotation.copy()
-    camera_rotation.col[
+    world_matrix = world_matrix.copy()
+    world_matrix.col[
         3
-    ] = camera_center  # Set translation to camera position
-    return camera_rotation
+    ] = camera_center_hom_coord  # Set translation to camera position
+    return world_matrix
 
 
 def compute_camera_matrix_world(camera, convert_coordinate_system=True):
