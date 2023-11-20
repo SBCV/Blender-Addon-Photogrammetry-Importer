@@ -85,13 +85,19 @@ def _add_camera_data(camera, camera_name):
 
 
 def add_camera_object(
-    camera, camera_name, camera_collection, copy_matrix_world=True
+    camera,
+    camera_name,
+    camera_collection,
+    copy_matrix_world=True,
+    convert_coordinate_system=True,
 ):
     """Add a camera as Blender object."""
     bcamera = _add_camera_data(camera, camera_name)
     camera_object = add_obj(bcamera, camera_name, camera_collection)
     if copy_matrix_world:
-        camera_object.matrix_world = compute_camera_matrix_world(camera)
+        camera_object.matrix_world = compute_camera_matrix_world(
+            camera, convert_coordinate_system
+        )
     return camera_object
 
 
