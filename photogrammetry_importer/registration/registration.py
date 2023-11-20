@@ -23,12 +23,18 @@ from photogrammetry_importer.operators.open3d_import_op import (
 from photogrammetry_importer.operators.point_data_import_op import (
     ImportPointDataOperator,
 )
+from photogrammetry_importer.operators.instant_ngp_import_op import (
+    ImportInstantNGPOperator,
+)
 
 from photogrammetry_importer.operators.visualsfm_export_op import (
     ExportVisualSfMOperator,
 )
 from photogrammetry_importer.operators.colmap_export_op import (
     ExportColmapOperator,
+)
+from photogrammetry_importer.operators.instant_ngp_export_op import (
+    ExportInstantNGPOperator,
 )
 
 # Definining the following import and export functions within the
@@ -93,6 +99,12 @@ def _visualsfm_import_operator_function(topbar_file_import, context):
     )
 
 
+def _instant_ngp_import_operator_function(topbar_file_import, context):
+    topbar_file_import.layout.operator(
+        ImportInstantNGPOperator.bl_idname, text="Instant-NGP (.json)"
+    )
+
+
 # Export Functions
 def _colmap_export_operator_function(topbar_file_export, context):
     topbar_file_export.layout.operator(
@@ -103,6 +115,12 @@ def _colmap_export_operator_function(topbar_file_export, context):
 def _visualsfm_export_operator_function(topbar_file_export, context):
     topbar_file_export.layout.operator(
         ExportVisualSfMOperator.bl_idname, text="VisualSfM (.nvm)"
+    )
+
+
+def _instant_ngp_export_operator_function(topbar_file_export, context):
+    topbar_file_export.layout.operator(
+        ExportInstantNGPOperator.bl_idname, text="Instant-NGP (.json)"
     )
 
 
@@ -202,6 +220,11 @@ class Registration:
             ImportVisualSfMOperator,
             _visualsfm_import_operator_function,
         )
+        cls._register_importer(
+            import_prefs.instant_ngp_importer_bool,
+            ImportInstantNGPOperator,
+            _instant_ngp_import_operator_function,
+        )
 
     @classmethod
     def unregister_importers(cls):
@@ -230,6 +253,10 @@ class Registration:
         cls._unregister_importer(
             ImportVisualSfMOperator, _visualsfm_import_operator_function
         )
+        cls._unregister_importer(
+            ImportInstantNGPOperator,
+            _instant_ngp_import_operator_function,
+        )
 
     @classmethod
     def register_exporters(cls, export_prefs):
@@ -244,6 +271,11 @@ class Registration:
             ExportVisualSfMOperator,
             _visualsfm_export_operator_function,
         )
+        cls._register_exporter(
+            export_prefs.instant_ngp_exporter_bool,
+            ExportInstantNGPOperator,
+            _instant_ngp_export_operator_function,
+        )
 
     @classmethod
     def unregister_exporters(cls):
@@ -253,4 +285,7 @@ class Registration:
         )
         cls._unregister_exporter(
             ExportVisualSfMOperator, _visualsfm_export_operator_function
+        )
+        cls._unregister_exporter(
+            ExportInstantNGPOperator, _instant_ngp_export_operator_function
         )

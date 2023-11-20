@@ -57,10 +57,16 @@ class AddonPreferences(
     visualsfm_importer_bool: BoolProperty(
         name="VisualSfM Importer", default=True
     )
+    instant_ngp_importer_bool: BoolProperty(
+        name="Instant-NGP Importer", default=True
+    )
     # Exporter
     colmap_exporter_bool: BoolProperty(name="Colmap Exporter", default=True)
     visualsfm_exporter_bool: BoolProperty(
         name="VisualSfM Exporter", default=True
+    )
+    instant_ngp_exporter_bool: BoolProperty(
+        name="Instant-NGP Exporter", default=True
     )
     # Management of system paths
     sys_path_list_str: StringProperty(
@@ -281,11 +287,13 @@ class AddonPreferences(
         importer_box.prop(self, "openmvg_importer_bool")
         importer_box.prop(self, "point_data_importer_bool")
         importer_box.prop(self, "visualsfm_importer_bool")
+        importer_box.prop(self, "instant_ngp_importer_bool")
 
         column = split.column()
         exporter_box = column.box()
         exporter_box.prop(self, "colmap_exporter_bool")
         exporter_box.prop(self, "visualsfm_exporter_bool")
+        exporter_box.prop(self, "instant_ngp_exporter_bool")
 
         importer_exporter_box.operator(
             UpdateImporterExporterOperator.bl_idname
