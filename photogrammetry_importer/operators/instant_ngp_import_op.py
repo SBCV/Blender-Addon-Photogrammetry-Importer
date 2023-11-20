@@ -70,6 +70,7 @@ class ImportInstantNGPOperator(
         """Draw the import options corresponding to this operator."""
         layout = self.layout
         self.draw_camera_options(
-            layout, draw_workspace_image_usage=True,
+            layout,
+            draw_workspace_image_usage=True,
         )
         self.draw_general_options(layout)
