@@ -179,7 +179,10 @@ def load_background_image(blender_image, camera_name):
     """Add a set of reconstructed cameras to Blender's 3D view port."""
     camera_data = bpy.data.objects[camera_name].data
     camera_data.show_background_images = True
-    background_image = camera_data.background_images.new()
+    if len(camera_data.background_images) == 0:
+        background_image = camera_data.background_images.new()
+    else:
+        background_image = camera_data.background_images[0]
     background_image.image = blender_image
     background_image.frame_method = "CROP"
 
