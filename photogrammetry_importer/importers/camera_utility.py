@@ -175,6 +175,15 @@ def compute_camera_matrix_world(camera, convert_coordinate_system=True):
     )
 
 
+def load_background_image(blender_image, camera_name):
+    """Add a set of reconstructed cameras to Blender's 3D view port."""
+    camera_data = bpy.data.objects[camera_name].data
+    camera_data.show_background_images = True
+    background_image = camera_data.background_images.new()
+    background_image.image = blender_image
+    background_image.frame_method = "CROP"
+
+
 def add_cameras(
     cameras,
     parent_collection,
@@ -281,11 +290,7 @@ def add_cameras(
         blender_image = bpy.data.images.load(image_path)
 
         if add_background_images:
-            camera_data = bpy.data.objects[camera_name].data
-            camera_data.show_background_images = True
-            background_image = camera_data.background_images.new()
-            background_image.image = blender_image
-            background_image.frame_method = "CROP"
+            load_background_image(blender_image, camera_name)
 
         if add_image_planes and not camera.is_panoramic():
             # Group image plane and camera:
