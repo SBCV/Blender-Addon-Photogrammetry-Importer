@@ -13,7 +13,7 @@ def add_color_emission_to_material(mesh_obj):
 
         node_tree.links.new(
             input_socket,
-            principled_bsdf_node.inputs["Emission"],
+            principled_bsdf_node.inputs["Emission Color"],
         )
 
 
@@ -55,5 +55,5 @@ def add_mesh_vertex_color_material(
     if add_mesh_color_emission:
         node_tree.links.new(
             attribute_node.outputs["Color"],
-            principled_bsdf_node.inputs["Emission"],
+            principled_bsdf_node.inputs["Emission Color"],
         )
