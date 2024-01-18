@@ -67,7 +67,7 @@ year={2021}
 ```
 <br clear="left"/>
 
-## Example
+## Reconstruction Examples
 This repository contains an example Colmap model. The following image shows the imported camera poses, image planes and point cloud in Blender's 3D view.
 ![alt text](doc/images/import_result.jpg)
 The input images of the Colmap model are located here: [https://github.com/openMVG/ImageDataset_SceauxCastle](https://github.com/openMVG/ImageDataset_SceauxCastle).
