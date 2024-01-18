@@ -79,7 +79,6 @@ def serialize_numpy_array(np_array, use_pickle=False):
     return serialized_np_array
 
 
-
 def configure_testbed(testbed, args):
     if testbed.mode == ngp.TestbedMode.Sdf:
         testbed.tonemap_curve = ngp.TonemapCurve.ACES

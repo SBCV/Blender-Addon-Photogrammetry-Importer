@@ -99,8 +99,12 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         parameter_list = ["--load_snapshot", view_synthesis_snapshot_fp]
         parameter_list += ["--temp_json_ifp", temp_json_file.name]
         parameter_list += ["--temp_array_ofp", temp_array_file.name]
-        parameter_list += ["--additional_system_dps", additional_system_dps]
         parameter_list += ["--samples_per_pixel", str(samples_per_pixel)]
+        if additional_system_dps.strip() != "":
+            parameter_list += [
+                "--additional_system_dps",
+                additional_system_dps,
+            ]
 
         assert os.path.isfile(view_synthesis_exe_or_script_fp)
         assert os.path.isfile(temp_json_file.name)
