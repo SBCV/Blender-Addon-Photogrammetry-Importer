@@ -63,6 +63,9 @@ from photogrammetry_importer.preferences.addon_preferences import (
 from photogrammetry_importer.registration.registration import Registration
 
 from photogrammetry_importer.panels.view_3d_opengl_panel import OpenGLPanel
+from photogrammetry_importer.panels.view_3d_view_synthesis_panel import (
+    ViewSynthesisPanel,
+)
 from photogrammetry_importer.opengl.utility import redraw_points
 from photogrammetry_importer.preferences.dependency import (
     add_command_line_sys_path_if_necessary,
@@ -89,6 +92,7 @@ def register():
     Registration.register_exporters(import_export_prefs)
 
     bpy.utils.register_class(OpenGLPanel)
+    bpy.utils.register_class(ViewSynthesisPanel)
 
     log_report(
         "INFO",
@@ -104,6 +108,7 @@ def unregister():
     Registration.unregister_exporters()
 
     bpy.utils.unregister_class(OpenGLPanel)
+    bpy.utils.unregister_class(ViewSynthesisPanel)
 
     log_report("INFO", "Unregistered {}".format(bl_info["name"]))
 
