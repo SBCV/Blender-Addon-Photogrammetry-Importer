@@ -48,7 +48,7 @@ def create_args_parser():
 
     # For "import pyngp as ngp"
     parser.add_argument(
-        "--additional_system_fps",
+        "--additional_system_dps",
         nargs="+",
         default="",
         help="Path to the temporary json file.",
@@ -200,8 +200,9 @@ if __name__ == "__main__":
     parser = create_args_parser()
     args = parser.parse_args()
 
-    for system_fp in args.additional_system_fps:
-        sys.path.append(system_fp)
+    for system_dp in args.additional_system_dps:
+        assert os.path.isdir(system_dp)
+        sys.path.append(system_dp)
 
     # The following import (i.e. "import pyngp as ngp") requires the python
     #  build directory of instant_ngp (i.e. "path/to/instant_ngp/build") in the
