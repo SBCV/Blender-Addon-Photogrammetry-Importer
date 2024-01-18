@@ -1,5 +1,5 @@
 # Blender Photogrammetry Importer
-This repository contains a Blender addon to import reconstruction results of several libraries.
+This repository contains a Blender addon to import results of several reconstruction libraries. In addition it allows to perform novel view synthesis using Neural Radiance Fields (NeRF).
 
 ## Compatibility
 
