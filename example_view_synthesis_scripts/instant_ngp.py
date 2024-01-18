@@ -1,5 +1,4 @@
 import sys
-import glob
 import argparse
 import os
 import commentjson as json
@@ -11,13 +10,6 @@ import pickle
 def create_args_parser():
     parser = argparse.ArgumentParser(
         description="Run instant neural graphics primitives with additional configuration & output options"
-    )
-
-    parser.add_argument(
-        "--scene",
-        "--training_data",
-        default="",
-        help="The scene to load. Can be the scene's name or a full path to the training data. Can be NeRF dataset, a *.obj/*.stl mesh for training a SDF, an image, or a *.nvdb volume.",
     )
 
     parser.add_argument(
@@ -86,18 +78,6 @@ def serialize_numpy_array(np_array, use_pickle=False):
         serialized_np_array = memory_file.getvalue()
     return serialized_np_array
 
-
-def load_scene(testbed, args):
-    if args.scene:
-        print("args.scene", args.scene)
-        assert os.path.isdir(args.scene)
-
-        json_files = glob.glob(f"{args.scene}/*.json", recursive=True)
-        json_files = [os.path.abspath(json_file) for json_file in json_files]
-        msg = "Scene directories with multiple json files are not supported:"
-        msg += f" {json_files}"
-        assert len(json_files) == 1, msg
-        testbed.load_training_data(args.scene)
 
 
 def configure_testbed(testbed, args):
@@ -211,7 +191,6 @@ if __name__ == "__main__":
 
     testbed = ngp.Testbed()
 
-    load_scene(testbed, args)
     testbed.load_snapshot(args.load_snapshot)
     configure_testbed(testbed, args)
     img_np_array = create_single_screenshot(testbed, args)
