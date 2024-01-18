@@ -7,7 +7,7 @@ The latest release of the addon is currently compatible with **Blender 4.0.2 onw
 
 ## Supported Reconstruction Libraries and Point Cloud Data Formats
 
-Supported libraries (data formats):
+Supported photogrammetry libraries (data formats):
 
 - [x] [Agisoft Metashape](https://www.agisoft.com/) (VisualSfM NVM) <sup>1</sup>
 - [x] [Colmap](https://github.com/colmap/colmap) (Model folders (BIN and TXT), dense workspaces, NVM, PLY)  
@@ -18,6 +18,9 @@ Supported libraries (data formats):
 - [x] [OpenMVG](https://github.com/openMVG/openMVG) (JSON, NVM, PLY)
 - [x] [Regard3D](https://www.regard3d.org/) (OpenMVG JSON)
 - [x] [VisualSFM](http://ccwu.me/vsfm/) (NVM) <sup>1</sup>
+
+Supported view synthesis libraries (data formats):
+- [x] [Instant NGP](https://github.com/NVlabs/instant-ngp) (JSON)
 
 In addition, the addon supports some common point cloud data formats:
 
