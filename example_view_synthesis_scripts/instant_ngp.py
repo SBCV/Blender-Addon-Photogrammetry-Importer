@@ -136,8 +136,6 @@ def post_process_image(img):
     else:
         img = linear_to_srgb(img)
 
-    print("img[0]", img[0])
-
     # # See: write_image_imageio(img_file, img, quality)
     # img = (np.clip(img, 0.0, 1.0) * 255.0 + 0.5).astype(np.uint8)
 
