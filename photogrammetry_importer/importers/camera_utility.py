@@ -522,7 +522,7 @@ def add_camera_image_plane(
     if add_image_plane_emission:
         links.new(
             shader_node_tex_image.outputs["Color"],
-            shader_node_principled_bsdf.inputs["Emission"],
+            shader_node_principled_bsdf.inputs["Emission Color"],
         )
 
     shader_node_tex_image.image = blender_image

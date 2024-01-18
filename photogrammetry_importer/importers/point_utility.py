@@ -179,7 +179,7 @@ def _add_particle_material(
     if add_particle_color_emission:
         node_tree.links.new(
             particle_color_node.outputs["Color"],
-            principled_bsdf_node.inputs["Emission"],
+            principled_bsdf_node.inputs["Emission Color"],
         )
 
 

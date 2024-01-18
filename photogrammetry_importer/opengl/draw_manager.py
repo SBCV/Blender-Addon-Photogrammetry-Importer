@@ -98,7 +98,7 @@ class _DrawCallBackHandler:
     """Class that allows to handle point drawing callbacks."""
 
     def __init__(self):
-        self._shader = gpu.shader.from_builtin("3D_FLAT_COLOR")
+        self._shader = gpu.shader.from_builtin("FLAT_COLOR")
 
         # Handle to the function
         self._draw_handler_handle = None
