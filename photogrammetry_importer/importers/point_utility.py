@@ -272,17 +272,13 @@ def add_points_as_object_with_particle_system(
     log_report("INFO", "Adding Points as Particle System: Done", op)
     return point_cloud_obj_list
 
-
 def create_geometry_nodes_node_group():
     """Create a new node group for a geometry nodes modifier."""
     node_group = bpy.data.node_groups.new("GeometryNodes", "GeometryNodeTree")
-    input_node = node_group.nodes.new("NodeGroupInput")
-    output_node = node_group.nodes.new("NodeGroupOutput")
-
-    # input_node must be created before calling node_group.inputs
-    node_group.inputs.new("NodeSocketGeometry", "Geometry")
-    # output_node must be created before calling node_group.outputs
-    node_group.outputs.new("NodeSocketGeometry", "Geometry")
+    socket_type = "NodeSocketGeometry"
+    socket_name = "Geometry"
+    input_node = create_interface_socket(node_group, socket_name, 'INPUT', socket_type)
+    output_node = create_interface_socket(node_group, socket_name, 'OUTPUT', socket_type)
 
     node_group.links.new(
         input_node.outputs["Geometry"], output_node.inputs["Geometry"]
@@ -327,22 +323,24 @@ def add_points_as_mesh_vertices(
             geometry_nodes.node_group = create_geometry_nodes_node_group()
 
         # The group_input and the group_output nodes are created by default
-        group_input = geometry_nodes.node_group.nodes["Group Input"]
-        group_output = geometry_nodes.node_group.nodes["Group Output"]
+        node_group = geometry_nodes.node_group
+        group_input = node_group.nodes["Group Input"]
+        group_output = node_group.nodes["Group Output"]
 
         # Add modifier inputs that are editable from the GUI, the order these are added is important
-        geometry_nodes.node_group.inputs.new(
-            "NodeSocketMaterial", "Point Color"
-        )  # Input_2
-        geometry_nodes.node_group.inputs.new(
-            "NodeSocketFloat", "Point Radius"
-        )  # Input_3
-        geometry_nodes.node_group.inputs.new(
-            "NodeSocketIntUnsigned", "Point Subdivisions"
-        )  # Input_4
-        geometry_nodes["Input_2"] = _get_color_from_attribute("point_color")
-        geometry_nodes["Input_3"] = point_radius
-        geometry_nodes["Input_4"] = point_subdivisions
+        create_interface_socket(node_group,
+            "Point Color", 'INPUT', 'NodeSocketMaterial'
+        )  # {Input|Socket}_1
+        create_interface_socket(node_group,
+            "Point Radius", 'INPUT', 'NodeSocketFloat'
+        )  # {Input|Socket}_2
+        create_interface_socket(node_group,
+            "Point Subdivisions", 'INPUT', 'NodeSocketIntUnsigned'
+        )  # {Input|Socket}_3
+        input_prefix = 'Socket_' if hasattr(node_group, 'interface') else 'Input_'
+        geometry_nodes[input_prefix + "2"] = _get_color_from_attribute("point_color")
+        geometry_nodes[input_prefix + "3"] = point_radius
+        geometry_nodes[input_prefix + "4"] = point_subdivisions
 
         # Note: To determine the name required for new(...), create the
         # corresponding node with the gui and print the value of "bl_rna".
@@ -431,3 +429,20 @@ def _get_color_from_attribute(attribute_name):
         material.node_tree.nodes["Principled BSDF"].inputs["Base Color"],
     )
     return material
+
+def create_interface_socket(node_group, socket_name, in_out, socket_type):
+    group_name = 'Group Input' if in_out == 'INPUT' else 'Group Output'
+    node_name = 'Node' + group_name.replace(' ', '')
+    if not group_name in node_group.nodes:
+        node = node_group.nodes.new(node_name)
+    if hasattr(node_group, 'interface'):
+        socket_type = 'NodeSocketInt' if socket_type == 'NodeSocketIntUnsigned' else socket_type
+        node_group.interface.new_socket(socket_name, in_out=in_out, socket_type=socket_type)
+        return node_group.nodes[group_name]
+    else:
+        node = node_group.nodes.new(node_name)
+        if in_out == 'INPUT':
+            node_group.inputs.new(socket_type, socket_name)
+        else:
+            node_group.outputs.new(socket_type, socket_name)
+        return node
