@@ -3,7 +3,7 @@ This repository contains a Blender addon to import reconstruction results of sev
 
 ## Compatibility
 
-The latest release of the addon is currently compatible with **Blender 3.1.2 onwards**. For older Blender versions you might find a suitable release [here](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/releases). 
+The latest release of the addon is currently compatible with **Blender 4.0.2 onwards**. For older Blender versions you might find a suitable release [here](https://github.com/SBCV/Blender-Addon-Photogrammetry-Importer/releases). 
 
 ## Supported Reconstruction Libraries and Point Cloud Data Formats
 
