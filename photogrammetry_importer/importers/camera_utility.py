@@ -1,9 +1,11 @@
 import os
 import bpy
 import colorsys
+import numpy as np
 from mathutils import Matrix
 from mathutils import Vector
 
+from photogrammetry_importer.types.camera import Camera
 from photogrammetry_importer.blender_utility.object_utility import (
     add_collection,
     add_obj,
@@ -173,6 +175,86 @@ def compute_camera_matrix_world(camera, convert_coordinate_system=True):
     return _get_world_matrix_from_translation_and_rotation(
         translation_vec, rotation_mat
     )
+
+
+def get_calibration_mat(blender_camera, op=None):
+    """Derive calibration matrix from a Blender camera object."""
+    scene = bpy.context.scene
+    render_resolution_width = scene.render.resolution_x
+    render_resolution_height = scene.render.resolution_y
+    focal_length_in_mm = float(blender_camera.data.lens)
+    sensor_width_in_mm = float(blender_camera.data.sensor_width)
+    focal_length_in_pixel = (
+        float(max(scene.render.resolution_x, scene.render.resolution_y))
+        * focal_length_in_mm
+        / sensor_width_in_mm
+    )
+    max_extent = max(render_resolution_width, render_resolution_height)
+    p_x = (
+        render_resolution_width / 2.0
+        - blender_camera.data.shift_x * max_extent
+    )
+    p_y = (
+        render_resolution_height / 2.0
+        - blender_camera.data.shift_y * max_extent
+    )
+    calibration_mat = Camera.compute_calibration_mat(
+        focal_length_in_pixel, cx=p_x, cy=p_y
+    )
+    return calibration_mat
+
+
+def get_computer_vision_camera_transformation_matrix(blender_camera, op=None):
+    """Derive camera transformation matrix from a Blender camera."""
+
+    # Only if the objects have a scale of 1, the 3x3 part
+    # of the corresponding matrix_world contains a pure rotation.
+    # Otherwise, it also contains scale or shear information
+    if not np.allclose(tuple(blender_camera.scale), (1, 1, 1)):
+        log_report(
+            "ERROR",
+            "Blender camera contains scale: " + str(blender_camera.scale),
+            op,
+        )
+        assert False
+
+    camera_matrix = np.array(blender_camera.matrix_world)
+    blender_camera_rotation_inverse = camera_matrix.copy()[0:3, 0:3]
+    blender_camera_rotation = blender_camera_rotation_inverse.T
+
+    # Important: Blender uses a camera coordinate frame system, which looks
+    # down the negative z-axis. This differs from the camera coordinate
+    # systems used by most SfM tools/frameworks. Thus, rotate the camera
+    # rotation matrix by 180 degrees (i.e. invert the y and z axis).
+    sfm_camera_rotation = invert_y_and_z_axis(blender_camera_rotation)
+    sfm_camera_rotation_inverse = sfm_camera_rotation.T
+
+    rotated_camera_matrix_around_x_by_180 = camera_matrix.copy()
+    rotated_camera_matrix_around_x_by_180[
+        0:3, 0:3
+    ] = sfm_camera_rotation_inverse
+    return rotated_camera_matrix_around_x_by_180
+
+
+def get_computer_vision_camera(
+    blender_camera, camera_name, image_dp=None, camera_index=None, op=None
+):
+    """Derive a camera object from a Blender camera object."""
+
+    calibration_mat = get_calibration_mat(blender_camera)
+    camera_matrix_computer_vision = (
+        get_computer_vision_camera_transformation_matrix(blender_camera, op)
+    )
+
+    camera = Camera()
+    camera.id = camera_index
+    camera.set_relative_fp(camera_name, Camera.IMAGE_FP_TYPE_NAME)
+    camera.image_dp = image_dp
+    camera.width = bpy.context.scene.render.resolution_x
+    camera.height = bpy.context.scene.render.resolution_y
+    camera.set_calibration(calibration_mat, radial_distortion=0)
+    camera.set_4x4_cam_to_world_mat(camera_matrix_computer_vision)
+    return camera
 
 
 def load_background_image(blender_image, camera_name):
