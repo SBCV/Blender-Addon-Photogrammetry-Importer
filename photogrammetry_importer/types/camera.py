@@ -1,6 +1,7 @@
 import math
 import os
 import numpy as np
+from photogrammetry_importer.utility.np_utility import is_rotation_mat
 
 
 class Camera:
@@ -249,7 +250,7 @@ class Camera:
     ):
         """Set the camera rotation using a rotation matrix."""
         if check_rotation:
-            assert self.__class__._is_rotation_mat_valid(rotation_mat)
+            assert is_rotation_mat(rotation_mat)
         self._rotation_mat = rotation_mat
         # We must change the quaternion as well.
         self._quaternion = Camera.rotation_matrix_to_quaternion(rotation_mat)
@@ -257,7 +258,7 @@ class Camera:
     def set_camera_center_after_rotation(self, center, check_rotation=True):
         """Set the camera center after setting the camera rotation."""
         if check_rotation:
-            assert self.__class__._is_rotation_mat_valid(self._rotation_mat)
+            assert is_rotation_mat(self._rotation_mat)
         self._center = center
         # t = -R C
         self._translation_vec = -np.dot(self._rotation_mat, center)
@@ -267,7 +268,7 @@ class Camera:
     ):
         """Set the camera translation after setting the camera rotation."""
         if check_rotation:
-            assert self.__class__._is_rotation_mat_valid(self._rotation_mat)
+            assert is_rotation_mat(self._rotation_mat)
         self._translation_vec = translation_vector
         # C = -R^T t
         self._center = -np.dot(
@@ -321,14 +322,6 @@ class Camera:
         self.set_camera_center_after_rotation(
             cam_to_world_mat[0:3, 3], check_rotation=check_rotation
         )
-
-    @staticmethod
-    def _is_rotation_mat_valid(some_mat):
-        # Test if rotation_mat is really a rotation matrix
-        # (i.e. det = -1 or det = 1)
-        det = np.linalg.det(some_mat)
-        res = np.isclose(det, 1) or np.isclose(det, -1)
-        return res
 
     @staticmethod
     def quaternion_to_rotation_matrix(q):
