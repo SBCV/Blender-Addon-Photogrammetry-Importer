@@ -63,6 +63,12 @@ class ViewSynthesisPanelSettings(bpy.types.PropertyGroup):
         description="",
         default=1,
     )
+    rotation_anchor_obj_name: StringProperty(
+        name="Rotation Anchor Object",
+        description="The rotation of this object is considered for view "
+        " synthesis. This allows to rotate the corresponding input scene.",
+        default="OpenGL Point Cloud",
+    )
 
 
 class ViewSynthesisPanel(bpy.types.Panel):
@@ -141,5 +147,11 @@ class ViewSynthesisPanel(bpy.types.Panel):
         )
         row = view_synthesis_box.row()
         row.prop(settings, "samples_per_pixel", text="Samples Per Pixel")
+
+        row = view_synthesis_box.row()
+        row.prop(
+            settings, "rotation_anchor_obj_name", text="Rotation Anchor Object"
+        )
+
         row = view_synthesis_box.row()
         row.operator(RunViewSynthesisOperator.bl_idname)
