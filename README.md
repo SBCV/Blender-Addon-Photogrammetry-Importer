@@ -67,6 +67,13 @@ year={2021}
 ```
 <br clear="left"/>
 
+## View Synthesis Examples
+Ihis addon allows to peform novel view synthesis for arbitrary cameras using NeRF (e.g. [Instant NGP](https://github.com/NVlabs/instant-ngp)). The left image shows a plain NeRF result and the right image an overlay with the corresponding point cloud.
+<p float="left" align="middle">
+  <img src="doc/images/view_synthesis_nerf.jpg" width="48%" />
+  <img src="doc/images/view_synthesis_nerf_point_cloud.jpg" width="48%" /> 
+</p>
+
 ## Reconstruction Examples
 This repository contains an example Colmap model. The following image shows the imported camera poses, image planes and point cloud in Blender's 3D view.
 ![alt text](doc/images/import_result.jpg)
