@@ -241,7 +241,11 @@ def get_computer_vision_camera_transformation_matrix(blender_camera, op=None):
 
 
 def get_computer_vision_camera(
-    blender_camera, camera_name, image_dp=None, camera_index=None, op=None
+    blender_camera,
+    camera_name,
+    image_dp=None,
+    camera_index=None,
+    op=None,
 ):
     """Derive a camera object from a Blender camera object."""
 
