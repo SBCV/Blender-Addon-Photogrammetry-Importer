@@ -168,6 +168,7 @@ def _add_transformation_animation(
         if transformation is None:
             continue
 
+        # A direct assignment of a numpy array leads to incorrect results!
         animated_obj.matrix_world = Matrix(transformation)
 
         animated_obj.keyframe_insert(
