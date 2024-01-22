@@ -43,7 +43,9 @@ class MeshImporter:
             if os.path.splitext(mesh_fp)[1].lower() == ".obj":
                 # https://docs.blender.org/api/current/bpy.ops.import_scene.html
                 bpy.ops.wm.obj_import(
-                    filepath=mesh_fp, forward_axis="NEGATIVE_Y", up_axis="NEGATIVE_Z"
+                    filepath=mesh_fp,
+                    forward_axis="NEGATIVE_Y",
+                    up_axis="NEGATIVE_Z",
                 )
             elif os.path.splitext(mesh_fp)[1].lower() == ".ply":
                 # https://docs.blender.org/api/current/bpy.ops.import_mesh.html
