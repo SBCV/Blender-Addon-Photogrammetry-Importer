@@ -3,9 +3,13 @@ import subprocess
 import os
 import numpy as np
 import bpy
+from mathutils import Matrix
 from tempfile import NamedTemporaryFile
 
 
+from photogrammetry_importer.utility.np_utility import (
+    invert_transformation_matrix,
+)
 from photogrammetry_importer.blender_utility.retrieval_utility import (
     get_selected_camera,
 )
