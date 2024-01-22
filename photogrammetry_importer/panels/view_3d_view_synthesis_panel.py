@@ -103,8 +103,6 @@ class ViewSynthesisPanel(bpy.types.Panel):
         view_synthesis_box = layout.box()
 
         row = view_synthesis_box.row()
-        row.operator(RunViewSynthesisOperator.bl_idname)
-        row = view_synthesis_box.row()
         row.prop(settings, "execution_environment", text="Script Environment")
         if settings.execution_environment == "CONDA":
             row = view_synthesis_box.row()
@@ -143,3 +141,5 @@ class ViewSynthesisPanel(bpy.types.Panel):
         )
         row = view_synthesis_box.row()
         row.prop(settings, "samples_per_pixel", text="Samples Per Pixel")
+        row = view_synthesis_box.row()
+        row.operator(RunViewSynthesisOperator.bl_idname)
