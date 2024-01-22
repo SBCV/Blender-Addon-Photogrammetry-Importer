@@ -162,7 +162,10 @@ def _get_world_matrix_from_translation_and_rotation(translation_vec, rotation):
 
 
 def compute_camera_matrix_world(camera, convert_coordinate_system=True):
-    """Compute Blender's :code:`matrix_world` for a given camera."""
+    """Compute Blender's :code:`matrix_world` for a given camera.
+
+    This function returns a Blender Matrix and not a Numpy array.
+    """
     translation_vec = camera.get_translation_vec()
     rotation_mat = camera.get_rotation_as_rotation_mat()
     if convert_coordinate_system:
@@ -172,9 +175,10 @@ def compute_camera_matrix_world(camera, convert_coordinate_system=True):
         # i.e. invert the x and y axis.
         rotation_mat = invert_y_and_z_axis(rotation_mat)
         translation_vec = invert_y_and_z_axis(translation_vec)
-    return _get_world_matrix_from_translation_and_rotation(
+    world_matrix = _get_world_matrix_from_translation_and_rotation(
         translation_vec, rotation_mat
     )
+    return world_matrix
 
 
 def get_calibration_mat(blender_camera, op=None):

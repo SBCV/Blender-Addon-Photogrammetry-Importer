@@ -120,6 +120,29 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         cmd_call = " ".join(command)
         log_report("INFO", cmd_call, self)
 
+        anchor_obj = bpy.data.objects[
+            scene.view_synthesis_panel_settings.rotation_anchor_obj_name
+        ]
+        anchor_matrix_world_inverse = Matrix(
+            invert_transformation_matrix(np.array(anchor_obj.matrix_world))
+        )
+
+        camera_obj = get_selected_camera()
+        camera_obj_relative_to_anchor = camera_obj.copy()
+        camera_obj_relative_to_anchor.matrix_world = (
+            anchor_matrix_world_inverse
+            @ camera_obj_relative_to_anchor.matrix_world
+        )
+
+        camera_relative_to_anchor = get_computer_vision_camera(
+            camera_obj_relative_to_anchor, camera_obj_relative_to_anchor.name
+        )
+
+        # Call before executing the child process
+        InstantNGPFileHandler.write_instant_ngp_file(
+            temp_json_file.name, [camera_relative_to_anchor]
+        )
+
         child_process = subprocess.Popen(command)
         child_process.communicate()
 
