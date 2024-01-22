@@ -64,14 +64,6 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         else:
             assert False
 
-        camera_obj = get_selected_camera()
-        camera = get_computer_vision_camera(camera_obj, camera_obj.name)
-
-        # Call before executing the child process
-        InstantNGPFileHandler.write_instant_ngp_file(
-            temp_json_file.name, [camera]
-        )
-
         if (
             scene.view_synthesis_panel_settings.execution_environment
             == "CONDA"
