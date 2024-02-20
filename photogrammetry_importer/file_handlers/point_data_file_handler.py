@@ -245,10 +245,14 @@ class PointDataFileHandler:
             pseudo_color = False
             point_cloud = PyntCloud.from_file(ifp)
         xyz_arr = point_cloud.points.loc[:, ["x", "y", "z"]].to_numpy()
-        if set(["red", "green", "blue"]).issubset(point_cloud.points.columns):
+        if {"red", "green", "blue"}.issubset(point_cloud.points.columns):
             color_arr = point_cloud.points.loc[
                 :, ["red", "green", "blue"]
             ].to_numpy()
+            if 0 <= np.min(color_arr) <= 1 and 0 <= np.max(color_arr) <= 1:
+                # if all color values are set in between zero and one
+                # scale to be in range from 0.0 to 255.0
+                pseudo_color = True
             if pseudo_color:
                 color_arr *= 255
         else:
