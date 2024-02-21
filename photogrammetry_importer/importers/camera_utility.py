@@ -354,7 +354,6 @@ def add_cameras(
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
-
         # camera_name = "Camera %d" % index     # original code
         # Replace the camera name so it matches the image name (without extension)
         blender_image_name_stem = _get_camera_obj_gui_str(camera)

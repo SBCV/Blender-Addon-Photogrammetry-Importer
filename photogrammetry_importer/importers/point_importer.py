@@ -111,10 +111,12 @@ class PointImporter:
                 points = points[:: self.point_cloud_display_sparsity]
 
             if self.center_points:
-                points = Point.get_centered_points(points)
+                points, centroid_shift = Point.get_centered_points(points)
+
+            obj_handle = None
 
             if self.draw_points_with_gpu:
-                draw_points(
+                obj_handle = draw_points(
                     points,
                     self.point_size,
                     self.add_points_to_point_cloud_handle,
@@ -123,7 +125,7 @@ class PointImporter:
                 )
 
             if self.add_points_as_mesh_oject:
-                add_points_as_mesh_vertices(
+                obj_handle = add_points_as_mesh_vertices(
                     points,
                     reconstruction_collection,
                     self.add_mesh_to_point_geometry_nodes,
@@ -132,3 +134,8 @@ class PointImporter:
                     self.add_color_as_custom_property,
                     op=self,
                 )
+
+            if self.center_points and obj_handle is not None:
+                # store the xyz shift as custom property in the object handle
+                print("centroid_shift", centroid_shift)
+                obj_handle["centroid_shift"] = centroid_shift

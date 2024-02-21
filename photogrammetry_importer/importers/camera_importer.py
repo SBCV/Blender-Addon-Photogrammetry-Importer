@@ -364,7 +364,6 @@ class CameraImporter:
     def _set_principal_point_for_cameras(
         cameras, default_pp_x, default_pp_y, op=None
     ):
-
         if not math.isnan(default_pp_x) and not math.isnan(default_pp_y):
             log_report(
                 "WARNING", "Setting principal points to default values!", op

@@ -12,7 +12,7 @@ from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 def _copy_values_to_image(value_tripplets, image_name):
-    """ Copy values to image pixels. """
+    """Copy values to image pixels."""
     image = bpy.data.images[image_name]
     # working on a copy of the pixels results in a MASSIVE performance speed
     local_pixels = list(image.pixels[:])
@@ -41,7 +41,6 @@ def _compute_particle_color_texture(colors, name="ParticleColor"):
 def _create_particle_color_nodes(
     node_tree, colors, particle_overwrite_color=None
 ):
-
     if particle_overwrite_color is not None:
         if "RGB" in node_tree.nodes:
             particle_color_node = node_tree.nodes["RGB"]
@@ -238,7 +237,6 @@ def add_points_as_object_with_particle_system(
 
     point_cloud_obj_list = []
     for i in range(0, len(points), max_number_particles):
-
         particle_obj_name = f"Particle Shape {i}"
         particle_material_name = f"Point Cloud Material {i}"
         point_cloud_obj_name = f"Particle Point Cloud {i}"

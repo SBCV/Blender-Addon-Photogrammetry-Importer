@@ -42,6 +42,7 @@ from photogrammetry_importer.operators.instant_ngp_export_op import (
 # "file/import" of the following form:
 # "rna_uiItemO: operator missing srna 'import_scene.colmap_model'""
 
+
 # Import Functions
 def _colmap_import_operator_function(topbar_file_import, context):
     topbar_file_import.layout.operator(

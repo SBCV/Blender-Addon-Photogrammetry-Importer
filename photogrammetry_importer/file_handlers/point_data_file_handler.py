@@ -175,7 +175,6 @@ class PointDataFileHandler:
 
     @staticmethod
     def _convert_data_semantics_to_list(data_semantics):
-
         named_list = [
             "s" + str(idx) for idx in range(data_semantics.num_data_entries)
         ]

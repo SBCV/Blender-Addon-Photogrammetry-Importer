@@ -227,7 +227,7 @@ class MVEFileHandler:
         suppress_distortion_warnings,
         op=None,
     ):
-        """Parse a :code:`MVE` workspace. """
+        """Parse a :code:`MVE` workspace."""
         log_report("INFO", "Parse MVE workspace: ...", op)
         log_report("INFO", workspace_idp, op)
         views_idp = os.path.join(workspace_idp, "views")
@@ -258,7 +258,7 @@ class MVEFileHandler:
 
     @staticmethod
     def read_depth_map(depth_map_ifp):
-        """Read a depth map. """
+        """Read a depth map."""
         # See:
         # https://github.com/simonfuhrmann/mve/wiki/MVE-File-Format#the-mvei-image-format
         # https://github.com/simonfuhrmann/mve/blob/master/libs/mve/image_io.cc

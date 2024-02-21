@@ -35,6 +35,7 @@ def get_additional_command_line_sys_path():
         stdout=PIPE,
         stderr=PIPE,
     )
+
     command_line_sys_paths = json.loads(result.stdout)
     blender_sys_paths = copy.deepcopy(sys.path)
 

@@ -119,9 +119,18 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         anchor_obj = bpy.data.objects[
             scene.view_synthesis_panel_settings.rotation_anchor_obj_name
         ]
-        anchor_matrix_world_inverse = Matrix(
-            invert_transformation_matrix(np.array(anchor_obj.matrix_world))
+        anchor_matrix_world = invert_transformation_matrix(
+            np.array(anchor_obj.matrix_world)
         )
+        # if the anchor obj was shifted to the center during import
+        # apply the reverse translation so that the camera is relative to the original coordinate system
+        centroid_shift = anchor_obj.get("centroid_shift", None)
+        if centroid_shift is not None:
+            anchor_matrix_world[0, 3] += centroid_shift[0]
+            anchor_matrix_world[1, 3] += centroid_shift[1]
+            anchor_matrix_world[2, 3] += centroid_shift[2]
+
+        anchor_matrix_world_inverse = Matrix(anchor_matrix_world)
 
         camera_obj = get_selected_camera()
         camera_obj_relative_to_anchor = camera_obj.copy()

@@ -33,7 +33,6 @@ class OpenMVGJSONFileHandler:
         suppress_distortion_warnings,
         op=None,
     ):
-
         # For each input image there exists an entry in "views". In contrast,
         # "extrinsics" contains only information of registered images (i.e.
         # reconstructed camera poses) and may contain only information for a
@@ -51,7 +50,6 @@ class OpenMVGJSONFileHandler:
         # Iterate over views and create a camera if intrinsic and extrinsic
         # parameters exist
         for id, view in views.items():  # Iterate over views
-
             id_view = view["key"]
             # view["value"]["ptr_wrapper"]["data"] should be equal to
             # view["value"]["ptr_wrapper"]["data"]["id_view"]
@@ -64,7 +62,6 @@ class OpenMVGJSONFileHandler:
                 id_pose in extrinsics.keys()
                 and id_intrinsic in intrinsics.keys()
             ):
-
                 camera = Camera()
 
                 camera.image_fp_type = image_fp_type
@@ -107,7 +104,6 @@ class OpenMVGJSONFileHandler:
                     cx = camera.width / 2
                     cy = camera.height / 2
                 else:
-
                     focal_length = intrinsic_data["focal_length"]
                     principal_point = intrinsic_data["principal_point"]
                     cx = principal_point[0]
@@ -153,7 +149,6 @@ class OpenMVGJSONFileHandler:
 
     @staticmethod
     def _parse_points(json_data, view_index_to_absolute_fp=None, op=None):
-
         # Note: Blender 3.1.2 comes with Python 3.10, which is compatible to
         #  Pillow >= 9.0 and Pillow 8.3.2 - 8.4.
         #  However:

@@ -29,7 +29,6 @@ class VisualSfMFileHandler:
         suppress_distortion_warnings,
         op=None,
     ):
-
         """
         VisualSFM CAMERA coordinate system is the standard CAMERA
         coordinate system in computer vision (not the same as
@@ -124,7 +123,6 @@ class VisualSfMFileHandler:
 
     @staticmethod
     def _parse_nvm_points(input_file, num_3D_points):
-
         points = []
         for point_index in range(num_3D_points):
             # From the VSFM docs:
@@ -142,7 +140,6 @@ class VisualSfMFileHandler:
 
     @staticmethod
     def _parse_fixed_calibration(line, op):
-
         line_elements = line.split()
         if len(line_elements) == 1:
             assert line.startswith("NVM_V3")
@@ -227,7 +224,6 @@ class VisualSfMFileHandler:
 
     @staticmethod
     def _create_nvm_first_line(cameras, op):
-
         log_report("INFO", "create_nvm_first_line: ...", op)
         # The first line can be either
         #   'NVM_V3'
@@ -369,7 +365,6 @@ class VisualSfMFileHandler:
 
     @staticmethod
     def _compute_translation_vector(c, R):
-
         """
         x_cam = R (X - C) = RX - RC == RX + t
         <=> t = -RC

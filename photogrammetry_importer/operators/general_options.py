@@ -32,11 +32,11 @@ class GeneralOptions:
                     break
             # Setting "active_space.clip_end" to values close to "sys.maxsize"
             # causes strange graphical artifacts in the 3D view.
-            if sys.maxsize == 2 ** 63 - 1:
+            if sys.maxsize == 2**63 - 1:
                 # 2**(63-8) = 2**55 works without artifacts
-                active_space.clip_end = 2 ** 55 - 1
+                active_space.clip_end = 2**55 - 1
             else:
-                active_space.clip_end = 2 ** 23 - 1
+                active_space.clip_end = 2**23 - 1
             log_report(
                 "INFO", "Adjust clipping distance of 3D view: Done", self
             )
