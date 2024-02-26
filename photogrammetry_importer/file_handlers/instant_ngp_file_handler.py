@@ -130,7 +130,9 @@ class InstantNGPFileHandler:
             assert cam_1.height == cam_2.height
 
     @classmethod
-    def write_instant_ngp_file(cls, ofp, cameras, op=None):
+    def write_instant_ngp_file(
+        cls, ofp, cameras, op=None, ref_centroid_shift=None
+    ):
         """Write cameras and points as :code:`Instant-NGP` json file."""
         log_report("INFO", f"Write Instant-NGP json file: {ofp}", op)
 
@@ -155,6 +157,9 @@ class InstantNGPFileHandler:
             "w": width,
             "h": height,
         }
+
+        if ref_centroid_shift is not None:
+            json_data["ref_centroid_shift"] = ref_centroid_shift.to_list()
 
         json_frames = []
         for camera in cameras:

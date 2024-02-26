@@ -140,12 +140,16 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         )
 
         camera_relative_to_anchor = get_computer_vision_camera(
-            camera_obj_relative_to_anchor, camera_obj_relative_to_anchor.name
+            camera_obj_relative_to_anchor,
+            camera_obj_relative_to_anchor.name,
+            allow_scale=True,
         )
 
         # Call before executing the child process
         InstantNGPFileHandler.write_instant_ngp_file(
-            temp_json_file.name, [camera_relative_to_anchor]
+            temp_json_file.name,
+            [camera_relative_to_anchor],
+            ref_centroid_shift=centroid_shift,
         )
 
         child_process = subprocess.Popen(command)
