@@ -88,6 +88,9 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         additional_system_dps = (
             scene.view_synthesis_panel_settings.additional_system_dps
         )
+        additional_output_dp = (
+            scene.view_synthesis_panel_settings.additional_output_dp
+        )
         samples_per_pixel = (
             scene.view_synthesis_panel_settings.samples_per_pixel
         )
@@ -100,6 +103,11 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
             parameter_list += [
                 "--additional_system_dps",
                 additional_system_dps,
+            ]
+        if additional_output_dp.strip() != "":
+            parameter_list += [
+                "--additional_output_dp",
+                additional_output_dp,
             ]
 
         assert os.path.isfile(view_synthesis_exe_or_script_fp)
