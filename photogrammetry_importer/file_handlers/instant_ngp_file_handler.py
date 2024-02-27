@@ -131,7 +131,7 @@ class InstantNGPFileHandler:
 
     @classmethod
     def write_instant_ngp_file(
-        cls, ofp, cameras, op=None, ref_centroid_shift=None
+        cls, ofp, cameras, ref_centroid_shift=None, op=None
     ):
         """Write cameras and points as :code:`Instant-NGP` json file."""
         log_report("INFO", f"Write Instant-NGP json file: {ofp}", op)

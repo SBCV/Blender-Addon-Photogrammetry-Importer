@@ -150,7 +150,7 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         camera_relative_to_anchor = get_computer_vision_camera(
             camera_obj_relative_to_anchor,
             camera_obj_relative_to_anchor.name,
-            allow_scale=True,
+            check_scale=False,
         )
 
         # Call before executing the child process

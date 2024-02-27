@@ -137,5 +137,4 @@ class PointImporter:
 
             if self.center_points and obj_handle is not None:
                 # store the xyz shift as custom property in the object handle
-                print("centroid_shift", centroid_shift)
                 obj_handle["centroid_shift"] = centroid_shift
