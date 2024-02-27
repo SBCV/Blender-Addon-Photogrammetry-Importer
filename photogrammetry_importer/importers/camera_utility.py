@@ -208,13 +208,15 @@ def get_calibration_mat(blender_camera, op=None):
     return calibration_mat
 
 
-def get_computer_vision_camera_transformation_matrix(blender_camera, op=None):
+def get_computer_vision_camera_transformation_matrix(
+    blender_camera, check_scale=True, op=None
+):
     """Derive camera transformation matrix from a Blender camera."""
 
     # Only if the objects have a scale of 1, the 3x3 part
     # of the corresponding matrix_world contains a pure rotation.
     # Otherwise, it also contains scale or shear information
-    if not np.allclose(tuple(blender_camera.scale), (1, 1, 1)):
+    if check_scale and not np.allclose(tuple(blender_camera.scale), (1, 1, 1)):
         log_report(
             "ERROR",
             "Blender camera contains scale: " + str(blender_camera.scale),
@@ -245,13 +247,16 @@ def get_computer_vision_camera(
     camera_name,
     image_dp=None,
     camera_index=None,
+    check_scale=True,
     op=None,
 ):
     """Derive a camera object from a Blender camera object."""
 
     calibration_mat = get_calibration_mat(blender_camera)
     camera_matrix_computer_vision = (
-        get_computer_vision_camera_transformation_matrix(blender_camera, op)
+        get_computer_vision_camera_transformation_matrix(
+            blender_camera, check_scale, op
+        )
     )
 
     camera = Camera()
@@ -261,7 +266,9 @@ def get_computer_vision_camera(
     camera.width = bpy.context.scene.render.resolution_x
     camera.height = bpy.context.scene.render.resolution_y
     camera.set_calibration(calibration_mat, radial_distortion=0)
-    camera.set_4x4_cam_to_world_mat(camera_matrix_computer_vision)
+    camera.set_4x4_cam_to_world_mat(
+        camera_matrix_computer_vision, check_rotation=check_scale
+    )
     return camera
 
 
@@ -354,7 +361,6 @@ def add_cameras(
 
     # Adding cameras and image planes:
     for index, camera in enumerate(cameras):
-
         # camera_name = "Camera %d" % index     # original code
         # Replace the camera name so it matches the image name (without extension)
         blender_image_name_stem = _get_camera_obj_gui_str(camera)

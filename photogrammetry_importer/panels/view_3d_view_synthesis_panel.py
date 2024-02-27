@@ -48,6 +48,11 @@ class ViewSynthesisPanelSettings(bpy.types.PropertyGroup):
         "paths must be separated by a whitespace.",
         default="path/to/instant-ngp/build",
     )
+    additional_output_dp: StringProperty(
+        name="Additional Path for Script to store additional Output",
+        description="Additional output paths given to the script to store additional output such as visualizations.",
+        default="path/to/a/dir",
+    )
     view_synthesis_executable_fp: StringProperty(
         name="View Synthesis Script File Name",
         description="",
@@ -132,6 +137,12 @@ class ViewSynthesisPanel(bpy.types.Panel):
             settings,
             "additional_system_dps",
             text="Additional System Paths",
+        )
+        row = view_synthesis_box.row()
+        row.prop(
+            settings,
+            "additional_output_dp",
+            text="Additional Output Path",
         )
         row = view_synthesis_box.row()
         row.prop(

@@ -109,7 +109,7 @@ def configure_testbed(testbed, args):
 
 
 def linear_to_srgb(img):
-    """ Copy of linear_to_srgb(img) in instant-ngp/scripts/common.py """
+    """Copy of linear_to_srgb(img) in instant-ngp/scripts/common.py"""
     limit = 0.0031308
     return np.where(
         img > limit, 1.055 * (img ** (1.0 / 2.4)) - 0.055, 12.92 * img

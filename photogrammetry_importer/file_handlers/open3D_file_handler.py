@@ -72,7 +72,6 @@ class Open3DFileHandler:
     ):
         cams = []
         with open(open3d_ifp, "r") as open3d_file:
-
             lines = open3d_file.readlines()
             # Chunk size: 1 line meta data, 4 lines for the matrix
             chunk_size = 5
@@ -134,7 +133,6 @@ class Open3DFileHandler:
             for pinhole_camera_parameter, image_relative_fp in zip(
                 parameters, image_relative_fp_list
             ):
-
                 cam = Camera()
                 cam.image_fp_type = image_fp_type
                 cam.image_dp = image_dp

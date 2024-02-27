@@ -81,7 +81,6 @@ def _enhance_cameras_with_non_reconstructed_cameras(
 
 
 def _remove_quaternion_discontinuities(target_obj):
-
     # the interpolation of quaternions may lead to discontinuities
     # if the quaternions show different signs
 
@@ -133,7 +132,6 @@ def _remove_quaternion_discontinuities(target_obj):
 
 
 def _set_fcurve_interpolation(some_obj, interpolation_type="LINEAR"):
-
     # interpolation_string: ['CONSTANT', 'LINEAR', 'BEZIER', 'SINE',
     # 'QUAD', 'CUBIC', 'QUART', 'QUINT', 'EXPO', 'CIRC',
     # 'BACK', 'BOUNCE', 'ELASTIC']
@@ -201,7 +199,6 @@ def _add_transformation_animation(
 def _add_camera_intrinsics_animation(
     animated_obj_name, intrinsics_sorted, number_interpolation_frames, op=None
 ):
-
     log_report("INFO", "Adding camera intrinsic parameter animation: ...", op)
 
     step_size = number_interpolation_frames + 1
@@ -309,7 +306,6 @@ def _add_background_image_sequence(
         bpy.data.movieclips.remove(bpy.data.movieclips[movie_clip_name])
 
     if os.path.isfile(os.path.join(dp, first_fn)):
-
         # in bpy.ops.clip.open() is used to determine the image in the
         # image sequence. All images with higher sequence numbers are added
         # to the movie clip.

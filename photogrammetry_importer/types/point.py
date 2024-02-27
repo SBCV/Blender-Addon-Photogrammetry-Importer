@@ -67,4 +67,4 @@ class Point(namedtuple("Point", ["coord", "color", "id", "scalars"])):
                 scalars=point.scalars,
             )
             mean_free_points.append(mean_free_point)
-        return mean_free_points
+        return mean_free_points, centroid_coord

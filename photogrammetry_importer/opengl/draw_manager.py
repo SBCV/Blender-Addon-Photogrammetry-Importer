@@ -7,7 +7,6 @@ from photogrammetry_importer.blender_utility.logging_utility import log_report
 
 
 def _compute_transformed_coords(object_anchor_matrix_world, positions):
-
     if len(positions) == 0:
         return []
 
@@ -66,7 +65,6 @@ class DrawManager:
         transf_coord_list = []
         color_list = []
         for object_anchor in self._anchor_to_point_coords:
-
             if visible_only and not object_anchor.visible_get():
                 continue
 
@@ -134,11 +132,9 @@ class _DrawCallBackHandler:
 
         if handle_is_valid:
             if object_anchor_name in bpy.data.objects:
-
                 # Use the visibility of the object to enable /
                 # disable the drawing of the point cloud
                 if bpy.data.objects[object_anchor_name].visible_get():
-
                     # Update the batch depending on the anchor pose (only if
                     # necessary)
                     object_anchor_has_changed = not np.array_equal(
@@ -146,7 +142,6 @@ class _DrawCallBackHandler:
                         object_anchor.matrix_world,
                     )
                     if self._batch_cached is None or object_anchor_has_changed:
-
                         self._object_anchor_pose_previous = np.copy(
                             object_anchor.matrix_world
                         )
