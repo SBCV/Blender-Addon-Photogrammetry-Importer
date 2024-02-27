@@ -421,9 +421,9 @@ class Camera:
         # M = [R^T    c]
         #     [0      1]
         homogeneous_mat = np.identity(4, dtype=float)
-        homogeneous_mat[
-            0:3, 0:3
-        ] = self.get_rotation_as_rotation_mat().transpose()
+        homogeneous_mat[0:3, 0:3] = (
+            self.get_rotation_as_rotation_mat().transpose()
+        )
         homogeneous_mat[0:3, 3] = self.get_camera_center()
         return homogeneous_mat
 

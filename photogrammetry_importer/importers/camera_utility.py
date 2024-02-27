@@ -155,9 +155,9 @@ def _get_world_matrix_from_translation_and_rotation(translation_vec, rotation):
     camera_center_hom_coord[3] = 1.0
 
     world_matrix = world_matrix.copy()
-    world_matrix.col[
-        3
-    ] = camera_center_hom_coord  # Set translation to camera position
+    world_matrix.col[3] = (
+        camera_center_hom_coord  # Set translation to camera position
+    )
     return world_matrix
 
 
@@ -236,9 +236,9 @@ def get_computer_vision_camera_transformation_matrix(
     sfm_camera_rotation_inverse = sfm_camera_rotation.T
 
     rotated_camera_matrix_around_x_by_180 = camera_matrix.copy()
-    rotated_camera_matrix_around_x_by_180[
-        0:3, 0:3
-    ] = sfm_camera_rotation_inverse
+    rotated_camera_matrix_around_x_by_180[0:3, 0:3] = (
+        sfm_camera_rotation_inverse
+    )
     return rotated_camera_matrix_around_x_by_180
 
 

@@ -54,9 +54,9 @@ class DrawManager:
         draw_callback_handler.register_points_draw_callback(
             self, object_anchor, coords, colors, point_size
         )
-        self._anchor_to_draw_callback_handler[
-            object_anchor
-        ] = draw_callback_handler
+        self._anchor_to_draw_callback_handler[object_anchor] = (
+            draw_callback_handler
+        )
         self._anchor_to_point_coords[object_anchor] = coords
         self._anchor_to_point_colors[object_anchor] = colors
 
