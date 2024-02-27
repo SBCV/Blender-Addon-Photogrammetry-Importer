@@ -25,3 +25,4 @@ photogrammetry_importer.zip
 /photogrammetry_importer/opengl/__pycache__/
 /photogrammetry_importer/panel/__pycache__/
 /photogrammetry_importer/test/
+.idea/
