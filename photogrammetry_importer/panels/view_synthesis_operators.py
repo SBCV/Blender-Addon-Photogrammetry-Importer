@@ -88,6 +88,9 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         additional_system_dps = (
             scene.view_synthesis_panel_settings.additional_system_dps
         )
+        additional_output_dp = (
+            scene.view_synthesis_panel_settings.additional_output_dp
+        )
         samples_per_pixel = (
             scene.view_synthesis_panel_settings.samples_per_pixel
         )
@@ -100,6 +103,11 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
             parameter_list += [
                 "--additional_system_dps",
                 additional_system_dps,
+            ]
+        if additional_output_dp.strip() != "":
+            parameter_list += [
+                "--additional_output_dp",
+                additional_output_dp,
             ]
 
         assert os.path.isfile(view_synthesis_exe_or_script_fp)
@@ -119,9 +127,18 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         anchor_obj = bpy.data.objects[
             scene.view_synthesis_panel_settings.rotation_anchor_obj_name
         ]
-        anchor_matrix_world_inverse = Matrix(
-            invert_transformation_matrix(np.array(anchor_obj.matrix_world))
+        anchor_matrix_world = invert_transformation_matrix(
+            np.array(anchor_obj.matrix_world)
         )
+        # if the anchor obj was shifted to the center during import
+        # apply the reverse translation so that the camera is relative to the original coordinate system
+        centroid_shift = anchor_obj.get("centroid_shift", None)
+        if centroid_shift is not None:
+            anchor_matrix_world[0, 3] += centroid_shift[0]
+            anchor_matrix_world[1, 3] += centroid_shift[1]
+            anchor_matrix_world[2, 3] += centroid_shift[2]
+
+        anchor_matrix_world_inverse = Matrix(anchor_matrix_world)
 
         camera_obj = get_selected_camera()
         camera_obj_relative_to_anchor = camera_obj.copy()
@@ -131,12 +148,16 @@ class RunViewSynthesisOperator(bpy.types.Operator):  # ImportHelper
         )
 
         camera_relative_to_anchor = get_computer_vision_camera(
-            camera_obj_relative_to_anchor, camera_obj_relative_to_anchor.name
+            camera_obj_relative_to_anchor,
+            camera_obj_relative_to_anchor.name,
+            check_scale=False,
         )
 
         # Call before executing the child process
         InstantNGPFileHandler.write_instant_ngp_file(
-            temp_json_file.name, [camera_relative_to_anchor]
+            temp_json_file.name,
+            [camera_relative_to_anchor],
+            ref_centroid_shift=centroid_shift,
         )
 
         child_process = subprocess.Popen(command)

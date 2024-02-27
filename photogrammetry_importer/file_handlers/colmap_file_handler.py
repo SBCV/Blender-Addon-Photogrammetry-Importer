@@ -343,7 +343,6 @@ class ColmapFileHandler:
         colmap_cams = {}
         colmap_images = {}
         for cam in cameras:
-
             # TODO Support the "PINHOLE" camera model
             colmap_camera_model_name = "SIMPLE_PINHOLE"
 

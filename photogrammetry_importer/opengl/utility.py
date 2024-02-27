@@ -20,7 +20,6 @@ def _draw_coords_with_color(
     object_anchor_handle_name="OpenGL Point Cloud",
     op=None,
 ):
-
     object_anchor_handle = add_empty(
         object_anchor_handle_name, reconstruction_collection
     )
@@ -94,7 +93,6 @@ def redraw_points(dummy):
     # This test is very cheap, so it will not cause
     # huge overheads for scenes without point clouds
     if "contains_opengl_point_clouds" in bpy.context.scene:
-
         log_report(
             "INFO",
             "Checking scene for missing point cloud draw handlers",
@@ -134,7 +132,6 @@ def render_opengl_image(image_name, cam, coords, colors, point_size):
 
     offscreen = gpu.types.GPUOffScreen(width, height)
     with offscreen.bind():
-
         gpu.state.point_size_set(point_size)
 
         previous_depth_mask_value = gpu.state.depth_mask_get()
@@ -183,7 +180,6 @@ def _create_image_lazy(image_name, width, height):
 
 
 def _copy_buffer_to_pixel(buffer, image, width, height):
-
     # According to
     #   https://developer.blender.org/D2734
     #   https://docs.blender.org/api/current/gpu.html#copy-offscreen-rendering-result-back-to-ram

@@ -19,7 +19,6 @@ class OpenSfMJSONFileHandler:
     def _convert_intrinsics(
         json_camera_intrinsics, relative_fp, suppress_distortion_warnings, op
     ):
-
         # See https://www.opensfm.org/docs/_modules/opensfm/types.html
 
         height = json_camera_intrinsics["height"]
@@ -101,7 +100,6 @@ class OpenSfMJSONFileHandler:
     def _parse_cameras(
         json_data, image_dp, image_fp_type, suppress_distortion_warnings, op
     ):
-
         json_cameras_intrinsics = json_data["cameras"]
         views = json_data["shots"]
 

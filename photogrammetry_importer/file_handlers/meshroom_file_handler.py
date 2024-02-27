@@ -34,7 +34,6 @@ class MeshroomFileHandler:
         suppress_distortion_warnings,
         op,
     ):
-
         cams = []
         image_index_to_camera_index = {}
 
@@ -67,7 +66,6 @@ class MeshroomFileHandler:
         # (Not all views are necessarily contained in the reconstruction)
 
         for rec_index, extrinsic in enumerate(extrinsics):
-
             camera = Camera()
             view_index = int(extrinsic["poseId"])
             image_index_to_camera_index[view_index] = rec_index
@@ -226,7 +224,6 @@ class MeshroomFileHandler:
     def _parse_points_from_json_data(
         json_data, image_index_to_camera_index, op
     ):
-
         points = []
         is_valid_file = "structure" in json_data
 
