@@ -1,4 +1,5 @@
 import bpy
+import mathutils
 from photogrammetry_importer.types.point import Point
 from photogrammetry_importer.importers.camera_utility import (
     get_computer_vision_camera,
@@ -54,7 +55,7 @@ class ExportOperator(bpy.types.Operator):
                     coords = obj["particle_coords"]
                     colors = obj["particle_colors"]
                     for coord, color in zip(coords, colors):
-                        coord_world = coord
+                        coord_world = obj.matrix_world @ mathutils.Vector(coord)
                         scaled_color = [round(value * 255) for value in color]
                         obj_points.append(
                             Point(
