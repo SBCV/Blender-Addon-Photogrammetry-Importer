@@ -1,4 +1,5 @@
 import os
+import re
 import numpy as np
 
 from photogrammetry_importer.ext.read_dense import read_array
@@ -355,13 +356,17 @@ class ColmapFileHandler:
                 params=np.array([cam.get_focal_length(), pp[0], pp[1]]),
             )
             colmap_cams[cam.id] = colmap_cam
-
+            
+            image_filename = cam.get_file_name()
+            if (re.findall(r"\.\d\d\d$", image_filename)):
+                image_filename = image_filename[:-4]
+                
             colmap_image = ColmapImage(
                 id=cam.id,
                 qvec=cam.get_rotation_as_quaternion(),
                 tvec=cam.get_translation_vec(),
                 camera_id=cam.id,
-                name=cam.get_file_name(),
+                name=image_filename,
                 xys=[],
                 point3D_ids=[],
             )
