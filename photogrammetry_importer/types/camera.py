@@ -412,6 +412,21 @@ class Camera:
         else:
             return None
 
+    # def get_4x4_world_to_cam_mat(self):
+    #     """Return the world to camera transformation matrix.
+
+    #     This matrix can be used to convert points given in world coordinates
+    #     into points given in camera coordinates
+    #     """
+    #     # M = [R      -Rc] = [R      t]
+    #     #     [0      1  ]   [0      1]
+    #     homogeneous_mat = np.identity(4, dtype=float)
+    #     homogeneous_mat[
+    #         0:3, 0:3
+    #     ] = self.get_rotation_as_rotation_mat()
+    #     homogeneous_mat[0:3, 3] = self.get_translation_vec()
+    #     return homogeneous_mat
+
     def get_4x4_cam_to_world_mat(self):
         """Return the camera to world transformation matrix.
 
