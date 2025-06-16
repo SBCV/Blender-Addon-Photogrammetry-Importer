@@ -26,3 +26,46 @@ photogrammetry_importer.zip
 /photogrammetry_importer/panel/__pycache__/
 /photogrammetry_importer/test/
 .idea/
+
+# Testing related
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.tox/
+.nox/
+
+# Claude settings
+.claude/*
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+.env
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Poetry
+poetry.lock
